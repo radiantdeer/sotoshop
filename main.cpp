@@ -1,22 +1,29 @@
 #include <QApplication>
-#include <QPushButton>
 #include <QLabel>
-#include <QWidget>
-#include "file_handling/ImageLoaderFactory.hpp"
+#include <QMainWindow>
+#include <QMenuBar>
+#include <QPainter>
+#include <QPaintEvent>
+#include <QRegion>
+#include "DrawSurface.hpp"
+#include "file_handling/loader/ImageLoaderFactory.hpp"
 
 int main (int argc, char *argv[]) {
     QApplication app(argc, argv);
-    QWidget rootWindow;
-    rootWindow.setWindowTitle("Hello, World!");
+    QMainWindow rootWindow;
+    rootWindow.setWindowTitle("SotoShop");
     rootWindow.setFixedSize(800,600);
 
-    QLabel hello("Hello, World!", &rootWindow);
-    hello.setGeometry(10, 10, 100, 15);
-    QPushButton loadButton("Load File", &rootWindow);
-    loadButton.setToolTip("Load an image");
-    loadButton.setGeometry(10, 30, 100, 20);
+    QMenu * fileMenu = rootWindow.menuBar()->addMenu("File");
+    QAction * loadAction = fileMenu->addAction("Load");
+    QAction * saveAction = fileMenu->addAction("Save");
 
-    ImageLoader * imageLoader = ImageLoaderFactory::getImageLoader("test.ppm");
+    DrawSurface drawspace(&rootWindow);
+    rootWindow.setCentralWidget(&drawspace);
+    QRegion tempRegion;
+    drawspace.paintEvent(new QPaintEvent(tempRegion));
+
+    //ImageLoader * imageLoader = ImageLoaderFactory::getImageLoader("test.ppm");
 
     rootWindow.show();
 
