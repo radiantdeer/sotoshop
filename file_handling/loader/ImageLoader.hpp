@@ -2,7 +2,7 @@
 #define __IMAGELOADER_HPP
 
 #include <string>
-#include "../datastruct/Image.hpp"
+#include "../../datastruct/Image.hpp"
 
 class ImageLoader {
 
