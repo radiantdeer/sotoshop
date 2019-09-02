@@ -3,11 +3,7 @@
 #include <locale>
 #include <iostream>
 
-ImageLoaderFactory::ImageLoaderFactory() {
-
-}
-
-ImageLoader * ImageLoaderFactory::getInstance(std::string filename) {
+ImageLoader * ImageLoaderFactory::getImageLoader(std::string filename) {
     using namespace std;
     string extension = filename.substr(filename.find(".") + 1, filename.length());
     ImageLoader * imageLoader;

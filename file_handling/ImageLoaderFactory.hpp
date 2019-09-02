@@ -7,8 +7,7 @@
 class ImageLoaderFactory {
     
     public:
-        ImageLoaderFactory();
-        ImageLoader * getInstance(std::string filename);
+        static ImageLoader * getImageLoader(std::string filename);
 
 };
 
