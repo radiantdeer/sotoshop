@@ -1,3 +1,4 @@
+#include <QPainter>
 #include <QPaintEvent>
 #include <QWidget>
 #include "datastruct/Image.hpp"
