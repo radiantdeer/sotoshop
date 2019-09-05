@@ -4,6 +4,6 @@ RawImageLoader::RawImageLoader() {
 
 }
 
-Image RawImageLoader::load(std::string filename) {
+Image RawImageLoader::load(std::string fileUrl) {
     
 }

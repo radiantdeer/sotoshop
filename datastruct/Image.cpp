@@ -62,6 +62,10 @@ std::vector<std::vector<Pixel>> Image::getPixelData() const {
     return data;
 }
 
+std::string Image::getFileUrl() const {
+    return fileUrl;
+}
+
 void Image::setPixelAt(int x, int y, Pixel pixel) {
     data[y][x] = pixel;
 }
@@ -76,5 +80,9 @@ void Image::setHeight(int height) {
 
 void Image::setOriginalFormat(std::string originalFormat) {
     this->originalFormat = originalFormat;
+}
+
+void Image::setFileUrl(std::string fileUrl) {
+    this->fileUrl = fileUrl;
 }
 

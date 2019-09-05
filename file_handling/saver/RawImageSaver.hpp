@@ -7,7 +7,7 @@ class RawImageSaver : public ImageSaver {
     
     public:
         RawImageSaver();
-        int save(const Image& image, std::string filename);
+        int save(const Image& image, std::string fileUrl);
 
 };
 

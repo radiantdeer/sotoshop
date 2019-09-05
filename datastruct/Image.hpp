@@ -12,6 +12,7 @@ class Image {
         int height;
         std::vector<std::vector<Pixel>> data;
         std::string originalFormat;
+        std::string fileUrl;
 
     public:
         Image();
@@ -24,11 +25,13 @@ class Image {
         int getHeight() const;
         std::vector<std::vector<Pixel>> getPixelData() const;
         std::string getOriginalFormat() const;
+        std::string getFileUrl() const;
 
         void setPixelAt(int x, int y, Pixel pixel);
         void setWidth(int width);
         void setHeight(int height);
         void setOriginalFormat(std::string originalFormat);
+        void setFileUrl(std::string fileUrl);
 };
 
 #endif
