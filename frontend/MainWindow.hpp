@@ -21,12 +21,14 @@ class MainWindow : public QMainWindow {
 
     public slots:
         void loadFile();
+        void saveFile();
 
     private:
         QAction * loadAction;
         QAction * saveAction;
         DrawSurface * drawSurface;
         
+        void connectActionsToControllers();
         std::string getFileUrl(std::string dialogTitle);
         
 };

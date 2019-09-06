@@ -2,14 +2,25 @@
 
 #include <QPainter>
 
-DrawSurface::DrawSurface() : QWidget() {}
-DrawSurface::DrawSurface(QWidget * parentWidget) : QWidget(parentWidget) {}
+DrawSurface::DrawSurface() : QWidget() {
+    imageLoaded = false;
+}
+
+DrawSurface::DrawSurface(QWidget * parentWidget) : QWidget(parentWidget) {
+    imageLoaded = false;
+}
+
 DrawSurface::DrawSurface(QWidget * parentWidget, Image * activeImage) : QWidget(parentWidget) {
     this->activeImage = activeImage;
+    imageLoaded = true;
 }
 
 Image * DrawSurface::getActiveImage() {
     return activeImage;
+}
+
+bool DrawSurface::isImageLoaded() {
+    return imageLoaded;
 }
 
 void DrawSurface::setActiveImage(Image * newImage) {

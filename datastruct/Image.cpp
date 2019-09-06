@@ -62,6 +62,10 @@ std::vector<std::vector<Pixel>> Image::getPixelData() const {
     return data;
 }
 
+std::string Image::getOriginalFormat() const {
+    return originalFormat;
+}
+
 void Image::setPixelAt(int x, int y, Pixel pixel) {
     data[y][x] = pixel;
 }

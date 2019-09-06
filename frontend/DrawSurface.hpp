@@ -6,6 +6,7 @@ class DrawSurface : public QWidget {
 
     private:
         Image * activeImage;
+        bool imageLoaded;
 
     public:
         DrawSurface();
@@ -13,6 +14,7 @@ class DrawSurface : public QWidget {
         DrawSurface(QWidget * parentWidget, Image * activeImage);
 
         Image * getActiveImage();
+        bool isImageLoaded();
 
         void setActiveImage(Image * newImage);
 

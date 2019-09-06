@@ -11,12 +11,13 @@ MainWindow::MainWindow() : QMainWindow() {
     QMenu * fileMenu = this->menuBar()->addMenu("File");
     loadAction = fileMenu->addAction("Load");
     saveAction = fileMenu->addAction("Save");  
+
+    connectActionsToControllers();
+
     drawSurface = new DrawSurface(this);
     this->setCentralWidget(drawSurface);
     QRegion tempRegion;
     drawSurface->paintEvent(new QPaintEvent(tempRegion));
-
-    connect(loadAction, &QAction::triggered, this, &MainWindow::loadFile);
 }
 
 QAction * MainWindow::getLoadAction() {
@@ -34,12 +35,32 @@ DrawSurface * MainWindow::getDrawSurface() {
 
 void MainWindow::loadFile() {
     std::string url = getFileUrl("Load Image");
-    std::cout << url << std::endl;
     if (url != "") {
+        std::cout << "Loading from file " << url << std::endl;
         ImageLoader * imageLoader = ImageLoaderFactory::getImageLoader(url);
         //drawSurface->setActiveImage(imageLoader->load(url));
         delete imageLoader;
     }
+}
+
+void MainWindow::saveFile() {
+    if (drawSurface->isImageLoaded()) {
+        std::string url = getFileUrl("Save Image");
+        if (url != "") {
+            std::cout << "Saving to file " << url << std::endl;
+            Image * imageToBeSaved = drawSurface->getActiveImage();
+            ImageSaver * imageSaver = ImageSaverFactory::getImageSaver(imageToBeSaved->getOriginalFormat());
+            //imageSaver->save(imageToBeSaved, url);
+            delete imageSaver;
+        }
+    } else {
+        std::cout << "SotoShop cannot save nothing! Load an image first!" << std::endl;
+    }
+}
+
+void MainWindow::connectActionsToControllers() {
+    connect(loadAction, &QAction::triggered, this, &MainWindow::loadFile);
+    connect(saveAction, &QAction::triggered, this, &MainWindow::saveFile);
 }
 
 std::string MainWindow::getFileUrl(std::string dialogTitle) {
