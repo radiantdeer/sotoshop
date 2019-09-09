@@ -18,13 +18,8 @@ MainWindow::MainWindow() : QMainWindow() {
     this->setCentralWidget(drawSurface);
 
     /* STUB IMAGE DATA */
-    Pixel pixel[100];
-    for (int i = 0; i < 100; i++) {
-        pixel[i].setRed(255);
-        pixel[i].setGreen(0);
-        pixel[i].setBlue(0);
-    }
-    Image * image = new Image(20, 5, pixel, "raw");
+    Image * image = new Image(100, 100);
+
     this->setActiveImage(image);
     this->getDrawSurface()->setImageLoaded(true);
 

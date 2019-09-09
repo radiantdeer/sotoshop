@@ -15,6 +15,8 @@ class Image {
 
     public:
         Image();
+        Image(int, int);
+        Image(int, int, std::string);
         Image(int, int, Pixel *, std::string);
         Image(int, int, Pixel **, std::string);
         Image(const Image&);
