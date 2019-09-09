@@ -7,7 +7,7 @@
 class ImageSaver {
 
     public:
-        virtual int save(const Image& image, std::string filename) = 0;
+        virtual int save(const Image& image, std::string fileUrl) = 0;
 
 };
 
