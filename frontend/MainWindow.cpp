@@ -16,6 +16,18 @@ MainWindow::MainWindow() : QMainWindow() {
 
     drawSurface = new DrawSurface(this);
     this->setCentralWidget(drawSurface);
+
+    /* STUB IMAGE DATA */
+    Pixel pixel[100];
+    for (int i = 0; i < 100; i++) {
+        pixel[i].setRed(255);
+        pixel[i].setGreen(0);
+        pixel[i].setBlue(0);
+    }
+    Image * image = new Image(20, 5, pixel, "raw");
+    this->setActiveImage(image);
+    this->getDrawSurface()->setImageLoaded(true);
+
     QRegion tempRegion;
     drawSurface->paintEvent(new QPaintEvent(tempRegion));
 }
@@ -31,7 +43,6 @@ QAction * MainWindow::getSaveAction() {
 DrawSurface * MainWindow::getDrawSurface() {
     return drawSurface;
 }
-
 
 void MainWindow::loadFile() {
     std::string url = getFileUrl("Load Image");
@@ -67,4 +78,8 @@ std::string MainWindow::getFileUrl(std::string dialogTitle) {
     QUrl tempFileUrl = QFileDialog::getOpenFileUrl(this, dialogTitle.c_str(), *(new QUrl()), "Image Files (*.raw, *.pbm, *.pgm, *.ppm, *.bmp);; All Files (*)");
     std::string fileUrl = tempFileUrl.toLocalFile().toUtf8().constData();
     return fileUrl;
+}
+
+void MainWindow::setActiveImage(Image * image) {
+    drawSurface->setActiveImage(image);
 }

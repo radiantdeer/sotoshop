@@ -1,5 +1,7 @@
 #include "Image.hpp"
 
+#include <iostream>
+
 Image::Image() {
     width = 0;
     height = 0;
@@ -9,12 +11,12 @@ Image::Image() {
 Image::Image(int width, int height, Pixel * data, std::string originalFormat) {
     this->width = width;
     this->height = height;
-    this->data.reserve(height);
     for (int j = 0; j < height; j++) {
-        this->data[j].reserve(width);
+        std::vector<Pixel> tempData;
         for (int i = 0; i < width; i++) {
-            this->data[j][i] = data[(j * width) + i];
+            tempData.push_back(data[(j * width) + i]);
         }
+        this->data.push_back(tempData);
     }
     this->originalFormat = originalFormat;
 }
@@ -22,12 +24,12 @@ Image::Image(int width, int height, Pixel * data, std::string originalFormat) {
 Image::Image(int width, int height, Pixel ** data, std::string originalFormat) {
     this->width = width;
     this->height = height;
-    this->data.reserve(height);
     for (int j = 0; j < height; j++) {
-        this->data[j].reserve(width);
+        std::vector<Pixel> tempData;
         for (int i = 0; i < width; i++) {
-            this->data[j][i] = data[j][i];
+            tempData.push_back(data[j][i]);
         }
+        this->data.push_back(tempData);
     }
     this->originalFormat = originalFormat;
 }
@@ -35,12 +37,12 @@ Image::Image(int width, int height, Pixel ** data, std::string originalFormat) {
 Image::Image(const Image& other) {
     this->width = width;
     this->height = height;
-    this->data.reserve(height);
     for (int j = 0; j < height; j++) {
-        this->data[j].reserve(width);
+        std::vector<Pixel> tempData;
         for (int i = 0; i < width; i++) {
-            this->data[j][i] = data[j][i];
+            tempData.push_back(data[j][i]);
         }
+        this->data.push_back(tempData);
     }
     this->originalFormat = originalFormat;
 }

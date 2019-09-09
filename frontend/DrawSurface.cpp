@@ -1,6 +1,10 @@
 #include "DrawSurface.hpp"
 
+#include <iostream>
+#include <QColor>
 #include <QPainter>
+
+#include "../datastruct/Pixel.hpp"
 
 DrawSurface::DrawSurface() : QWidget() {
     imageLoaded = false;
@@ -27,22 +31,25 @@ void DrawSurface::setActiveImage(Image * newImage) {
     activeImage = newImage;
 }
 
+void DrawSurface::setImageLoaded(bool imageLoaded) {
+    this->imageLoaded = imageLoaded;
+}
+
 // Implementing protected virtual method from QWidget
 // Currently set to draw a small red line
 // This function will be used to draw/re-draw the image
 void DrawSurface::paintEvent(QPaintEvent * event) {
     QPainter painter(this);
-    painter.setPen(QColor(Qt::red));
-    for (int i = 50; i < 100; i++) {
-        painter.drawPoint(i, 20);
-    }
-    for (int i = 0; i < 50; i++) {
-        painter.drawPoint(100, 20 + i);
-    }
-    for (int i = 0; i < 50; i++) {
-        painter.drawPoint(50, 20 + i);
-    }
-    for (int i = 50; i < 100; i++) {
-        painter.drawPoint(i, 70);
+    if (this->isImageLoaded()) {
+        for (int i = 0; i < activeImage->getHeight(); i++) {
+            for (int j = 0; j < activeImage->getWidth(); j++) {
+                Pixel thisPixel = activeImage->getPixelAt(j, i);
+                QColor * thisPixelColor = new QColor(thisPixel.getRed(), thisPixel.getGreen(), thisPixel.getBlue());
+                painter.setPen(*thisPixelColor);
+                painter.drawPoint(j, i);
+            }
+        }
+    } else {
+        std::cout << "[WARN] No active image in DrawSurface!" << std::endl;
     }
 }

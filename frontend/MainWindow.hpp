@@ -8,6 +8,7 @@
 #include <string>
 
 #include "DrawSurface.hpp"
+#include "../datastruct/Image.hpp"
 #include "../file_handling/loader/ImageLoaderFactory.hpp"
 #include "../file_handling/saver/ImageSaverFactory.hpp"
 
@@ -18,6 +19,7 @@ class MainWindow : public QMainWindow {
         QAction * getLoadAction();
         QAction * getSaveAction();
         DrawSurface * getDrawSurface();
+        void setActiveImage(Image * image);
 
     public slots:
         void loadFile();
