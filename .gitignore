@@ -6,3 +6,5 @@ SotoShop
 
 *.exe
 \.qmake\.stash
+
+\.vscode/
