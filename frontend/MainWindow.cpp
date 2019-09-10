@@ -16,15 +16,6 @@ MainWindow::MainWindow() : QMainWindow() {
 
     drawSurface = new DrawSurface(this);
     this->setCentralWidget(drawSurface);
-
-    /* STUB IMAGE DATA */
-    Image * image = new Image(100, 100);
-
-    this->setActiveImage(image);
-    this->getDrawSurface()->setImageLoaded(true);
-
-    QRegion tempRegion;
-    drawSurface->paintEvent(new QPaintEvent(tempRegion));
 }
 
 QAction * MainWindow::getLoadAction() {
@@ -77,4 +68,10 @@ std::string MainWindow::getFileUrl(std::string dialogTitle) {
 
 void MainWindow::setActiveImage(Image * image) {
     drawSurface->setActiveImage(image);
+    drawSurface->setImageLoaded(true);
+}
+
+void MainWindow::refresh() {
+    QRegion tempRegion;
+    drawSurface->paintEvent(new QPaintEvent(tempRegion));
 }

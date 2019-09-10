@@ -6,8 +6,11 @@ int main (int argc, char *argv[]) {
     MainWindow rootWindow;
     rootWindow.setWindowTitle("SotoShop");
     rootWindow.setFixedSize(800,600); 
-
     rootWindow.show();
+
+    /* STUB IMAGE DATA */
+    Image * image = new Image(500, 400);
+    rootWindow.setActiveImage(image); 
 
     return app.exec();
 }
