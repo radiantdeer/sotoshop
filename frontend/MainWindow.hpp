@@ -24,6 +24,7 @@ class MainWindow : public QMainWindow {
     public slots:
         void loadFile();
         void saveFile();
+        void refresh();
 
     private:
         QAction * loadAction;
