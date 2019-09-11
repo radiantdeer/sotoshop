@@ -37,11 +37,11 @@ void Pixel::setRed(unsigned char red) {
     this->red = red;
 }
 
-void Pixel::setGreen(unsigned char) {
+void Pixel::setGreen(unsigned char green) {
     this->green = green;
 }
 
-void Pixel::setBlue(unsigned char) {
+void Pixel::setBlue(unsigned char blue) {
     this->blue = blue;
 }
 
