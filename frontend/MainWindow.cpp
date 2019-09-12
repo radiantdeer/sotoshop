@@ -35,7 +35,9 @@ void MainWindow::loadFile() {
     if (url != "") {
         std::cout << "Loading from file " << url << std::endl;
         ImageLoader * imageLoader = ImageLoaderFactory::getImageLoader(url);
-        //drawSurface->setActiveImage(imageLoader->load(url));
+        Image * loadedImage = imageLoader->load(url);
+        drawSurface->setActiveImage(loadedImage);
+        drawSurface->setImageLoaded(true);
         delete imageLoader;
     }
 }

@@ -7,7 +7,7 @@ class RawImageLoader : public ImageLoader {
     
     public:
         RawImageLoader();
-        Image load(std::string fileUrl);
+        Image * load(std::string fileUrl);
 
 };
 

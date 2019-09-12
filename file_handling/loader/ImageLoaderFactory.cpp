@@ -1,4 +1,5 @@
 #include "ImageLoaderFactory.hpp"
+#include "PBMImageLoader.hpp"
 #include "RawImageLoader.hpp"
 #include <locale>
 #include <iostream>
@@ -7,7 +8,6 @@ ImageLoader * ImageLoaderFactory::getImageLoader(std::string filename) {
     using namespace std;
     string extension = filename.substr(filename.find(".") + 1, filename.length());
     ImageLoader * imageLoader;
-    cout << extension << endl;
 
     if ((extension == "raw") || (extension == "RAW")) {
         cout << "RAW" << endl;
@@ -20,7 +20,7 @@ ImageLoader * ImageLoaderFactory::getImageLoader(std::string filename) {
         imageLoader = new RawImageLoader();
     } else if ((extension == "pbm") || (extension == "PBM")) {
         cout << "PBM" << endl;
-        imageLoader = new RawImageLoader();
+        imageLoader = new PBMImageLoader();
     } else if ((extension == "bmp") || (extension == "BMP")) {
         cout << "BMP" << endl;
         imageLoader = new RawImageLoader();

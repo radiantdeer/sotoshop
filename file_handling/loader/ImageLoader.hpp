@@ -7,7 +7,7 @@
 class ImageLoader {
 
     public:
-        virtual Image load(std::string fileUrl) = 0;
+        virtual Image * load(std::string fileUrl) = 0;
 
 };
 
