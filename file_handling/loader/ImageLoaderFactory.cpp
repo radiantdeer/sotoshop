@@ -8,7 +8,6 @@ ImageLoader * ImageLoaderFactory::getImageLoader(std::string filename) {
     using namespace std;
     string extension = filename.substr(filename.find(".") + 1, filename.length());
     ImageLoader * imageLoader;
-    cout << extension << endl;
 
     if ((extension == "raw") || (extension == "RAW")) {
         cout << "RAW" << endl;

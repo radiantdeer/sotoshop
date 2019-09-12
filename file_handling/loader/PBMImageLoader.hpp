@@ -6,7 +6,7 @@
 class PBMImageLoader : public ImageLoader {
     public:
         PBMImageLoader();
-        Image load(std::string filename);
+        Image * load(std::string filename);
 };
 
 #endif
