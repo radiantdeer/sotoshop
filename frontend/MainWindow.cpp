@@ -63,7 +63,7 @@ void MainWindow::connectActionsToControllers() {
 }
 
 std::string MainWindow::getFileUrl(std::string dialogTitle) {
-    QUrl tempFileUrl = QFileDialog::getOpenFileUrl(this, dialogTitle.c_str(), *(new QUrl()), "Image Files (*.raw, *.pbm, *.pgm, *.ppm, *.bmp);; All Files (*)");
+    QUrl tempFileUrl = QFileDialog::getOpenFileUrl(this, dialogTitle.c_str(), *(new QUrl()), "Image Files (*.raw , *.pbm , *.pgm , *.ppm , *.bmp);; All Files (*)");
     std::string fileUrl = tempFileUrl.toLocalFile().toUtf8().constData();
     return fileUrl;
 }
