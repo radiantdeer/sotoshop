@@ -98,9 +98,9 @@ Image loadBinary(std::string filename) {
         fileread.read((char*) buff, sizeof(int)*height*width);
         for (int i = 0; i < height; i++) {
             for (int j = 0; j < width; j++) {
-                data[i][j].setRed((int) buff[i*width + j]);
-                data[i][j].setGreen((int) buff[i*width + j]);
-                data[i][j].setBlue((int) buff[i*width + j]);
+                data[i][j].setRed((unsigned char) buff[i*width + j]);
+                data[i][j].setGreen((unsigned char) buff[i*width + j]);
+                data[i][j].setBlue((unsigned char) buff[i*width + j]);
             }
         }
         fileread.close();

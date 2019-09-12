@@ -68,7 +68,7 @@ Image::Image(const Image& other) {
     for (int j = 0; j < height; j++) {
         std::vector<Pixel> tempData;
         for (int i = 0; i < width; i++) {
-            tempData.push_back(data[j][i]);
+            tempData.push_back(other.getPixelAt(i,j));
         }
         this->data.push_back(tempData);
     }

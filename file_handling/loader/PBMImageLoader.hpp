@@ -3,7 +3,7 @@
 
 #include "ImageLoader.hpp"
 
-class PBMImageLoader : ImageLoader {
+class PBMImageLoader : public ImageLoader {
     public:
         PBMImageLoader();
         Image load(std::string filename);
