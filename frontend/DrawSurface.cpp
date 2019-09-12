@@ -46,7 +46,6 @@ void DrawSurface::setImageLoaded(bool imageLoaded) {
 void DrawSurface::paintEvent(QPaintEvent * event) {
     QPainter painter(this);
     if (this->isImageLoaded()) {
-        std::cout << activeImage->getWidth() << "x" << activeImage->getHeight() << std::endl;
         for (int i = 0; i < activeImage->getHeight(); i++) {
             for (int j = 0; j < activeImage->getWidth(); j++) {
                 Pixel thisPixel = activeImage->getPixelAt(j, i);

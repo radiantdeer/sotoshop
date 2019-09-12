@@ -16,15 +16,6 @@ MainWindow::MainWindow() : QMainWindow() {
 
     drawSurface = new DrawSurface(this);
     this->setCentralWidget(drawSurface);
-
-    /* STUB IMAGE DATA */
-    Image * image = new Image(100, 100);
-
-    this->setActiveImage(image);
-    this->getDrawSurface()->setImageLoaded(true);
-
-    /*QRegion tempRegion;
-    drawSurface->paintEvent(new QPaintEvent(tempRegion));*/
 }
 
 QAction * MainWindow::getLoadAction() {
