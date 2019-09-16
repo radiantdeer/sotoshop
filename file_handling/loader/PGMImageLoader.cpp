@@ -22,6 +22,7 @@ Image * PGMImageLoader::load(std::string filename) {
         while (fileType[0] == '#') {
             std::getline(fileread, fileType);
         }
+        fileread.close();
         if (fileType == ASCII_PGM) {
             return loadASCII(filename);
         } else if (fileType == BINARY_PGM) {
@@ -45,7 +46,6 @@ Image * loadASCII(std::string filename) {
         while (fileType[0] == '#') {
             std::getline(fileread, fileType);
         }
-        fileread.close();
         if (fileType == ASCII_PGM) {
             std::getline(fileread, dimensions);
             while (dimensions[0] == '#') {
@@ -57,8 +57,36 @@ Image * loadASCII(std::string filename) {
             }
             width = std::stoi(dimensions.substr(0, dimensions.find(' ')));
             height = std::stoi(dimensions.substr(level.find(' ') + 1, dimensions.length()));
-            level = std::stoi(level);
-            return new Image(width, height);
+            grayLevel = std::stoi(level);
+            Pixel **data = new Pixel *[height];
+            for (int j = 0; j < height; j++) {
+                data[j] = new Pixel[width];
+            }
+            char buff;
+            int intBuff = 0;
+            int i = 0, j = 0;
+            int flag = 0;
+            int value = 0;
+            while (!fileread.eof() && i < height && j < width) {
+                fileread >> std::noskipws >> buff;
+                if (buff - '0' >= 0 && buff - '0' <= 9) {
+                    intBuff = (buff - '0') + 10*intBuff;
+                    flag = 1;
+                } else if (buff = ' ' && flag) {
+                    value = intBuff * MAX_COLOR / grayLevel;
+                    data[i][j].setRed(value);
+                    data[i][j].setGreen(value);
+                    data[i][j].setBlue(value);
+                    intBuff = 0;
+                    flag = 0;
+                    j++;
+                    if (j == width) {
+                        i++;
+                        j = 0;
+                    }
+                }
+            }
+            return new Image(width, height, data, "pgm");
         } else {
             throw std::runtime_error("Not PGM File");
         }
@@ -97,7 +125,7 @@ Image * loadBinary(std::string filename) {
             }
             int imageSize = height*width;
             buff = new unsigned char [imageSize];
-            fileread.read((char*) buff, sizeof(char)*height*width);
+            fileread.read((char*) buff, sizeof(char)*imageSize);
             for (int i = 0; i < height; i++) {
                 for (int j = 0; j < width; j++) {
                     int value = ((int) buff[i*width + j] * MAX_COLOR / grayLevel);
