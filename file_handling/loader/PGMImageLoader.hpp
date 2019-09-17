@@ -1,11 +1,11 @@
-#ifndef _PBMIMAGELOADER_HPP
-#define _PBMIMAGELOADER_HPP
+#ifndef _PGMIMAGELOADER_HPP
+#define _PGMIMAGELOADER_HPP
 
 #include "ImageLoader.hpp"
 
-class PBMImageLoader : public ImageLoader {
+class PGMImageLoader : public ImageLoader {
     public:
-        PBMImageLoader();
+        PGMImageLoader();
         Image * load(std::string filename);
 
     private:
