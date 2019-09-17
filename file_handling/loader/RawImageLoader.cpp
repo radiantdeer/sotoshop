@@ -15,9 +15,14 @@ Image * RawImageLoader::load(std::string fileUrl) {
 
         Pixel * data = new Pixel[width * height];
         std::string tempBuffer;
-        for (int i = 0; i < height; i++) {
+        int i;
+        int j = 0;
+        for (i = 0; i < height; i++) {
             std::getline(fileIn, tempBuffer);
-            for (int j = 0; j < width - 1; j++) {
+            if (fileIn.eof()) {
+                break;
+            }
+            for (j = 0; j < width - 1; j++) {
                 std::string currentPixelStr = tempBuffer.substr(0, tempBuffer.find(" "));
                 tempBuffer = tempBuffer.substr(tempBuffer.find(" ") + 1, tempBuffer.length());
                 unsigned char currentPixel = (unsigned char) std::stoi(currentPixelStr);
@@ -30,7 +35,12 @@ Image * RawImageLoader::load(std::string fileUrl) {
             data[i * width - 1].setGreen(currentPixel);
             data[i * width - 1].setBlue(currentPixel);
         }
-        return new Image(width, height, data, "raw");
+        if (i < height) {
+            std::cout << "RawImageLoader::load: Data supplied is shorter than specified size. Partial image is loaded." << std::endl;
+            return new Image(j +1, i + 1, data, "raw");
+        } else {
+            return new Image(width, height, data, "raw");
+        }
 
     } else {
         std::cout << "RawImageLoader::load: Cannot open file!" << std::endl;
