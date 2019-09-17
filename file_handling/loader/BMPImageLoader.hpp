@@ -7,6 +7,7 @@ class BMPImageLoader : ImageLoader {
   public:
     BMPImageLoader();
     Image load(std::string fileUrl);
+    Image loadBM(std::string fileUrl);
 };
 
 #endif

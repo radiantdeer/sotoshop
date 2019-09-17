@@ -4,7 +4,7 @@
 #include <string>
 #include <sstream>
 
-#define BMP_HEADER "BM"
+#define BMP_HEADER_WINDOWS "BM"
 
 int buffertoInteger(char* buffer, int start, int size);
 
@@ -13,55 +13,175 @@ BMPImageLoader::BMPImageLoader() {
 }
 
 Image BMPImageLoader::load(std::string fileUrl) {
-  std::string line;
-
-  char *fileheader = new char[14];
-
-  char *fileformat = new char[2];
-  char *BitmapHeaderSize = new char[4];
   
-  unsigned char z;
+  char *fileheader = new char[14];
   std::ifstream fileread(fileUrl.c_str());
+
   if (fileread.good()) {
-    std::cout << "Opened" << std::endl;
-    
     /* READ FILE HEADER */
     fileread.read(fileheader, 14);
 
     /* GET FILE FORMAT */
-    fileformat[0] = fileheader[0];
-    fileformat[1] = fileheader[1];
-    std::cout << fileformat[0] << fileformat[1] << std::endl;
+    std::string fileformat(fileheader, 2);
+    std::cout << "Bitmap format: " << fileformat << std::endl;
+
+    if (fileformat == BMP_HEADER_WINDOWS) {
+      return loadBM(fileUrl);
+    }
+  }
+  
+  // fileread.close();
+
+  delete [] fileheader;
+  return Image();
+}
+
+Image BMPImageLoader::loadBM(std::string fileUrl) {
+  std::string line;
+
+  char *fileheader = new char[14];
+
+  char *BitmapHeaderSize = new char[4];
+  
+  char* buff1;
+  unsigned char* buff;
+  std::ifstream fileread(fileUrl.c_str());
+  if (fileread.good()) {
+    std::cout << "Opened" << std::endl;
+
+    /**********************************************/
+    /* THIS SECTION READS */
+    /* FILE HEADER */
+    /* FILE HEADER SIZE IS 14 BYTES */
+    /**********************************************/
+    fileread.read(fileheader, 14);
 
     /* READ SIZE */
     // fileread.read(sizebuffer, 4);
     int filesize = buffertoInteger(fileheader, 2, 4);
-    std::cout << filesize << std::endl;
+    std::cout << "File size: " << filesize << std::endl;
 
     /* READ OFFSET */
     int offset = buffertoInteger(fileheader, 10, 4);
-    std::cout << offset << std::endl;
+    std::cout << "Offset: " << offset << std::endl;
 
-    /* READ BITMAP HEADER */
+    /**********************************************/
+    /* THIS SECTION READS */
+    /* BITMAP HEADER */
+    /* BITMAP HEADER SIZE IS 40 BYTES */
+    /**********************************************/
     fileread.read(BitmapHeaderSize, 4);
     int headersize = buffertoInteger(BitmapHeaderSize, 0, 4);
-    std::cout << headersize << std::endl;
-
+    std::cout << "Header size: " << headersize << std::endl;
     fileread.seekg(14);
     char *bitmapheader = new char[headersize];
+
+    /* READ BITMAP HEADER DETAIL */
     fileread.read(bitmapheader, headersize);
+
+    // picture width
     int width = buffertoInteger(bitmapheader, 4, 4);
+    // picture height
     int height = buffertoInteger(bitmapheader, 8, 4);
-    std::cout << width << " " << height << std::endl;
+    std::cout << "Dimension: " << width << " x " << height << std::endl;
 
+    // picture plane
+    int plane = buffertoInteger(bitmapheader, 12, 2);
+    std::cout << "Plane: " << plane << std::endl;
+
+    // picture pixel count
+    int pixelcount = buffertoInteger(bitmapheader, 14, 2);
+    std::cout << "Pixel count in bits: " << pixelcount << std::endl;
+
+    // picture compression
+    int compression = buffertoInteger(bitmapheader, 16, 4);
+    if (compression) {
+      std::cout << "Compressed" << std::endl;
+    } else {
+      std::cout << "Uncompressed" << std::endl;
+    }
+    
+    // picture image size
+    int imgsize = buffertoInteger(bitmapheader, 20, 4);
+    std::cout << "Bitmap size in byte: " << imgsize << std::endl;
+    
+    // picture horizontal resolution
+    int resolutionh = buffertoInteger(bitmapheader, 24, 4);
+    std::cout << "Resolution (horizontal): " << resolutionh << std::endl;
+    
+    // picture vertical resolution
+    int resolutionv = buffertoInteger(bitmapheader, 28, 4);
+    std::cout << "Resolution (vertical): " << resolutionv << std::endl;
+    
+    // picture color count
+    int colorcount = buffertoInteger(bitmapheader, 32, 4);
+    std::cout << "Color count: " << colorcount << std::endl;
+    
+    // picture important color count
+    int importantcolorcount = buffertoInteger(bitmapheader, 36, 4);
+    std::cout << "Color count (I): " << importantcolorcount << std::endl;
+
+    /**********************************************/
+    /* THIS SECTION READS */
+    /* BITMAP COLOR TABLE */
+    /* BITMAP COLOR TABLE IS UNDEFINED */
+    /**********************************************/
+    Pixel **data = new Pixel*[height];
+    for (int i = 0; i < height; i++) {
+      data[i] = new Pixel[width];
+    }
+
+    if (colorcount > 0) {
+
+    }
+
+    /**********************************************/
+    /* THIS SECTION READS */
+    /* BITMAP COLOR */
+    /* BITMAP COLOR STORED WITH PIXEL IF COLOR TABLE DOES NOT EXIST */
+    /**********************************************/
+
+    else {
+
+      // buff1 = new char[3];
+      // fileread.read(buff1, 3);
+      // std::cout << buffertoInteger(buff1, 0, 1) << std::endl;
+
+      // data[0][0].setRed((unsigned char) buff1[2]);
+
+      // if (data[0][0].getRed() == 255) {
+      //   std::cout << "Red is full" << std::endl;
+      // }
+
+      // buff = new unsigned char[3];
+      // fileread.read((char*) buff, 3);
+      // std::cout << buffertoInteger((char*) buff, 2, 1) << std::endl;
+
+
+      // int imageSize = height*width;
+      buff = new unsigned char[height * width];
+      int bitsize = pixelcount /  sizeof(int);
+      fileread.seekg(offset);
+      // fileread.read((char*) buff, 3);
+      // std::cout << buffertoInteger((char*) buff, 2, 1) << std::endl;
+      for (int i = height - 1; i > 0; i--) {
+        fileread.read((char *) buff, bitsize*width);
+        for (int j = 0; j < width; j += bitsize) {
+          data[i][j].setBlue((unsigned char) buff[j*bitsize]);
+          data[i][j].setGreen((unsigned char) buff[j*bitsize + 1]);
+          data[i][j].setRed((unsigned char) buff[j*bitsize + 2]);
+        }
+      }
+
+    }
+
+    fileread.close();
+    return Image(width, height, data, "bmp");
+    
   } else {
-    std::cout << "Not Opened" << std::endl;
+    // std::cout << "Not Opened" << std::endl;
+    throw std::runtime_error("BMPIMageLoader::loadBM: " + fileUrl + " is unreadable.");
   }
-
-  fileread.close();
-
-  delete [] fileheader;
-  return Image();
 }
 
 int buffertoInteger(char* buffer, int start, int size) {
