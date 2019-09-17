@@ -24,9 +24,9 @@ Image * PGMImageLoader::load(std::string filename) {
         }
         fileread.close();
         if (fileType == ASCII_PGM) {
-            return loadASCII(filename);
+            return this->loadASCII(filename);
         } else if (fileType == BINARY_PGM) {
-            return loadBinary(filename);
+            return this->loadBinary(filename);
         } else {
             throw std::runtime_error("Not PGM");
         }
@@ -35,7 +35,7 @@ Image * PGMImageLoader::load(std::string filename) {
     }
 }
 
-Image * loadASCII(std::string filename) {
+Image * PGMImageLoader::loadASCII(std::string filename) {
     std::string fileType;
     std::string dimensions;
     std::string level;
@@ -95,7 +95,7 @@ Image * loadASCII(std::string filename) {
     }
 }
 
-Image * loadBinary(std::string filename) {
+Image * PGMImageLoader::loadBinary(std::string filename) {
     std::string fileType;
     std::string dimensions;
     std::string level;
