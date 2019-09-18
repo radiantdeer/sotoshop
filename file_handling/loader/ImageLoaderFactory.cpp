@@ -1,6 +1,7 @@
 #include "ImageLoaderFactory.hpp"
 #include "PBMImageLoader.hpp"
 #include "PPMImageLoader.hpp"
+#include "PGMImageLoader.hpp"
 #include "RawImageLoader.hpp"
 #include <locale>
 #include <iostream>
@@ -15,7 +16,7 @@ ImageLoader * ImageLoaderFactory::getImageLoader(std::string filename) {
         imageLoader = new RawImageLoader();
     } else if ((extension == "pgm") || (extension == "PGM")) {
         cout << "PGM" << endl;
-        imageLoader = new RawImageLoader();
+        imageLoader = new PGMImageLoader;
     } else if ((extension == "ppm") || (extension == "PPM")) {
         cout << "PPM" << endl;
         imageLoader = new PPMImageLoader();
