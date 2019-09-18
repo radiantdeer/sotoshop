@@ -134,13 +134,13 @@ Image * PPMImageLoader::loadBinary(std::string filename) {
         for (int j = 0; j < height; j++) {
             data[j] = new Pixel[height];
         }
-        buff = new unsigned char[width * height * 3];
-        fileread.read((char*) buff, sizeof(char) * width * height * 3);
+        buff = new unsigned char[width * height * MAX_CHANNEL];
+        fileread.read((char*) buff, sizeof(char) * width * height * MAX_CHANNEL);
         for (int i = 0; i < height; i++) {
                 for (int j = 0; j < width; j++) {
-                    data[i][j].setRed((int) buff[i*width + j] * MAX_COLOR / colorLevel);
-                    data[i][j].setGreen((int) buff[i*width + j + 1] * MAX_COLOR / colorLevel);
-                    data[i][j].setBlue((int) buff[i*width + j + 2] * MAX_COLOR / colorLevel);
+                    data[i][j].setRed((int) buff[MAX_CHANNEL*(i*width + j)] * MAX_COLOR / colorLevel);
+                    data[i][j].setGreen((int) buff[MAX_CHANNEL*(i*width + j) + 1] * MAX_COLOR / colorLevel);
+                    data[i][j].setBlue((int) buff[MAX_CHANNEL*(i*width + j) + 2] * MAX_COLOR / colorLevel);
                 }
             }
             fileread.close();
