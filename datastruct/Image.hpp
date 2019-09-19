@@ -7,13 +7,6 @@
 
 class Image {
     
-    private:
-        int width;
-        int height;
-        std::vector<std::vector<Pixel>> data;
-        std::string originalFormat;
-        std::string fileUrl;
-
     public:
         Image();
         Image(int, int);
@@ -34,6 +27,22 @@ class Image {
         void setHeight(int height);
         void setOriginalFormat(std::string originalFormat);
         void setFileUrl(std::string fileUrl);
+
+        Image * add(Image B, int width, int height);
+        Image * adjustBrightness(unsigned char delta); 
+        Image * substract(Image B, int width, int height);
+        
+        Image * operator+(Image B);
+        Image * operator+(unsigned char deltaBrightness);
+        Image * operator-(Image B);
+        Image * operator-(unsigned char deltaBrightness);
+
+    private:
+        int width;
+        int height;
+        std::vector<std::vector<Pixel>> data;
+        std::string originalFormat;
+        std::string fileUrl;
 };
 
 #endif

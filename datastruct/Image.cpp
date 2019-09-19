@@ -120,3 +120,83 @@ void Image::setFileUrl(std::string fileUrl) {
     this->fileUrl = fileUrl;
 }
 
+// TODO
+// DEBUG METHOD
+Image * Image::add(Image B, int width, int height) {
+    for (int i = 0; i < width; i++) {
+        for (int j = 0; j < height; j++) {
+            Pixel a = this->getPixelAt(i, j);
+            Pixel b = B.getPixelAt(i, j);
+            Pixel *pixel = new Pixel();
+
+            pixel->setRed(a.getRed() + b.getRed());
+            pixel->setBlue(a.getBlue() + b.getBlue());
+            pixel->setGreen(a.getGreen() + b.getGreen());
+
+            this->setPixelAt(width, height, *pixel);
+            delete pixel;
+        }
+    }
+
+    return this;
+}
+
+// TODO
+// DEBUG METHOD
+Image * Image::substract(Image B, int width, int height) {
+    for (int i = 0; i < width; i++) {
+        for (int j = 0; j < height; j++) {
+            Pixel a = this->getPixelAt(i, j);
+            Pixel b = B.getPixelAt(i, j);
+            Pixel *pixel = new Pixel();
+
+            pixel->setRed(a.getRed() - b.getRed());
+            pixel->setBlue(a.getBlue() - b.getBlue());
+            pixel->setGreen(a.getGreen() - b.getGreen());
+
+            this->setPixelAt(width, height, *pixel);
+            delete pixel;
+        }
+    }
+
+    return this;
+}
+
+// TODO
+// DEBUG METHOD
+Image * Image::adjustBrightness(unsigned char delta) {
+    for (int i = 0; i < this->getWidth(); i++) {
+        for (int j = 0; j < this->getHeight(); j++) {
+            Pixel a = this->getPixelAt(i, j);
+            Pixel *pixel = new Pixel();
+
+            pixel->setRed(a.getRed() + delta);
+            pixel->setBlue(a.getBlue() + delta);
+            pixel->setGreen(a.getGreen() + delta);
+
+            this->setPixelAt(i, j, *pixel);
+            delete pixel;
+        }
+    }
+    return this;
+}
+
+Image * Image::operator+(Image B) {
+    Image * C = new Image(*this);
+    return C->add(B, B.getWidth(), B.getHeight());
+}
+
+Image * Image::operator+(unsigned char deltaBrightness) {
+    Image * C = new Image(*this);
+    return C->adjustBrightness(deltaBrightness);
+}
+
+Image * Image::operator-(Image B) {
+    Image * C = new Image(*this);
+    return C->substract(B, B.getWidth(), B.getHeight());
+}
+
+Image * Image::operator-(unsigned char deltaBrightness) {
+    Image * C = new Image(*this);
+    return C->adjustBrightness(0 - deltaBrightness);
+}
