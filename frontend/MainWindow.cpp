@@ -35,7 +35,9 @@ void MainWindow::loadFile() {
     if (url != "") {
         std::cout << "Loading from file " << url << std::endl;
         ImageLoader * imageLoader = ImageLoaderFactory::getImageLoader(url);
-        //drawSurface->setActiveImage(imageLoader->load(url));
+        Image * loadedImage = imageLoader->load(url);
+        drawSurface->setActiveImage(loadedImage);
+        drawSurface->setImageLoaded(true);
         delete imageLoader;
     }
 }
@@ -61,7 +63,7 @@ void MainWindow::connectActionsToControllers() {
 }
 
 std::string MainWindow::getFileUrl(std::string dialogTitle) {
-    QUrl tempFileUrl = QFileDialog::getOpenFileUrl(this, dialogTitle.c_str(), *(new QUrl()), "Image Files (*.raw, *.pbm, *.pgm, *.ppm, *.bmp);; All Files (*)");
+    QUrl tempFileUrl = QFileDialog::getOpenFileUrl(this, dialogTitle.c_str(), *(new QUrl()), "Image Files (*.raw , *.pbm , *.pgm , *.ppm , *.bmp);; All Files (*)");
     std::string fileUrl = tempFileUrl.toLocalFile().toUtf8().constData();
     return fileUrl;
 }

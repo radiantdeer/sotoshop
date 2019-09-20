@@ -31,6 +31,11 @@ void DrawSurface::setActiveImage(Image * newImage) {
     activeImage = newImage;
 }
 
+void DrawSurface::setActiveImage(Image& newImage) {
+    delete activeImage;
+    activeImage = new Image(newImage);
+}
+
 void DrawSurface::setImageLoaded(bool imageLoaded) {
     this->imageLoaded = imageLoaded;
 }
