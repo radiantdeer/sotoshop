@@ -8,6 +8,7 @@
 class Image {
     
     public:
+        static const int MAX_GRAY = 255;
         Image();
         Image(int, int);
         Image(int, int, std::string);
@@ -31,6 +32,7 @@ class Image {
         Image * add(Image B, int width, int height);
         Image * adjustBrightness(unsigned char delta); 
         Image * substract(Image B, int width, int height);
+        Image * invert();
         
         Image * operator+(Image B);
         Image * operator+(unsigned char deltaBrightness);

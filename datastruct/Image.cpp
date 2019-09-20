@@ -181,6 +181,23 @@ Image * Image::adjustBrightness(unsigned char delta) {
     return this;
 }
 
+Image * Image::invert() {
+    for (int i = 0; i < this->getWidth(); i++) {
+        for (int j = 0; j < this->getHeight(); j++) {
+            Pixel a = this->getPixelAt(i, j);
+            Pixel * pixel = new Pixel();
+
+            pixel->setRed(MAX_GRAY - a.getRed());
+            pixel->setBlue(MAX_GRAY - a.getBlue());
+            pixel->setGreen(MAX_GRAY - a.getGreen());
+
+            this->setPixelAt(i, j, *pixel);
+            delete pixel;
+        }
+    }
+    return this;
+}
+
 Image * Image::operator+(Image B) {
     Image * C = new Image(*this);
     return C->add(B, B.getWidth(), B.getHeight());
