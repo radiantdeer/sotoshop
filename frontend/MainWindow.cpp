@@ -8,6 +8,8 @@
 #include <QUrl>
 
 MainWindow::MainWindow() : QMainWindow() {
+    this->setWindowTitle("SotoShop");
+
     QMenu * fileMenu = this->menuBar()->addMenu("File");
     loadAction = fileMenu->addAction("Load");
     saveAction = fileMenu->addAction("Save");
@@ -42,12 +44,17 @@ DrawSurface * MainWindow::getDrawSurface() {
 void MainWindow::loadFile() {
     std::string url = getFileUrl("Load Image");
     if (url != "") {
+        if (drawSurface->isImageLoaded()) {
+            drawSurface->purgeImage();
+        }
         std::cout << "Loading from file " << url << std::endl;
         ImageLoader * imageLoader = ImageLoaderFactory::getImageLoader(url);
         Image * loadedImage = imageLoader->load(url);
         drawSurface->setActiveImage(loadedImage);
         drawSurface->setImageLoaded(true);
         delete imageLoader;
+        std::string windowTitle = "SotoShop [" + url + "]";
+        this->setWindowTitle(windowTitle.c_str());
     }
 }
 

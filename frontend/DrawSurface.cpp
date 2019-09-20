@@ -7,10 +7,12 @@
 #include "../datastruct/Pixel.hpp"
 
 DrawSurface::DrawSurface() : QWidget() {
+    activeImage = nullptr; 
     imageLoaded = false;
 }
 
 DrawSurface::DrawSurface(QWidget * parentWidget) : QWidget(parentWidget) {
+    activeImage = nullptr;
     imageLoaded = false;
 }
 
@@ -38,6 +40,13 @@ void DrawSurface::setActiveImage(Image& newImage) {
 
 void DrawSurface::setImageLoaded(bool imageLoaded) {
     this->imageLoaded = imageLoaded;
+}
+
+void DrawSurface::purgeImage() {
+    if (activeImage != nullptr) {
+        delete activeImage;
+        imageLoaded = false;
+    }
 }
 
 // Implementing protected virtual method from QWidget

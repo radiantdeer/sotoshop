@@ -18,6 +18,7 @@ class DrawSurface : public QWidget {
         void setActiveImage(Image * newImage);
         void setActiveImage(Image& newImage);
         void setImageLoaded(bool imageLoaded);
+        void purgeImage();
 
         void paintEvent(QPaintEvent * event);
 
