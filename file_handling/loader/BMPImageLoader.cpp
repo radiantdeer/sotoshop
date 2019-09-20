@@ -131,7 +131,38 @@ Image BMPImageLoader::loadBM(std::string fileUrl) {
       data[i] = new Pixel[width];
     }
 
-    if (colorcount > 0) {
+    if (offset > 54) {
+      int colortablesize = offset - 54;
+      Pixel *color = new Pixel[colortablesize];
+
+      int bitsize = pixelcount /  sizeof(int);
+      char *colorbuff = new char[colortablesize*bitsize];
+
+      // READ COLOR TABLE
+      fileread.seekg(54);
+      fileread.read(colorbuff, colortablesize*bitsize);
+
+      // INSERT INTO COLOR TABLE
+      // NOTE THAT COLOR TABLE EXIST ONLY ON GRAYSCALE FORMAT
+      for (int i = 0; i < colortablesize; i += bitsize) {
+        color[i].setRed((unsigned char) colorbuff[i]);
+        color[i].setGreen((unsigned char) colorbuff[i]);
+        color[i].setBlue((unsigned char) colorbuff[i]);
+      }
+      
+      // READ INDEX
+      buff = new unsigned char[width];
+      int coloridx;
+
+      for (int i = height - 1; i > 0; i--) {
+        fileread.read((char *) buff, width);
+        for (int j = 0; j < width; j += bitsize) {
+          coloridx = buffertoInteger((char *) buff + j, 0, 1);
+          data[i][j].setBlue(colorbuff[coloridx]);
+          data[i][j].setGreen(colorbuff[coloridx]);
+          data[i][j].setRed(colorbuff[coloridx]);
+        }
+      }
 
     }
 
@@ -143,24 +174,8 @@ Image BMPImageLoader::loadBM(std::string fileUrl) {
 
     else {
 
-      // buff1 = new char[3];
-      // fileread.read(buff1, 3);
-      // std::cout << buffertoInteger(buff1, 0, 1) << std::endl;
-
-      // data[0][0].setRed((unsigned char) buff1[2]);
-
-      // if (data[0][0].getRed() == 255) {
-      //   std::cout << "Red is full" << std::endl;
-      // }
-
-      // buff = new unsigned char[3];
-      // fileread.read((char*) buff, 3);
-      // std::cout << buffertoInteger((char*) buff, 2, 1) << std::endl;
-
-
-      // int imageSize = height*width;
-      buff = new unsigned char[height * width];
       int bitsize = pixelcount /  sizeof(int);
+      buff = new unsigned char[bitsize * width];
       fileread.seekg(offset);
       // fileread.read((char*) buff, 3);
       // std::cout << buffertoInteger((char*) buff, 2, 1) << std::endl;

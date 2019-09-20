@@ -2,5 +2,5 @@
 
 int main() {
   BMPImageLoader a = BMPImageLoader();
-  a.load("julia_set.bmp");
+  a.load("lena_gray.bmp");
 }
