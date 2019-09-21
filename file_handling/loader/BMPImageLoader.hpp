@@ -3,11 +3,11 @@
 
 #include "ImageLoader.hpp"
 
-class BMPImageLoader : ImageLoader {
+class BMPImageLoader : public ImageLoader {
   public:
     BMPImageLoader();
-    Image load(std::string fileUrl);
-    Image loadBM(std::string fileUrl);
+    Image * load(std::string fileUrl);
+    Image * loadBM(std::string fileUrl);
 };
 
 #endif

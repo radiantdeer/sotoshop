@@ -12,8 +12,8 @@ BMPImageLoader::BMPImageLoader() {
 
 }
 
-Image BMPImageLoader::load(std::string fileUrl) {
-  
+Image * BMPImageLoader::load(std::string fileUrl) {
+
   char *fileheader = new char[14];
   std::ifstream fileread(fileUrl.c_str());
 
@@ -29,20 +29,20 @@ Image BMPImageLoader::load(std::string fileUrl) {
       return loadBM(fileUrl);
     }
   }
-  
+
   // fileread.close();
 
   delete [] fileheader;
-  return Image();
+  return new Image();
 }
 
-Image BMPImageLoader::loadBM(std::string fileUrl) {
+Image * BMPImageLoader::loadBM(std::string fileUrl) {
   std::string line;
 
   char *fileheader = new char[14];
 
   char *BitmapHeaderSize = new char[4];
-  
+
   char* buff1;
   unsigned char* buff;
   std::ifstream fileread(fileUrl.c_str());
@@ -100,23 +100,23 @@ Image BMPImageLoader::loadBM(std::string fileUrl) {
     } else {
       std::cout << "Uncompressed" << std::endl;
     }
-    
+
     // picture image size
     int imgsize = buffertoInteger(bitmapheader, 20, 4);
     std::cout << "Bitmap size in byte: " << imgsize << std::endl;
-    
+
     // picture horizontal resolution
     int resolutionh = buffertoInteger(bitmapheader, 24, 4);
     std::cout << "Resolution (horizontal): " << resolutionh << std::endl;
-    
+
     // picture vertical resolution
     int resolutionv = buffertoInteger(bitmapheader, 28, 4);
     std::cout << "Resolution (vertical): " << resolutionv << std::endl;
-    
+
     // picture color count
     int colorcount = buffertoInteger(bitmapheader, 32, 4);
     std::cout << "Color count: " << colorcount << std::endl;
-    
+
     // picture important color count
     int importantcolorcount = buffertoInteger(bitmapheader, 36, 4);
     std::cout << "Color count (I): " << importantcolorcount << std::endl;
@@ -132,31 +132,34 @@ Image BMPImageLoader::loadBM(std::string fileUrl) {
     }
 
     if (offset > 54) {
+
+      int bitsize = pixelcount /  8;
+
       int colortablesize = offset - 54;
       Pixel *color = new Pixel[colortablesize];
 
-      int bitsize = pixelcount /  sizeof(int);
-      char *colorbuff = new char[colortablesize*bitsize];
+
+      char *colorbuff = new char[colortablesize*4];
 
       // READ COLOR TABLE
       fileread.seekg(54);
-      fileread.read(colorbuff, colortablesize*bitsize);
+      fileread.read(colorbuff, colortablesize*4);
 
       // INSERT INTO COLOR TABLE
       // NOTE THAT COLOR TABLE EXIST ONLY ON GRAYSCALE FORMAT
-      for (int i = 0; i < colortablesize; i += bitsize) {
-        color[i].setRed((unsigned char) colorbuff[i]);
-        color[i].setGreen((unsigned char) colorbuff[i]);
-        color[i].setBlue((unsigned char) colorbuff[i]);
+      for (int i = 0; i < colortablesize; i++) {
+        color[i].setBlue((unsigned char) colorbuff[i*4]);
+        color[i].setGreen((unsigned char) colorbuff[i*4 + 1]);
+        color[i].setRed((unsigned char) colorbuff[i*4 + 2]);
       }
-      
+
       // READ INDEX
       buff = new unsigned char[width];
       int coloridx;
 
-      for (int i = height - 1; i > 0; i--) {
+      for (int i = 0; i < height; i++) {
         fileread.read((char *) buff, width);
-        for (int j = 0; j < width; j += bitsize) {
+        for (int j = 0; j < width; j ++) {
           coloridx = buffertoInteger((char *) buff + j, 0, 1);
           data[i][j].setBlue(colorbuff[coloridx]);
           data[i][j].setGreen(colorbuff[coloridx]);
@@ -174,25 +177,24 @@ Image BMPImageLoader::loadBM(std::string fileUrl) {
 
     else {
 
-      int bitsize = pixelcount /  sizeof(int);
-      buff = new unsigned char[bitsize * width];
+      int bitsize = pixelcount /  8;
+      buff = new unsigned char[bitsize * height * width];
       fileread.seekg(offset);
-      // fileread.read((char*) buff, 3);
-      // std::cout << buffertoInteger((char*) buff, 2, 1) << std::endl;
-      for (int i = height - 1; i > 0; i--) {
-        fileread.read((char *) buff, bitsize*width);
-        for (int j = 0; j < width; j += bitsize) {
-          data[i][j].setBlue((unsigned char) buff[j*bitsize]);
-          data[i][j].setGreen((unsigned char) buff[j*bitsize + 1]);
-          data[i][j].setRed((unsigned char) buff[j*bitsize + 2]);
+
+      fileread.read((char *) buff, bitsize * height * width);
+      for (int i = 0; i < height; i++) {
+        for (int j = 0; j < width ; j++) {
+          data[i][j].setBlue((unsigned char) buff[(height - 1 - i) * width * bitsize + j*bitsize]);
+          data[i][j].setGreen((unsigned char) buff[(height - 1 - i) * width * bitsize + j*bitsize + 1]);
+          data[i][j].setRed((unsigned char) buff[(height - 1 - i) * width * bitsize + j*bitsize + 2]);
         }
       }
 
     }
 
     fileread.close();
-    return Image(width, height, data, "bmp");
-    
+    return new Image(width, height, data, "bmp");
+
   } else {
     // std::cout << "Not Opened" << std::endl;
     throw std::runtime_error("BMPIMageLoader::loadBM: " + fileUrl + " is unreadable.");

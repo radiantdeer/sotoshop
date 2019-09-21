@@ -2,6 +2,7 @@
 #include "PBMImageLoader.hpp"
 #include "PPMImageLoader.hpp"
 #include "PGMImageLoader.hpp"
+#include "BMPImageLoader.hpp"
 #include "RawImageLoader.hpp"
 #include <locale>
 #include <iostream>
@@ -25,7 +26,7 @@ ImageLoader * ImageLoaderFactory::getImageLoader(std::string filename) {
         imageLoader = new PBMImageLoader();
     } else if ((extension == "bmp") || (extension == "BMP")) {
         cout << "BMP" << endl;
-        imageLoader = new RawImageLoader();
+        imageLoader = new BMPImageLoader();
     } else {
         cout << "Unsupported" << endl;
         imageLoader = new RawImageLoader();
