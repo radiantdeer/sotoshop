@@ -7,6 +7,7 @@
 #define BMP_HEADER_WINDOWS "BM"
 
 int buffertoInteger(char* buffer, int start, int size);
+void PrintPixel(Pixel pixel);
 
 BMPImageLoader::BMPImageLoader() {
 
@@ -131,26 +132,28 @@ Image * BMPImageLoader::loadBM(std::string fileUrl) {
       data[i] = new Pixel[width];
     }
 
-    if (offset > 54) {
+    if (offset > filesize + headersize) {
 
-      int bitsize = pixelcount /  8;
+      // int bitsize = pixelcount /  8;
 
-      int colortablesize = offset - 54;
-      Pixel *color = new Pixel[colortablesize];
+      // int colortablesize = offset - (filesize + headersize);
+      Pixel *color = new Pixel[colorcount];
 
 
-      char *colorbuff = new char[colortablesize*4];
+      char *colorbuff = new char[colorcount*4];
 
       // READ COLOR TABLE
       fileread.seekg(54);
-      fileread.read(colorbuff, colortablesize*4);
+      fileread.read(colorbuff, colorcount*4);
 
       // INSERT INTO COLOR TABLE
       // NOTE THAT COLOR TABLE EXIST ONLY ON GRAYSCALE FORMAT
-      for (int i = 0; i < colortablesize; i++) {
+      for (int i = 0; i < colorcount; i++) {
         color[i].setBlue((unsigned char) colorbuff[i*4]);
         color[i].setGreen((unsigned char) colorbuff[i*4 + 1]);
         color[i].setRed((unsigned char) colorbuff[i*4 + 2]);
+
+        // PrintPixel(color[i]);
       }
 
       // READ INDEX
@@ -209,4 +212,13 @@ int buffertoInteger(char* buffer, int start, int size) {
 
   int z = total;
   return z;
+}
+
+void PrintPixel(Pixel pixel) {
+    unsigned char color = pixel.getRed();
+    std::cout << buffertoInteger((char *) &color, 0, 1) << " ";
+    color = pixel.getGreen();
+    std::cout << buffertoInteger((char *) &color, 0, 1) << " ";
+    color = pixel.getBlue();
+    std::cout << buffertoInteger((char *) &color, 0, 1) << std::endl;;
 }
