@@ -32,5 +32,6 @@ int PGMImageSaver::save(const Image& image, std::string fileUrl) {
         return 0;
     } else {
         std::runtime_error("Cannot write file");
+        return -1;
     }
 }
