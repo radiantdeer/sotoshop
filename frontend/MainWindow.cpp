@@ -16,15 +16,6 @@ MainWindow::MainWindow() : QMainWindow() {
 
     drawSurface = new DrawSurface(this);
     this->setCentralWidget(drawSurface);
-
-    /* STUB IMAGE DATA */
-    Image * image = new Image(100, 100);
-
-    this->setActiveImage(image);
-    this->getDrawSurface()->setImageLoaded(true);
-
-    /*QRegion tempRegion;
-    drawSurface->paintEvent(new QPaintEvent(tempRegion));*/
 }
 
 QAction * MainWindow::getLoadAction() {
@@ -44,7 +35,7 @@ void MainWindow::loadFile() {
     if (url != "") {
         std::cout << "Loading from file " << url << std::endl;
         ImageLoader * imageLoader = ImageLoaderFactory::getImageLoader(url);
-        Image loadedImage = imageLoader->load(url);
+        Image * loadedImage = imageLoader->load(url);
         drawSurface->setActiveImage(loadedImage);
         drawSurface->setImageLoaded(true);
         delete imageLoader;
@@ -72,11 +63,17 @@ void MainWindow::connectActionsToControllers() {
 }
 
 std::string MainWindow::getFileUrl(std::string dialogTitle) {
-    QUrl tempFileUrl = QFileDialog::getOpenFileUrl(this, dialogTitle.c_str(), *(new QUrl()), "Image Files (*.raw, *.pbm, *.pgm, *.ppm, *.bmp);; All Files (*)");
+    QUrl tempFileUrl = QFileDialog::getOpenFileUrl(this, dialogTitle.c_str(), *(new QUrl()), "Image Files (*.raw , *.pbm , *.pgm , *.ppm , *.bmp);; All Files (*)");
     std::string fileUrl = tempFileUrl.toLocalFile().toUtf8().constData();
     return fileUrl;
 }
 
 void MainWindow::setActiveImage(Image * image) {
     drawSurface->setActiveImage(image);
+    drawSurface->setImageLoaded(true);
+}
+
+void MainWindow::refresh() {
+    QRegion tempRegion;
+    drawSurface->paintEvent(new QPaintEvent(tempRegion));
 }
