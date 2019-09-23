@@ -95,7 +95,7 @@ Image loadBinary(std::string filename) {
         }
         int imageSize = height*width;
         buff = new unsigned char[height*width];
-        fileread.read((char*) buff, sizeof(int)*height*width);
+        fileread.read((char*) buff, sizeof(char)*height*width);
         for (int i = 0; i < height; i++) {
             for (int j = 0; j < width; j++) {
                 data[i][j].setRed((unsigned char) buff[i*width + j]);
