@@ -86,7 +86,7 @@ int Image::getWidth() const {
 
 int Image::getHeight() const {
     return height;
-}  
+}
 
 std::vector<std::vector<Pixel>> Image::getPixelData() const {
     return data;
@@ -198,6 +198,78 @@ Image * Image::invert() {
     return this;
 }
 
+Image * Image::grayscale() {
+    for (int i = 0; i < this->getWidth(); i++) {
+        for (int j = 0; j < this->getHeight(); j++) {
+            Pixel oldPixel = this->getPixelAt(i, j);
+            Pixel * newPixel = new Pixel();
+
+            int grayValue = (0.299f * oldPixel.getRed()) + (0.587f * oldPixel.getGreen()) + (0.144f * oldPixel.getBlue());
+            newPixel->setRed(grayValue);
+            newPixel->setBlue(grayValue);
+            newPixel->setGreen(grayValue);
+
+            this->setPixelAt(i,j, *newPixel);
+            delete newPixel;
+        }
+    }
+    return this;
+}
+
+Image * Image::and(Image B, int width, int height) {
+    for (int i = 0; i < this->getWidth(); i++) {
+        for (int j = 0; j < this->getHeight(); j++) {
+            Pixel a = this->getPixelAt(i, j);
+            Pixel b = B.getPixelAt(i, j);
+            Pixel *pixel = new Pixel();
+
+            pixel->setRed(a.getRed() & b.getRed());
+            pixel->setGreen(a.getGreen() & b.getGreen());
+            pixel->setBlue(a.getBlue() & b.getBlue());
+
+            this->setPixelAt(i, j, *pixel);
+            delete pixel;
+        }
+    }
+    return this;
+}
+
+Image * Image::or(Image B, int width, int height) {
+    for (int i = 0; i < this->getWidth(); i++) {
+        for (int j = 0; j < this->getHeight(); j++) {
+            Pixel a = this->getPixelAt(i, j);
+            Pixel b = B.getPixelAt(i, j);
+            Pixel *pixel = new Pixel();
+
+            pixel->setRed(a.getRed() | b.getRed());
+            pixel->setGreen(a.getGreen() | b.getGreen());
+            pixel->setBlue(a.getBlue() | b.getBlue());
+
+            this->setPixelAt(i, j, *pixel);
+            delete pixel;
+        }
+    }
+    return this;
+}
+
+Image * Image::not() {
+    for (int i = 0; i < this->getWidth(); i++) {
+        for (int j = 0; j < this->getHeight(); j++) {
+            Pixel a = this->getPixelAt(i, j);
+            Pixel *pixel = new Pixel();
+
+            pixel->setRed(~a.getRed());
+            pixel->setGreen(~a.getGreen());
+            pixel->setBlue(~a.getBlue());
+
+            this->setPixelAt(i, j, *pixel);
+            delete pixel;
+        }
+    }
+    return this;
+}
+
+
 Image * Image::operator+(Image B) {
     Image * C = new Image(*this);
     return C->add(B, B.getWidth(), B.getHeight());
@@ -216,4 +288,19 @@ Image * Image::operator-(Image B) {
 Image * Image::operator-(unsigned char deltaBrightness) {
     Image * C = new Image(*this);
     return C->adjustBrightness(0 - deltaBrightness);
+}
+
+Image * Image::operator&(Image B) {
+    Image * C = new Image(*this);
+    return C->and(B, B.getWidth(), B.getHeight());
+}
+
+Image * Image::operator|(Image B) {
+    Image * C = new Image(*this);
+    return C->or(B, B.getWidth(), B.getHeight());
+}
+
+Image * Image::operator~() {
+    Image * C = new Image(*this);
+    return C->not();
 }

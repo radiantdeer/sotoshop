@@ -30,14 +30,21 @@ class Image {
         void setFileUrl(std::string fileUrl);
 
         Image * add(Image B, int width, int height);
-        Image * adjustBrightness(unsigned char delta); 
+        Image * adjustBrightness(unsigned char delta);
         Image * substract(Image B, int width, int height);
         Image * invert();
-        
+        Image * grayscale();
+        Image * and(Image B, int width, int height);
+        Image * or(Image B, int width, int height);
+        Image * not();
+
         Image * operator+(Image B);
         Image * operator+(unsigned char deltaBrightness);
         Image * operator-(Image B);
         Image * operator-(unsigned char deltaBrightness);
+        Image * operator&(Image B);
+        Image * operator|(Image B);
+        Image * operator~();
 
     private:
         int width;
