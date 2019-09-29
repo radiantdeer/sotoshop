@@ -1,6 +1,7 @@
 #include "Image.hpp"
 
 #include <iostream>
+#include <cmath>
 
 Image::Image() {
     width = 0;
@@ -198,6 +199,8 @@ Image * Image::invert() {
     return this;
 }
 
+// TODO
+// TESTING AND DEBUG
 Image * Image::grayscale() {
     for (int i = 0; i < this->getWidth(); i++) {
         for (int j = 0; j < this->getHeight(); j++) {
@@ -216,6 +219,8 @@ Image * Image::grayscale() {
     return this;
 }
 
+// TODO
+// TESTING AND DEBUG
 Image * Image::and(Image B, int width, int height) {
     for (int i = 0; i < this->getWidth(); i++) {
         for (int j = 0; j < this->getHeight(); j++) {
@@ -234,6 +239,8 @@ Image * Image::and(Image B, int width, int height) {
     return this;
 }
 
+// TODO
+// TESTING AND DEBUG
 Image * Image::or(Image B, int width, int height) {
     for (int i = 0; i < this->getWidth(); i++) {
         for (int j = 0; j < this->getHeight(); j++) {
@@ -252,6 +259,8 @@ Image * Image::or(Image B, int width, int height) {
     return this;
 }
 
+// TODO
+// TESTING AND DEBUG
 Image * Image::not() {
     for (int i = 0; i < this->getWidth(); i++) {
         for (int j = 0; j < this->getHeight(); j++) {
@@ -269,6 +278,69 @@ Image * Image::not() {
     return this;
 }
 
+// TODO
+// TESTING AND DEBUG
+Image * Image::translate(int dx, int dy) {
+    for (int i = 0; i < this->getWidth(); i++) {
+        for (int j = 0; j < this->getHeight(); j++) {
+            Pixel a = this->getPixelAt(i, j);
+            if ((i + dx) < this->getWidth() && (j + dy) < this->getHeight()) {
+                // Translated if image still in image size range
+                Pixel *b = new Pixel();
+                b->setRed(a.getRed());
+                b->setGreen(a.getGreen());
+                b->setBlue(a.getBlue());
+                this->setPixelAt(i + dx, j + dy, *b);
+                delete b;
+            }
+            Pixel *c = new Pixel(0,0,0);
+            this->setPixelAt(i, j, *c);
+            delete c;
+        }
+    }
+    return this;
+}
+
+// TODO
+// TESTING AND DEBUG
+Image * Image::rotate90CW(){
+    Image *newImage = new Image(this->getHeight(), this->getWidth());
+    // Insert new Image
+    for (int i = 0; i < this->getWidth(); i++) {
+        int k = this->getHeight() - 1;
+        for (int j = 0; j < this->getHeight(); j++) {
+            Pixel a = this->getPixelAt(i,j);
+            Pixel *b = new Pixel();
+            b->setRed(a.getRed());
+            b->setGreen(a.getGreen());
+            b->setBlue(a.getBlue());
+            newImage->setPixelAt(k, i, *b);
+            k--;
+            delete b;
+        }
+    }
+    return newImage;
+}
+
+// TODO
+// TESTING AND DEBUG
+Image * Image::rotate90CCW(){
+    Image *newImage = new Image(this->getHeight(), this->getWidth());
+    int k = this->getWidth() - 1;
+    for (int i = 0; i < this->getWidth(); i++) {
+        for (int j = 0; j < this->getHeight(); j++) {
+            Pixel a = this->getPixelAt(i,j);
+            Pixel *b = new Pixel();
+            b->setRed(a.getRed());
+            b->setGreen(a.getGreen());
+            b->setBlue(a.getBlue());
+            newImage->setPixelAt(j, k, *b);
+            delete b;
+        }
+        k--;
+    }
+    return newImage;
+}
 
 Image * Image::operator+(Image B) {
     Image * C = new Image(*this);

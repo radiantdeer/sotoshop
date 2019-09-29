@@ -6,7 +6,7 @@
 #include "Pixel.hpp"
 
 class Image {
-    
+
     public:
         static const int MAX_GRAY = 255;
         Image();
@@ -37,6 +37,9 @@ class Image {
         Image * and(Image B, int width, int height);
         Image * or(Image B, int width, int height);
         Image * not();
+        Image * translate(int dx, int dy);
+        Image * rotate90CW();
+        Image * rotate90CCW();
 
         Image * operator+(Image B);
         Image * operator+(unsigned char deltaBrightness);
