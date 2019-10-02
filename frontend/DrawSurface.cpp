@@ -8,15 +8,18 @@
 
 DrawSurface::DrawSurface() : QWidget() {
     imageLoaded = false;
+    activeImageLock = new std::mutex();
 }
 
 DrawSurface::DrawSurface(QWidget * parentWidget) : QWidget(parentWidget) {
     imageLoaded = false;
+    activeImageLock = new std::mutex();
 }
 
 DrawSurface::DrawSurface(QWidget * parentWidget, Image * activeImage) : QWidget(parentWidget) {
     this->activeImage = activeImage;
     imageLoaded = true;
+    activeImageLock = new std::mutex();
 }
 
 Image * DrawSurface::getActiveImage() {
@@ -28,16 +31,26 @@ bool DrawSurface::isImageLoaded() {
 }
 
 void DrawSurface::setActiveImage(Image * newImage) {
+    this->acquireLockImage();
     activeImage = newImage;
-}
-
-void DrawSurface::setActiveImage(Image& newImage) {
-    delete activeImage;
-    activeImage = new Image(newImage);
+    if (newImage != nullptr) {
+        this->imageLoaded = true;
+    } else {
+        this->imageLoaded = false;
+    }
+    this->releaseLockImage();
 }
 
 void DrawSurface::setImageLoaded(bool imageLoaded) {
     this->imageLoaded = imageLoaded;
+}
+
+void DrawSurface::acquireLockImage() {
+    this->activeImageLock->lock();
+}
+
+void DrawSurface::releaseLockImage() {
+    this->activeImageLock->unlock();
 }
 
 // Implementing protected virtual method from QWidget
@@ -46,6 +59,7 @@ void DrawSurface::setImageLoaded(bool imageLoaded) {
 void DrawSurface::paintEvent(QPaintEvent * event) {
     QPainter painter(this);
     if (this->isImageLoaded()) {
+        acquireLockImage();
         for (int i = 0; i < activeImage->getHeight(); i++) {
             for (int j = 0; j < activeImage->getWidth(); j++) {
                 Pixel thisPixel = activeImage->getPixelAt(j, i);
@@ -54,6 +68,7 @@ void DrawSurface::paintEvent(QPaintEvent * event) {
                 painter.drawPoint(j, i);
             }
         }
+        releaseLockImage();
     } else {
         std::cout << "[WARN] No active image in DrawSurface!" << std::endl;
     }
