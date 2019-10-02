@@ -34,9 +34,9 @@ class Image {
         Image * substract(Image B, int width, int height);
         Image * invert();
         Image * grayscale();
-        Image * and(Image B, int width, int height);
-        Image * or(Image B, int width, int height);
-        Image * not();
+        Image * and_op(Image B, int width, int height);
+        Image * or_op(Image B, int width, int height);
+        Image * not_op();
         Image * translate(int dx, int dy);
         Image * rotate90CW();
         Image * rotate90CCW();

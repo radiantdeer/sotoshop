@@ -221,7 +221,7 @@ Image * Image::grayscale() {
 
 // TODO
 // TESTING AND DEBUG
-Image * Image::and(Image B, int width, int height) {
+Image * Image::and_op(Image B, int width, int height) {
     for (int i = 0; i < this->getWidth(); i++) {
         for (int j = 0; j < this->getHeight(); j++) {
             Pixel a = this->getPixelAt(i, j);
@@ -241,7 +241,7 @@ Image * Image::and(Image B, int width, int height) {
 
 // TODO
 // TESTING AND DEBUG
-Image * Image::or(Image B, int width, int height) {
+Image * Image::or_op(Image B, int width, int height) {
     for (int i = 0; i < this->getWidth(); i++) {
         for (int j = 0; j < this->getHeight(); j++) {
             Pixel a = this->getPixelAt(i, j);
@@ -261,7 +261,7 @@ Image * Image::or(Image B, int width, int height) {
 
 // TODO
 // TESTING AND DEBUG
-Image * Image::not() {
+Image * Image::not_op() {
     for (int i = 0; i < this->getWidth(); i++) {
         for (int j = 0; j < this->getHeight(); j++) {
             Pixel a = this->getPixelAt(i, j);
@@ -429,15 +429,15 @@ Image * Image::operator*(Image B) {
 
 Image * Image::operator&(Image B) {
     Image * C = new Image(*this);
-    return C->and(B, B.getWidth(), B.getHeight());
+    return C->and_op(B, B.getWidth(), B.getHeight());
 }
 
 Image * Image::operator|(Image B) {
     Image * C = new Image(*this);
-    return C->or(B, B.getWidth(), B.getHeight());
+    return C->or_op(B, B.getWidth(), B.getHeight());
 }
 
 Image * Image::operator~() {
     Image * C = new Image(*this);
-    return C->not();
+    return C->not_op();
 }
