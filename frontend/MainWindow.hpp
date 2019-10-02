@@ -13,7 +13,7 @@
 #include "../file_handling/saver/ImageSaverFactory.hpp"
 
 class MainWindow : public QMainWindow {
-    
+
     public:
         MainWindow();
         QAction * getLoadAction();
@@ -30,10 +30,11 @@ class MainWindow : public QMainWindow {
         QAction * loadAction;
         QAction * saveAction;
         DrawSurface * drawSurface;
-        
+
         void connectActionsToControllers();
-        std::string getFileUrl(std::string dialogTitle);
-        
+        std::string getOpenFileUrl(std::string dialogTitle);
+        std::string getSaveFileUrl(std::string dialogTitle);
+
 };
 
 #endif

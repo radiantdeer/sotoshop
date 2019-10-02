@@ -1,4 +1,5 @@
 #include "ImageSaverFactory.hpp"
+#include "PBMImageSaver.hpp"
 #include "RawImageSaver.hpp"
 
 ImageSaver * ImageSaverFactory::getImageSaver(std::string format) {
@@ -11,12 +12,12 @@ ImageSaver * ImageSaverFactory::getImageSaver(std::string format) {
     } else if ((format == "ppm") || (format == "PPM")) {
         imageSaver = new RawImageSaver();
     } else if ((format == "pbm") || (format == "PBM")) {
-        imageSaver = new RawImageSaver();
+        imageSaver = new PBMImageSaver();
     } else if ((format == "bmp") || (format == "BMP")) {
         imageSaver = new RawImageSaver();
     } else {
         imageSaver = new RawImageSaver();
     }
-    
+
     return imageSaver;
 }

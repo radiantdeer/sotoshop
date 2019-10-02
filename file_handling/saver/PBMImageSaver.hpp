@@ -3,7 +3,7 @@
 
 #include "ImageSaver.hpp"
 
-class PBMImageSaver : ImageSaver {
+class PBMImageSaver : public ImageSaver {
 
     public:
         PBMImageSaver();
