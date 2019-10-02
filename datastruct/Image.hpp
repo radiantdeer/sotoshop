@@ -40,11 +40,15 @@ class Image {
         Image * translate(int dx, int dy);
         Image * rotate90CW();
         Image * rotate90CCW();
+        Image * multiply(Image b);
+        Image * flipH();
+        Image * flipV();
 
         Image * operator+(Image B);
         Image * operator+(unsigned char deltaBrightness);
         Image * operator-(Image B);
         Image * operator-(unsigned char deltaBrightness);
+        Image * operator*(Image B);
         Image * operator&(Image B);
         Image * operator|(Image B);
         Image * operator~();

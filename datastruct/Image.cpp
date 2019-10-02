@@ -342,6 +342,64 @@ Image * Image::rotate90CCW(){
     return newImage;
 }
 
+// TODO
+// TESTING AND DEBUG
+Image * Image::multiply(Image B) {
+    int opWidth, opHeight;
+    if (B.getWidth() < this->getWidth()) {
+        opWidth = B.getWidth();
+    } else {
+        opWidth = this->getWidth();
+    }
+    if (B.getHeight() < this->getHeight()) {
+        opHeight = B.getHeight();
+    } else {
+        opHeight = this->getHeight();
+    }
+    for (int i = 0; i < opWidth; i++) {
+        for (int j = 0; j < opHeight; i++) {
+            Pixel a = this->getPixelAt(i, j);
+            Pixel b = B.getPixelAt(i,j);
+            Pixel * c = a * b;
+            this->setPixelAt(i,j, *c);
+            delete c;
+        }
+    }
+    return this;
+}
+
+// TODO
+// TESTING AND DEBUG
+Image * Image::flipH() {
+    Image * tempImage = new Image(*this);
+    for (int i = 0; i < tempImage->getWidth(); i++) {
+        for (int j = 0; j < tempImage->getHeight(); j++) {
+            Pixel a = tempImage->getPixelAt(i,j);
+            Pixel *b = new Pixel(a);
+            this->setPixelAt(tempImage->getWidth() - i, j, *b);
+            delete b;
+        }
+    }
+    delete tempImage;
+    return this;
+}
+
+// TODO
+// TESTING AND DEBUG
+Image * Image::flipV() {
+    Image * tempImage = new Image(*this);
+    for (int i = 0; i < tempImage->getWidth(); i++) {
+        for (int j = 0; j < tempImage-> getHeight(); j++) {
+            Pixel a = tempImage->getPixelAt(i, j);
+            Pixel *b = new Pixel(a);
+            this->setPixelAt(i, tempImage->getHeight() - j, *b);
+            delete b;
+        }
+    }
+    delete tempImage;
+    return this;
+}
+
 Image * Image::operator+(Image B) {
     Image * C = new Image(*this);
     return C->add(B, B.getWidth(), B.getHeight());
@@ -360,6 +418,13 @@ Image * Image::operator-(Image B) {
 Image * Image::operator-(unsigned char deltaBrightness) {
     Image * C = new Image(*this);
     return C->adjustBrightness(0 - deltaBrightness);
+}
+
+// TODO
+// TESTING AND DEBUG
+Image * Image::operator*(Image B) {
+    Image * C = new Image(*this);
+    return C->multiply(B);
 }
 
 Image * Image::operator&(Image B) {
