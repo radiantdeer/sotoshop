@@ -29,7 +29,7 @@ Image * PBMImageLoader::load(std::string filename) {
     throw std::runtime_error("PBMImageLoader::load: " + filename + " is unreadable.");
 }
 
-Image * loadASCII(std::string filename) {
+Image * PBMImageLoader::loadASCII(std::string filename) {
     int height = 0, width = 0;
     std::string line;
     std::ifstream fileread(filename);
@@ -72,7 +72,7 @@ Image * loadASCII(std::string filename) {
     throw std::runtime_error("PBMImageLoader::loadASCII: " + filename + " is unreadable.");
 }
 
-Image * loadBinary(std::string filename) {
+Image * PBMImageLoader::loadBinary(std::string filename) {
     int height = 0, width = 0;
     std::ifstream fileread(filename);
     std::string line;
