@@ -10,7 +10,7 @@
 MainWindow::MainWindow() : QMainWindow() {
     QMenu * fileMenu = this->menuBar()->addMenu("File");
     loadAction = fileMenu->addAction("Load");
-    saveAction = fileMenu->addAction("Save");  
+    saveAction = fileMenu->addAction("Save");
 
     connectActionsToControllers();
 
@@ -31,7 +31,7 @@ DrawSurface * MainWindow::getDrawSurface() {
 }
 
 void MainWindow::loadFile() {
-    std::string url = getFileUrl("Load Image");
+    std::string url = getOpenFileUrl("Load Image");
     if (url != "") {
         std::cout << "Loading from file " << url << std::endl;
         ImageLoader * imageLoader = ImageLoaderFactory::getImageLoader(url);
@@ -39,21 +39,23 @@ void MainWindow::loadFile() {
         drawSurface->setActiveImage(loadedImage);
         drawSurface->setImageLoaded(true);
         delete imageLoader;
+        drawSurface->update();
     }
 }
 
 void MainWindow::saveFile() {
+    using namespace std;
     if (drawSurface->isImageLoaded()) {
-        std::string url = getFileUrl("Save Image");
+        string url = getSaveFileUrl("Save Image");
         if (url != "") {
-            std::cout << "Saving to file " << url << std::endl;
+            cout << "Saving to file " << url << std::endl;
             Image * imageToBeSaved = drawSurface->getActiveImage();
-            ImageSaver * imageSaver = ImageSaverFactory::getImageSaver(imageToBeSaved->getOriginalFormat());
-            //imageSaver->save(imageToBeSaved, url);
+            ImageSaver * imageSaver = ImageSaverFactory::getImageSaver(url);
+            imageSaver->save(*imageToBeSaved, url);
             delete imageSaver;
         }
     } else {
-        std::cout << "SotoShop cannot save nothing! Load an image first!" << std::endl;
+        cout << "SotoShop cannot save nothing! Load an image first!" << std::endl;
     }
 }
 
@@ -62,9 +64,17 @@ void MainWindow::connectActionsToControllers() {
     connect(saveAction, &QAction::triggered, this, &MainWindow::saveFile);
 }
 
-std::string MainWindow::getFileUrl(std::string dialogTitle) {
+std::string MainWindow::getOpenFileUrl(std::string dialogTitle) {
+    using namespace std;
     QUrl tempFileUrl = QFileDialog::getOpenFileUrl(this, dialogTitle.c_str(), *(new QUrl()), "Image Files (*.raw , *.pbm , *.pgm , *.ppm , *.bmp);; All Files (*)");
-    std::string fileUrl = tempFileUrl.toLocalFile().toUtf8().constData();
+    string fileUrl = tempFileUrl.toLocalFile().toUtf8().constData();
+    return fileUrl;
+}
+
+std::string MainWindow::getSaveFileUrl(std::string dialogTitle) {
+    using namespace std;
+    QUrl tempFileUrl = QFileDialog::getSaveFileUrl(this, dialogTitle.c_str(), *(new QUrl()), "Raw Image File (*.raw);; PBM Image File (*.pbm);; PGM Image File (*.pgm);; PPM Image File (*.ppm);; Bitmap File (*.bmp)");
+    string fileUrl = tempFileUrl.toLocalFile().toUtf8().constData();
     return fileUrl;
 }
 
