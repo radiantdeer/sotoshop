@@ -24,6 +24,8 @@ class Pixel {
         void setBlue(unsigned char);
 
         std::string toString() const;
+
+        Pixel * operator*(Pixel B);
 };
 
 #endif
