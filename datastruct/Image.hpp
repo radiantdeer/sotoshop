@@ -15,6 +15,7 @@ class Image {
         std::string fileUrl;
 
     public:
+        static const int MAX_GRAY = 255;
         Image();
         Image(int, int);
         Image(int, int, std::string);
@@ -34,6 +35,37 @@ class Image {
         void setHeight(int height);
         void setOriginalFormat(std::string originalFormat);
         void setFileUrl(std::string fileUrl);
+
+        Image * add(Image B, int width, int height);
+        Image * adjustBrightness(unsigned char delta);
+        Image * substract(Image B, int width, int height);
+        Image * invert();
+        Image * grayscale();
+        Image * and(Image B, int width, int height);
+        Image * or(Image B, int width, int height);
+        Image * not();
+        Image * translate(int dx, int dy);
+        Image * rotate90CW();
+        Image * rotate90CCW();
+        Image * multiply(Image b);
+        Image * flipH();
+        Image * flipV();
+
+        Image * operator+(Image B);
+        Image * operator+(unsigned char deltaBrightness);
+        Image * operator-(Image B);
+        Image * operator-(unsigned char deltaBrightness);
+        Image * operator*(Image B);
+        Image * operator&(Image B);
+        Image * operator|(Image B);
+        Image * operator~();
+
+    private:
+        int width;
+        int height;
+        std::vector<std::vector<Pixel>> data;
+        std::string originalFormat;
+        std::string fileUrl;
 };
 
 #endif
