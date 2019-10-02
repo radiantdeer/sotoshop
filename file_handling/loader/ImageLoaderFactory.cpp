@@ -4,7 +4,7 @@
 #include "PGMImageLoader.hpp"
 #include "RawImageLoader.hpp"
 #include <locale>
-#include <iostream>
+#include "../../spdlog/spdlog.h"
 #include "../../utilities/Utilities.hpp"
 
 ImageLoader * ImageLoaderFactory::getImageLoader(std::string filename) {
@@ -13,22 +13,22 @@ ImageLoader * ImageLoaderFactory::getImageLoader(std::string filename) {
     ImageLoader * imageLoader;
 
     if ((extension == "raw") || (extension == "RAW")) {
-        cout << "RAW" << endl;
+        spdlog::debug("ImageLoaderFactory detects raw image");
         imageLoader = new RawImageLoader();
     } else if ((extension == "pgm") || (extension == "PGM")) {
-        cout << "PGM" << endl;
+        spdlog::debug("ImageLoaderFactory detects PGM image");
         imageLoader = new PGMImageLoader;
     } else if ((extension == "ppm") || (extension == "PPM")) {
-        cout << "PPM" << endl;
+        spdlog::debug("ImageLoaderFactory detects PPM image");
         imageLoader = new PPMImageLoader();
     } else if ((extension == "pbm") || (extension == "PBM")) {
-        cout << "PBM" << endl;
+        spdlog::debug("ImageLoaderFactory detects PBM image");
         imageLoader = new PBMImageLoader();
     } else if ((extension == "bmp") || (extension == "BMP")) {
-        cout << "BMP" << endl;
+        spdlog::debug("ImageLoaderFactory detects BMP image");
         imageLoader = new RawImageLoader();
     } else {
-        cout << "Unsupported" << endl;
+        spdlog::warn("ImageLoaderFactory receives an unsupported image format!");
         imageLoader = new RawImageLoader();
     }
 

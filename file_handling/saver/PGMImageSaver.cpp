@@ -2,6 +2,7 @@
 #include <fstream>
 #include <string>
 #include "PGMImageSaver.hpp"
+#include "../../spdlog/spdlog.h"
 
 #define MAGIC_NUMBER "P5";
 #define EXT ".pgm";
@@ -31,6 +32,7 @@ int PGMImageSaver::save(const Image& image, std::string fileUrl) {
         outfile.close();
         return 0;
     } else {
+        spdlog::error("PGMImageSaver::save: Cannot write file!");
         std::runtime_error("Cannot write file");
         return -1;
     }

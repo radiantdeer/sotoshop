@@ -5,6 +5,7 @@
 #include <QPainter>
 
 #include "../datastruct/Pixel.hpp"
+#include "../spdlog/spdlog.h"
 
 DrawSurface::DrawSurface() : QWidget() {
     imageLoaded = false;
@@ -46,10 +47,13 @@ void DrawSurface::setImageLoaded(bool imageLoaded) {
 }
 
 void DrawSurface::acquireLockImage() {
+    spdlog::debug("A thread is trying to lock the active image");
     this->activeImageLock->lock();
+    spdlog::debug("A thread is now granted the active image lock");
 }
 
 void DrawSurface::releaseLockImage() {
+    spdlog::debug("A thread is releasing the active image lock");
     this->activeImageLock->unlock();
 }
 
@@ -70,6 +74,6 @@ void DrawSurface::paintEvent(QPaintEvent * event) {
         }
         releaseLockImage();
     } else {
-        std::cout << "[WARN] No active image in DrawSurface!" << std::endl;
+        spdlog::warn("No active image in DrawSurface!");
     }
 }

@@ -3,6 +3,7 @@
 #include "PGMImageSaver.hpp"
 #include "RawImageSaver.hpp"
 #include <iostream>
+#include "../../spdlog/spdlog.h"
 #include "../../utilities/Utilities.hpp"
 
 ImageSaver * ImageSaverFactory::getImageSaver(std::string fileUrl) {
@@ -10,22 +11,22 @@ ImageSaver * ImageSaverFactory::getImageSaver(std::string fileUrl) {
 
     std::string format = Utilities::getFileExtension(fileUrl);
     if ((format == "raw") || (format == "RAW")) {
-        std::cout << "RAW" << std::endl;
+        spdlog::debug("ImageSaverFactory detects raw image");
         imageSaver = new RawImageSaver();
     } else if ((format == "pgm") || (format == "PGM")) {
-        std::cout << "PGM" << std::endl;
+        spdlog::debug("ImageSaverFactory detects PGM image");
         imageSaver = new PGMImageSaver();
     } else if ((format == "ppm") || (format == "PPM")) {
-        std::cout << "PPM" << std::endl;
+        spdlog::debug("ImageSaverFactory detects PPM image");
         imageSaver = new RawImageSaver();
     } else if ((format == "pbm") || (format == "PBM")) {
-        std::cout << "PBM" << std::endl;
+        spdlog::debug("ImageSaverFactory detects PBM image");
         imageSaver = new PBMImageSaver();
     } else if ((format == "bmp") || (format == "BMP")) {
-        std::cout << "BMP" << std::endl;
+        spdlog::debug("ImageSaverFactory detects BMP image");
         imageSaver = new RawImageSaver();
     } else {
-        std::cout << "Unsupported" << std::endl;
+        spdlog::warn("ImageSaverFactory receives an unsupported image!");
         imageSaver = new RawImageSaver();
     }
 

@@ -6,6 +6,7 @@
 #include <QPaintEvent>
 #include <QRegion>
 #include <QUrl>
+#include "../spdlog/spdlog.h"
 
 MainWindow::MainWindow() : QMainWindow() {
     QMenu * fileMenu = this->menuBar()->addMenu("File");
@@ -33,13 +34,15 @@ DrawSurface * MainWindow::getDrawSurface() {
 void MainWindow::loadFile() {
     std::string url = getOpenFileUrl("Load Image");
     if (url != "") {
-        std::cout << "Loading from file " << url << std::endl;
+        spdlog::info("Loading from file {}", url);
         ImageLoader * imageLoader = ImageLoaderFactory::getImageLoader(url);
         Image * loadedImage = imageLoader->load(url);
         drawSurface->setActiveImage(loadedImage);
         delete imageLoader;
-        std::cout << "Image loaded." << std::endl;
+        spdlog::info("Image {} is loaded.", url);
         drawSurface->update();
+    } else {
+        spdlog::info("File loading cancelled");
     }
 }
 
@@ -48,16 +51,19 @@ void MainWindow::saveFile() {
     if (drawSurface->isImageLoaded()) {
         string url = getSaveFileUrl("Save Image");
         if (url != "") {
-            cout << "Saving to file " << url << std::endl;
+            spdlog::info("Saving to file {}", url);
             ImageSaver * imageSaver = ImageSaverFactory::getImageSaver(url);
             drawSurface->acquireLockImage();
             Image * imageToBeSaved = drawSurface->getActiveImage();
             imageSaver->save(*imageToBeSaved, url);
             drawSurface->releaseLockImage();
             delete imageSaver;
+            spdlog::info("File {} successfully saved!", url);
+        } else {
+            spdlog::info("File saving cancelled.");
         }
     } else {
-        cout << "SotoShop cannot save nothing! Load an image first!" << std::endl;
+        spdlog::warn("SotoShop cannot save nothing! Load an image first!");
     }
 }
 
@@ -68,6 +74,7 @@ void MainWindow::connectActionsToControllers() {
 
 std::string MainWindow::getOpenFileUrl(std::string dialogTitle) {
     using namespace std;
+    spdlog::debug("Showing up the open file dialog...");
     QUrl tempFileUrl = QFileDialog::getOpenFileUrl(this, dialogTitle.c_str(), *(new QUrl()), "Image Files (*.raw , *.pbm , *.pgm , *.ppm , *.bmp);; All Files (*)");
     string fileUrl = tempFileUrl.toLocalFile().toUtf8().constData();
     return fileUrl;
@@ -75,6 +82,7 @@ std::string MainWindow::getOpenFileUrl(std::string dialogTitle) {
 
 std::string MainWindow::getSaveFileUrl(std::string dialogTitle) {
     using namespace std;
+    spdlog::debug("Showing up the save file dialog...");
     QUrl tempFileUrl = QFileDialog::getSaveFileUrl(this, dialogTitle.c_str(), *(new QUrl()), "Raw Image File (*.raw);; PBM Image File (*.pbm);; PGM Image File (*.pgm);; PPM Image File (*.ppm);; Bitmap File (*.bmp)");
     string fileUrl = tempFileUrl.toLocalFile().toUtf8().constData();
     return fileUrl;

@@ -1,4 +1,5 @@
 #include "RawImageSaver.hpp"
+#include "../../spdlog/spdlog.h"
 
 RawImageSaver::RawImageSaver() {
 
