@@ -34,6 +34,7 @@ class MainWindow : public QMainWindow {
         void connectActionsToControllers();
         std::string getOpenFileUrl(std::string dialogTitle);
         std::string getSaveFileUrl(std::string dialogTitle);
+        static std::string getFileExtension(std::string fileUrl);
 
 };
 

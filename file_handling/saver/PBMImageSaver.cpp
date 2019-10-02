@@ -12,7 +12,7 @@ PBMImageSaver::PBMImageSaver() {
 }
 
 int PBMImageSaver::save(const Image &image, std::string fileUrl) {
-    std::string filename = fileUrl + EXT;
+    std::string filename = fileUrl;
     std::ofstream outfile(filename);
     if (outfile.good()) {
         int height = image.getHeight();

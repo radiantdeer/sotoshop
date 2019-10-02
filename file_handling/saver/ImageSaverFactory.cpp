@@ -1,21 +1,28 @@
 #include "ImageSaverFactory.hpp"
 #include "PBMImageSaver.hpp"
 #include "RawImageSaver.hpp"
+#include <iostream>
 
 ImageSaver * ImageSaverFactory::getImageSaver(std::string format) {
     ImageSaver * imageSaver;
 
     if ((format == "raw") || (format == "RAW")) {
+        std::cout << "RAW" << std::endl;
         imageSaver = new RawImageSaver();
     } else if ((format == "pgm") || (format == "PGM")) {
+        std::cout << "PGM" << std::endl;
         imageSaver = new RawImageSaver();
     } else if ((format == "ppm") || (format == "PPM")) {
+        std::cout << "PPM" << std::endl;
         imageSaver = new RawImageSaver();
     } else if ((format == "pbm") || (format == "PBM")) {
+        std::cout << "PBM" << std::endl;
         imageSaver = new PBMImageSaver();
     } else if ((format == "bmp") || (format == "BMP")) {
+        std::cout << "BMP" << std::endl;
         imageSaver = new RawImageSaver();
     } else {
+        std::cout << "Unsupported" << std::endl;
         imageSaver = new RawImageSaver();
     }
 
