@@ -50,8 +50,7 @@ void MainWindow::saveFile() {
         if (url != "") {
             cout << "Saving to file " << url << std::endl;
             Image * imageToBeSaved = drawSurface->getActiveImage();
-            string extension = getFileExtension(url);
-            ImageSaver * imageSaver = ImageSaverFactory::getImageSaver(extension);
+            ImageSaver * imageSaver = ImageSaverFactory::getImageSaver(url);
             imageSaver->save(*imageToBeSaved, url);
             delete imageSaver;
         }
@@ -77,12 +76,6 @@ std::string MainWindow::getSaveFileUrl(std::string dialogTitle) {
     QUrl tempFileUrl = QFileDialog::getSaveFileUrl(this, dialogTitle.c_str(), *(new QUrl()), "Raw Image File (*.raw);; PBM Image File (*.pbm);; PGM Image File (*.pgm);; PPM Image File (*.ppm);; Bitmap File (*.bmp)");
     string fileUrl = tempFileUrl.toLocalFile().toUtf8().constData();
     return fileUrl;
-}
-
-std::string MainWindow::getFileExtension(std::string fileUrl) {
-    using namespace std;
-    string extension = fileUrl.substr(fileUrl.find(".") + 1, fileUrl.length());
-    return extension;
 }
 
 void MainWindow::setActiveImage(Image * image) {

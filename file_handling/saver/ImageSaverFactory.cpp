@@ -2,10 +2,12 @@
 #include "PBMImageSaver.hpp"
 #include "RawImageSaver.hpp"
 #include <iostream>
+#include "../../utilities/Utilities.hpp"
 
-ImageSaver * ImageSaverFactory::getImageSaver(std::string format) {
+ImageSaver * ImageSaverFactory::getImageSaver(std::string fileUrl) {
     ImageSaver * imageSaver;
 
+    std::string format = Utilities::getFileExtension(fileUrl);
     if ((format == "raw") || (format == "RAW")) {
         std::cout << "RAW" << std::endl;
         imageSaver = new RawImageSaver();
