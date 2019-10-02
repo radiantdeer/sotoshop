@@ -1,5 +1,6 @@
 #include "ImageSaverFactory.hpp"
 #include "PBMImageSaver.hpp"
+#include "PGMImageSaver.hpp"
 #include "RawImageSaver.hpp"
 #include <iostream>
 #include "../../utilities/Utilities.hpp"
@@ -13,7 +14,7 @@ ImageSaver * ImageSaverFactory::getImageSaver(std::string fileUrl) {
         imageSaver = new RawImageSaver();
     } else if ((format == "pgm") || (format == "PGM")) {
         std::cout << "PGM" << std::endl;
-        imageSaver = new RawImageSaver();
+        imageSaver = new PGMImageSaver();
     } else if ((format == "ppm") || (format == "PPM")) {
         std::cout << "PPM" << std::endl;
         imageSaver = new RawImageSaver();
