@@ -101,7 +101,7 @@ Image * PGMImageLoader::loadBinary(std::string filename) {
     std::string level;
     int height, width, grayLevel;
     unsigned char *buff;
-    std::ifstream fileread(filename);
+    std::ifstream fileread(filename, std::ios::binary);
     if (fileread.good()) {
         std::getline(fileread, fileType);
         while (fileType[0] == '#') {
