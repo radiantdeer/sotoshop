@@ -37,8 +37,8 @@ void MainWindow::loadFile() {
         ImageLoader * imageLoader = ImageLoaderFactory::getImageLoader(url);
         Image * loadedImage = imageLoader->load(url);
         drawSurface->setActiveImage(loadedImage);
-        drawSurface->setImageLoaded(true);
         delete imageLoader;
+        std::cout << "Image loaded." << std::endl;
         drawSurface->update();
     }
 }
@@ -49,9 +49,11 @@ void MainWindow::saveFile() {
         string url = getSaveFileUrl("Save Image");
         if (url != "") {
             cout << "Saving to file " << url << std::endl;
-            Image * imageToBeSaved = drawSurface->getActiveImage();
             ImageSaver * imageSaver = ImageSaverFactory::getImageSaver(url);
+            drawSurface->acquireLockImage();
+            Image * imageToBeSaved = drawSurface->getActiveImage();
             imageSaver->save(*imageToBeSaved, url);
+            drawSurface->releaseLockImage();
             delete imageSaver;
         }
     } else {
