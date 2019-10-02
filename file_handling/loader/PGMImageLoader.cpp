@@ -2,6 +2,7 @@
 #include <fstream>
 #include <string>
 #include "PGMImageLoader.hpp"
+#include "../../spdlog/spdlog.h"
 
 #define ASCII_PGM "P2"
 #define BINARY_PGM "P5"
@@ -28,9 +29,11 @@ Image * PGMImageLoader::load(std::string filename) {
         } else if (fileType == BINARY_PGM) {
             return this->loadBinary(filename);
         } else {
+            spdlog::error("PGMImageLoader::load: {} is not a PGM file!", filename);
             throw std::runtime_error("Not PGM");
         }
     } else {
+        spdlog::error("PGMImageLoader::load: {} is unreadable!", filename);
         throw std::runtime_error("Unreadable");
     }
 }
@@ -88,9 +91,11 @@ Image * PGMImageLoader::loadASCII(std::string filename) {
             }
             return new Image(width, height, data, "pgm");
         } else {
+            spdlog::error("PGMImageLoader::loadASCII: {} is not a PGM file!", filename);
             throw std::runtime_error("Not PGM File");
         }
     } else {
+        spdlog::error("PGMImageLoader::loadASCII: {} is unreadable!", filename);
         throw std::runtime_error("Unreadable");
     }
 }
@@ -137,9 +142,11 @@ Image * PGMImageLoader::loadBinary(std::string filename) {
             fileread.close();
             return new Image(width, height, data, "pgm");
         } else {
+            spdlog::error("PGMImageLoader::loadBinary: {} is not a PGM file!", filename);
             throw std::runtime_error("Not PGM File");
         }
     } else {
+        spdlog::error("PGMImageLoader::loadBinary: {} is unreadable!", filename);
         throw std::runtime_error("Unreadable");
     }
 }

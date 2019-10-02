@@ -2,6 +2,7 @@
 #include <fstream>
 #include <string>
 #include "PBMImageLoader.hpp"
+#include "../../spdlog/spdlog.h"
 
 #define ASCII_PBM "P1"
 #define BINARY_PBM "P4"
@@ -23,9 +24,11 @@ Image * PBMImageLoader::load(std::string filename) {
         } else if (line == BINARY_PBM) {
             return loadBinary(filename);
         } else {
+            spdlog::error("PBMImageLoader::load: {} is not a pbm file!", filename);
             throw std::runtime_error("PBMImageLoader::load: " + filename + " is not a pbm file.");
         }
     }
+    spdlog::error("PBMImageLoader::load: {} is unreadable!", filename);
     throw std::runtime_error("PBMImageLoader::load: " + filename + " is unreadable.");
 }
 
@@ -36,6 +39,7 @@ Image * PBMImageLoader::loadASCII(std::string filename) {
     if (fileread.good()) {
         std::getline(fileread, line);
         if (line != ASCII_PBM) {
+            spdlog::error("PBMImageLoader::load: {} is not a pbm file!", filename);
             throw std::runtime_error("PBMImageLoader::loadASCII: " + filename + " is not a pbm file.");
         }
         std::getline(fileread, line);
@@ -62,6 +66,7 @@ Image * PBMImageLoader::loadASCII(std::string filename) {
                     data[i][j].setGreen(255);
                     data[i][j].setBlue(255);
                 } else {
+                    spdlog::error("PBMImageLoader::loadASCII: there are invalid token at {}", filename);
                     throw std::runtime_error("PBMImageLoader::loadASCII: there are invalid token at " + filename);
                 }
             }
@@ -69,6 +74,7 @@ Image * PBMImageLoader::loadASCII(std::string filename) {
         fileread.close();
         return new Image(width, height, data, "pbm");
     }
+    spdlog::error("PBMImageLoader::load: {} is unreadable!", filename);
     throw std::runtime_error("PBMImageLoader::loadASCII: " + filename + " is unreadable.");
 }
 
@@ -81,6 +87,7 @@ Image * PBMImageLoader::loadBinary(std::string filename) {
     if (fileread.good()) {
         std::getline(fileread, line);
         if (line != BINARY_PBM) {
+            spdlog::error("PBMImageLoader::load: {} is not a pbm file!", filename);
             throw std::runtime_error("PBMImageLoader::loadASCII: " + filename + " is not a pbm file.");
         }
         std::getline(fileread, line);
@@ -106,6 +113,7 @@ Image * PBMImageLoader::loadBinary(std::string filename) {
         fileread.close();
         return new Image(width, height, data, "pbm");
     } else {
+        spdlog::error("PBMImageLoader::load: {} is unreadable!", filename);
         throw std::runtime_error("PBMImageLoader::loadBinary: " + filename + " is unreadable.");
     }
 }

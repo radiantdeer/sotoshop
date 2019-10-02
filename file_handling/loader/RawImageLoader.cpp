@@ -2,6 +2,7 @@
 #include <fstream>
 #include <iostream>
 #include <string>
+#include "../../spdlog/spdlog.h"
 
 RawImageLoader::RawImageLoader() { }
 
@@ -36,14 +37,13 @@ Image * RawImageLoader::load(std::string fileUrl) {
             data[i * width - 1].setBlue(currentPixel);
         }
         if (i < height) {
-            std::cout << "RawImageLoader::load: Data supplied is shorter than specified size. Partial image is loaded." << std::endl;
+            spdlog::warn("RawImageLoader::load: Data supplied is shorter than specified size. Partial image is loaded.");
             return new Image(j +1, i + 1, data, "raw");
         } else {
             return new Image(width, height, data, "raw");
         }
-
     } else {
-        std::cout << "RawImageLoader::load: Cannot open file!" << std::endl;
+        spdlog::error("RawImageLoader::load: Cannot open file!");
         return new Image();
     }
 }
