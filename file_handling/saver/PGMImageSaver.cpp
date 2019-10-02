@@ -12,7 +12,7 @@ PGMImageSaver::PGMImageSaver() {
 }
 
 int PGMImageSaver::save(const Image& image, std::string fileUrl) {
-    std::string filename = fileUrl + EXT;
+    std::string filename = fileUrl;
     std::ofstream outfile(filename, std::ios::binary);
     if (outfile.good()) {
         int height = image.getHeight();
