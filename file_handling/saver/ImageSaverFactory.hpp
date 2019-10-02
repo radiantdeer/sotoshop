@@ -5,9 +5,9 @@
 #include "ImageSaver.hpp"
 
 class ImageSaverFactory {
-    
+
     public:
-        static ImageSaver * getImageSaver(std::string format);
+        static ImageSaver * getImageSaver(std::string fileUrl);
 
 };
 
