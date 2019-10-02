@@ -5,10 +5,11 @@
 #include "RawImageLoader.hpp"
 #include <locale>
 #include <iostream>
+#include "../../utilities/Utilities.hpp"
 
 ImageLoader * ImageLoaderFactory::getImageLoader(std::string filename) {
     using namespace std;
-    string extension = filename.substr(filename.find(".") + 1, filename.length());
+    string extension = Utilities::getFileExtension(filename);
     ImageLoader * imageLoader;
 
     if ((extension == "raw") || (extension == "RAW")) {
@@ -30,6 +31,6 @@ ImageLoader * ImageLoaderFactory::getImageLoader(std::string filename) {
         cout << "Unsupported" << endl;
         imageLoader = new RawImageLoader();
     }
-    
+
     return imageLoader;
 }

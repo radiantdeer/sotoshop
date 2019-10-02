@@ -7,6 +7,13 @@
 
 class Image {
 
+    private:
+        int width;
+        int height;
+        std::vector<std::vector<Pixel>> data;
+        std::string originalFormat;
+        std::string fileUrl;
+
     public:
         static const int MAX_GRAY = 255;
         Image();
