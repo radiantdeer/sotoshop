@@ -18,9 +18,9 @@ int PPMImageSaver::save(const Image& image, std::string fileUrl) {
     if (outfile.good()) {
         int height = image.getHeight();
         int width = image.getWidth();
-        outfile << MAGIC_NUMBER; outfile << "\n";
-        outfile << std::to_string(width) + " " + std::to_string(height) + '\n';
-        outfile << MAX_COLOR; outfile << "\n";
+        outfile << MAGIC_NUMBER; outfile << std::endl;
+        outfile << std::to_string(width) + " " + std::to_string(height) << std::endl;
+        outfile << MAX_COLOR; outfile << std::endl;
         unsigned char *buff = new unsigned char[width*height*MAX_CHANNEL*sizeof(unsigned char)];
         for (int i = 0; i < height; i++) {
             for (int j = 0; j < width; j++) {
