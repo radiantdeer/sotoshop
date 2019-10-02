@@ -39,6 +39,7 @@ void MainWindow::loadFile() {
         drawSurface->setActiveImage(loadedImage);
         drawSurface->setImageLoaded(true);
         delete imageLoader;
+        drawSurface->update();
     }
 }
 
