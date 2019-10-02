@@ -7,11 +7,13 @@
 #include "../datastruct/Pixel.hpp"
 
 DrawSurface::DrawSurface() : QWidget() {
+    activeImage = nullptr; 
     imageLoaded = false;
     activeImageLock = new std::mutex();
 }
 
 DrawSurface::DrawSurface(QWidget * parentWidget) : QWidget(parentWidget) {
+    activeImage = nullptr;
     imageLoaded = false;
     activeImageLock = new std::mutex();
 }
@@ -51,6 +53,14 @@ void DrawSurface::acquireLockImage() {
 
 void DrawSurface::releaseLockImage() {
     this->activeImageLock->unlock();
+}
+  
+void DrawSurface::purgeImage() {
+    acquireLockImage();
+    if (activeImage != nullptr) {
+        delete activeImage;
+        imageLoaded = false;
+    }
 }
 
 // Implementing protected virtual method from QWidget

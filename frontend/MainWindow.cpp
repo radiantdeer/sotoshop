@@ -8,9 +8,20 @@
 #include <QUrl>
 
 MainWindow::MainWindow() : QMainWindow() {
+    this->setWindowTitle("SotoShop");
+
     QMenu * fileMenu = this->menuBar()->addMenu("File");
     loadAction = fileMenu->addAction("Load");
     saveAction = fileMenu->addAction("Save");
+
+    QMenu * editMenu = this->menuBar()->addMenu("Edit");
+    negativeImageAction = editMenu->addAction("Negative Image");
+    convertToGrayscaleAction = editMenu->addAction("Convert Image to Grayscale");
+    editMenu->addSeparator();
+    moveAction = editMenu->addAction("Move image");
+    rotateAction = editMenu->addAction("Rotate");
+    flipAction = editMenu->addAction("Flip");
+    zoomAction = editMenu->addAction("Zoom");
 
     connectActionsToControllers();
 
@@ -33,6 +44,9 @@ DrawSurface * MainWindow::getDrawSurface() {
 void MainWindow::loadFile() {
     std::string url = getOpenFileUrl("Load Image");
     if (url != "") {
+        if (drawSurface->isImageLoaded()) {
+            drawSurface->purgeImage();
+        }
         std::cout << "Loading from file " << url << std::endl;
         ImageLoader * imageLoader = ImageLoaderFactory::getImageLoader(url);
         Image * loadedImage = imageLoader->load(url);
@@ -40,6 +54,9 @@ void MainWindow::loadFile() {
         delete imageLoader;
         std::cout << "Image loaded." << std::endl;
         drawSurface->update();
+
+        std::string windowTitle = "SotoShop [" + url + "]";
+        this->setWindowTitle(windowTitle.c_str());
     }
 }
 
@@ -61,9 +78,65 @@ void MainWindow::saveFile() {
     }
 }
 
+void MainWindow::makeNegativeImage() {
+    if (drawSurface->isImageLoaded()) {
+        std::cout << "negative image" << std::endl;
+    } else {
+        std::cout << "Please load an image first!" << std::endl;
+    }
+}
+
+void MainWindow::convertToGrayscaleImage() {
+    if (drawSurface->isImageLoaded()) {
+        std::cout << "make grayscale image" << std::endl;
+    } else {
+        std::cout << "Please load an image first!" << std::endl;
+    }
+}
+
+void MainWindow::moveImage() {
+    if (drawSurface->isImageLoaded()) {
+        std::cout << "move image" << std::endl;
+    } else {
+        std::cout << "Please load an image first!" << std::endl;
+    }
+}
+
+void MainWindow::rotateImage() {
+    if (drawSurface->isImageLoaded()) {
+        std::cout << "rotate image" << std::endl;
+    } else {
+        std::cout << "Please load an image first!" << std::endl;
+    }
+}
+
+void MainWindow::flipImage() {
+    if (drawSurface->isImageLoaded()) {
+        std::cout << "flip image" << std::endl;
+    } else {
+        std::cout << "Please load an image first!" << std::endl;
+    }
+}
+
+void MainWindow::zoomImage() {
+    if (drawSurface->isImageLoaded()) {
+        std::cout << "zoom image" << std::endl;
+    } else {
+        std::cout << "Please load an image first!" << std::endl;
+    }
+}
+
+
 void MainWindow::connectActionsToControllers() {
     connect(loadAction, &QAction::triggered, this, &MainWindow::loadFile);
     connect(saveAction, &QAction::triggered, this, &MainWindow::saveFile);
+
+    connect(negativeImageAction, &QAction::triggered, this, &MainWindow::makeNegativeImage);
+    connect(convertToGrayscaleAction, &QAction::triggered, this, &MainWindow::convertToGrayscaleImage);
+    connect(moveAction, &QAction::triggered, this, &MainWindow::moveImage);
+    connect(rotateAction, &QAction::triggered, this, &MainWindow::rotateImage);
+    connect(flipAction, &QAction::triggered, this, &MainWindow::flipImage);
+    connect(zoomAction, &QAction::triggered, this, &MainWindow::zoomImage);
 }
 
 std::string MainWindow::getOpenFileUrl(std::string dialogTitle) {
