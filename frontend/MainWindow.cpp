@@ -21,7 +21,9 @@ MainWindow::MainWindow() : QMainWindow() {
     convertToGrayscaleAction = editMenu->addAction("Convert Image to Grayscale");
     editMenu->addSeparator();
     moveAction = editMenu->addAction("Move image");
-    rotateAction = editMenu->addAction("Rotate");
+    QMenu * rotateMenu = editMenu->addMenu("Rotate");
+    rotateCWAction = rotateMenu->addAction("90\370 CW (clock-wise)");
+    rotateCCWAction = rotateMenu->addAction("90\370 CCW (counterclock-wise)");
     flipAction = editMenu->addAction("Flip");
     zoomAction = editMenu->addAction("Zoom");
 
@@ -52,7 +54,9 @@ void MainWindow::loadFile() {
         }
         ImageLoader * imageLoader = ImageLoaderFactory::getImageLoader(url);
         Image * loadedImage = imageLoader->load(url);
+        drawSurface->acquireLockImage();
         drawSurface->setActiveImage(loadedImage);
+        drawSurface->releaseLockImage();
         delete imageLoader;
         spdlog::info("MainWindow::loadFile: Image {} loaded successfully.", url);
         drawSurface->update();
@@ -114,11 +118,11 @@ void MainWindow::convertToGrayscaleImage() {
 void MainWindow::moveImage() {
     if (drawSurface->isImageLoaded()) {
         spdlog::debug("Prompting the user to input deltaX");
-        int deltaX = promptValue("Values needed", "Enter delta X (how further the image is moved on the X scale) : ");
+        int deltaX = promptValue("Values needed", "Enter delta X (how further the image is moved horizontally) : ");
         spdlog::debug("User entered deltaX = {}", deltaX);
 
         spdlog::debug("Prompting the user to input deltaY");
-        int deltaY = promptValue("Values needed", "Enter delta Y (how further the image is moved on the X scale) : ");
+        int deltaY = promptValue("Values needed", "Enter delta Y (how further the image is moved vertically) : ");
         spdlog::debug("User entered deltaY = {}", deltaY);
 
         spdlog::info("MainWindow::moveImage: Now moving the image...");
@@ -132,12 +136,33 @@ void MainWindow::moveImage() {
     }
 }
 
-void MainWindow::rotateImage() {
+void MainWindow::rotateImageCW() {
     if (drawSurface->isImageLoaded()) {
-        spdlog::info("MainWindow::rotateImage: Rotating image...");
-        spdlog::info("MainWindow::rotateImage: stub function");
+        spdlog::info("MainWindow::rotateImageCW: Rotating image clockwise...");
+        drawSurface->acquireLockImage();
+        Image * oldImage = drawSurface->getActiveImage();
+        Image * newImage = oldImage->rotate90CW();
+        drawSurface->setActiveImage(newImage);
+        drawSurface->releaseLockImage();
+        drawSurface->update();
+        delete oldImage;
     } else {
-        spdlog::warn("MainWindow::rotateImage: Please load an image first!");
+        spdlog::warn("MainWindow::rotateImageCW: Please load an image first!");
+    }
+}
+
+void MainWindow::rotateImageCCW() {
+    if (drawSurface->isImageLoaded()) {
+        spdlog::info("MainWindow::rotateImageCCW: Rotating image counter-clockwise...");
+        drawSurface->acquireLockImage();
+        Image * oldImage = drawSurface->getActiveImage();
+        Image * newImage = oldImage->rotate90CCW();
+        drawSurface->setActiveImage(newImage);
+        drawSurface->releaseLockImage();
+        drawSurface->update();
+        delete oldImage;
+    } else {
+        spdlog::warn("MainWindow::rotateImageCCW: Please load an image first!");
     }
 }
 
@@ -159,7 +184,6 @@ void MainWindow::zoomImage() {
     }
 }
 
-
 void MainWindow::connectActionsToControllers() {
     connect(loadAction, &QAction::triggered, this, &MainWindow::loadFile);
     connect(saveAction, &QAction::triggered, this, &MainWindow::saveFile);
@@ -167,7 +191,8 @@ void MainWindow::connectActionsToControllers() {
     connect(negativeImageAction, &QAction::triggered, this, &MainWindow::makeNegativeImage);
     connect(convertToGrayscaleAction, &QAction::triggered, this, &MainWindow::convertToGrayscaleImage);
     connect(moveAction, &QAction::triggered, this, &MainWindow::moveImage);
-    connect(rotateAction, &QAction::triggered, this, &MainWindow::rotateImage);
+    connect(rotateCWAction, &QAction::triggered, this, &MainWindow::rotateImageCW);
+    connect(rotateCCWAction, &QAction::triggered, this, &MainWindow::rotateImageCCW);
     connect(flipAction, &QAction::triggered, this, &MainWindow::flipImage);
     connect(zoomAction, &QAction::triggered, this, &MainWindow::zoomImage);
 }

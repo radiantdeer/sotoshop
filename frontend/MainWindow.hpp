@@ -27,7 +27,8 @@ class MainWindow : public QMainWindow {
         void makeNegativeImage();
         void convertToGrayscaleImage();
         void moveImage();
-        void rotateImage();
+        void rotateImageCW();
+        void rotateImageCCW();
         void flipImage();
         void zoomImage();
         void refresh();
@@ -38,7 +39,8 @@ class MainWindow : public QMainWindow {
         QAction * negativeImageAction;
         QAction * convertToGrayscaleAction;
         QAction * moveAction;
-        QAction * rotateAction;
+        QAction * rotateCWAction;
+        QAction * rotateCCWAction;
         QAction * flipAction;
         QAction * zoomAction;
         DrawSurface * drawSurface;

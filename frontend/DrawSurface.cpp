@@ -34,14 +34,12 @@ bool DrawSurface::isImageLoaded() {
 }
 
 void DrawSurface::setActiveImage(Image * newImage) {
-    acquireLockImage();
     activeImage = newImage;
     if (newImage != nullptr) {
         this->imageLoaded = true;
     } else {
         this->imageLoaded = false;
     }
-    releaseLockImage();
 }
 
 void DrawSurface::setImageLoaded(bool imageLoaded) {
