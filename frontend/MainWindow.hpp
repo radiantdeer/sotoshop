@@ -47,6 +47,7 @@ class MainWindow : public QMainWindow {
         std::string getOpenFileUrl(std::string dialogTitle);
         std::string getSaveFileUrl(std::string dialogTitle);
         static std::string getFileExtension(std::string fileUrl);
+        int promptValue(std::string promptTitle, std::string promptText);
 
 };
 

@@ -2,6 +2,7 @@
 
 #include <iostream>
 #include <QFileDialog>
+#include <QInputDialog>
 #include <QMenuBar>
 #include <QPaintEvent>
 #include <QRegion>
@@ -104,6 +105,7 @@ void MainWindow::convertToGrayscaleImage() {
         drawSurface->getActiveImage()->grayscale();
         drawSurface->releaseLockImage();
         drawSurface->update();
+
     } else {
         spdlog::warn("MainWindow::convertToGrayscaleImage: Please load an image first!");
     }
@@ -111,8 +113,20 @@ void MainWindow::convertToGrayscaleImage() {
 
 void MainWindow::moveImage() {
     if (drawSurface->isImageLoaded()) {
-        spdlog::info("MainWindow::moveImage: Moving image...");
-        spdlog::info("MainWindow::moveImage: stub function");
+        spdlog::debug("Prompting the user to input deltaX");
+        int deltaX = promptValue("Values needed", "Enter delta X (how further the image is moved on the X scale) : ");
+        spdlog::debug("User entered deltaX = {}", deltaX);
+
+        spdlog::debug("Prompting the user to input deltaY");
+        int deltaY = promptValue("Values needed", "Enter delta Y (how further the image is moved on the X scale) : ");
+        spdlog::debug("User entered deltaY = {}", deltaY);
+
+        spdlog::info("MainWindow::moveImage: Now moving the image...");
+        drawSurface->acquireLockImage();
+        drawSurface->getActiveImage()->translate(deltaX, deltaY);
+        drawSurface->releaseLockImage();
+        drawSurface->update();
+
     } else {
         spdlog::warn("MainWindow::moveImage: Please load an image first!");
     }
@@ -172,6 +186,11 @@ std::string MainWindow::getSaveFileUrl(std::string dialogTitle) {
     QUrl tempFileUrl = QFileDialog::getSaveFileUrl(this, dialogTitle.c_str(), *(new QUrl()), "Raw Image File (*.raw);; PBM Image File (*.pbm);; PGM Image File (*.pgm);; PPM Image File (*.ppm);; Bitmap File (*.bmp)");
     string fileUrl = tempFileUrl.toLocalFile().toUtf8().constData();
     return fileUrl;
+}
+
+int MainWindow::promptValue(std::string promptTitle, std::string promptText) {
+    int value = QInputDialog::getInt(this, promptTitle.c_str(), promptText.c_str(), 0);
+    return value;
 }
 
 void MainWindow::setActiveImage(Image * image) {
