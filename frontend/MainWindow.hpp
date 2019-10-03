@@ -24,11 +24,23 @@ class MainWindow : public QMainWindow {
     public slots:
         void loadFile();
         void saveFile();
+        void makeNegativeImage();
+        void convertToGrayscaleImage();
+        void moveImage();
+        void rotateImage();
+        void flipImage();
+        void zoomImage();
         void refresh();
 
     private:
         QAction * loadAction;
         QAction * saveAction;
+        QAction * negativeImageAction;
+        QAction * convertToGrayscaleAction;
+        QAction * moveAction;
+        QAction * rotateAction;
+        QAction * flipAction;
+        QAction * zoomAction;
         DrawSurface * drawSurface;
 
         void connectActionsToControllers();
