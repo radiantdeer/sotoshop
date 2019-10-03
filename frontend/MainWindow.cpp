@@ -88,7 +88,10 @@ void MainWindow::saveFile() {
 void MainWindow::makeNegativeImage() {
     if (drawSurface->isImageLoaded()) {
         spdlog::info("MainWindow::makeNegativeImage: Creating negative image...");
-
+        drawSurface->acquireLockImage();
+        drawSurface->getActiveImage()->invert();
+        drawSurface->releaseLockImage();
+        drawSurface->update();
     } else {
         spdlog::warn("MainWindow::makeNegativeImage: Please load an image first!");
     }
@@ -97,6 +100,10 @@ void MainWindow::makeNegativeImage() {
 void MainWindow::convertToGrayscaleImage() {
     if (drawSurface->isImageLoaded()) {
         spdlog::info("MainWindow::convertToGrayscaleImage: Creating grayscale image...");
+        drawSurface->acquireLockImage();
+        drawSurface->getActiveImage()->grayscale();
+        drawSurface->releaseLockImage();
+        drawSurface->update();
     } else {
         spdlog::warn("MainWindow::convertToGrayscaleImage: Please load an image first!");
     }
@@ -105,6 +112,7 @@ void MainWindow::convertToGrayscaleImage() {
 void MainWindow::moveImage() {
     if (drawSurface->isImageLoaded()) {
         spdlog::info("MainWindow::moveImage: Moving image...");
+        spdlog::info("MainWindow::moveImage: stub function");
     } else {
         spdlog::warn("MainWindow::moveImage: Please load an image first!");
     }
@@ -113,6 +121,7 @@ void MainWindow::moveImage() {
 void MainWindow::rotateImage() {
     if (drawSurface->isImageLoaded()) {
         spdlog::info("MainWindow::rotateImage: Rotating image...");
+        spdlog::info("MainWindow::rotateImage: stub function");
     } else {
         spdlog::warn("MainWindow::rotateImage: Please load an image first!");
     }
@@ -121,6 +130,7 @@ void MainWindow::rotateImage() {
 void MainWindow::flipImage() {
     if (drawSurface->isImageLoaded()) {
         spdlog::info("MainWindow::flipImage: Flipping image...");
+        spdlog::info("MainWindow::flipImage: stub function");
     } else {
         spdlog::warn("MainWindow::rotateImage: Please load an image first!");
     }
@@ -129,8 +139,9 @@ void MainWindow::flipImage() {
 void MainWindow::zoomImage() {
     if (drawSurface->isImageLoaded()) {
         spdlog::info("MainWindow::zoomImage: Zooming image...");
+        spdlog::info("MainWindow::zoomImage: stub function");
     } else {
-        spdlog::warn("Please load an image first!");
+        spdlog::warn("MainWindow::zoomImage: Please load an image first!");
     }
 }
 
