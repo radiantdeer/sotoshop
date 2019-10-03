@@ -2,6 +2,7 @@
 #include <fstream>
 #include <string>
 #include "PBMImageSaver.hpp"
+#include "../../spdlog/spdlog.h"
 
 #define MAGIC_NUMBER "P4";
 #define EXT ".pbm";
@@ -35,6 +36,7 @@ int PBMImageSaver::save(const Image &image, std::string fileUrl) {
         outfile.close();
         return 0;
     } else {
+        spdlog::error("PBMImageSaver::save: Cannot write file!");
         throw std::runtime_error("Cannot write file");
     }
 }
