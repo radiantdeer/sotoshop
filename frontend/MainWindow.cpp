@@ -45,7 +45,7 @@ DrawSurface * MainWindow::getDrawSurface() {
 void MainWindow::loadFile() {
     std::string url = getOpenFileUrl("Load Image");
     if (url != "") {
-        spdlog::info("Loading from file {}", url);
+        spdlog::info("MainWindow::loadFile: Loading from file {}", url);
         if (drawSurface->isImageLoaded()) {
             drawSurface->purgeImage();
         }
@@ -53,14 +53,14 @@ void MainWindow::loadFile() {
         Image * loadedImage = imageLoader->load(url);
         drawSurface->setActiveImage(loadedImage);
         delete imageLoader;
-        spdlog::info("Image {} is loaded.", url);
+        spdlog::info("MainWindow::loadFile: Image {} loaded successfully.", url);
         drawSurface->update();
-      
+
         std::string windowTitle = "SotoShop [" + url + "]";
         this->setWindowTitle(windowTitle.c_str());
 
     } else {
-        spdlog::info("File loading cancelled");        
+        spdlog::info("MainWindow::loadFile: File loading cancelled");
     }
 }
 
@@ -69,67 +69,79 @@ void MainWindow::saveFile() {
     if (drawSurface->isImageLoaded()) {
         string url = getSaveFileUrl("Save Image");
         if (url != "") {
-            spdlog::info("Saving to file {}", url);
+            spdlog::info("MainWindow::saveFile: Saving to file {}", url);
             ImageSaver * imageSaver = ImageSaverFactory::getImageSaver(url);
             drawSurface->acquireLockImage();
             Image * imageToBeSaved = drawSurface->getActiveImage();
             imageSaver->save(*imageToBeSaved, url);
             drawSurface->releaseLockImage();
             delete imageSaver;
-            spdlog::info("File {} successfully saved!", url);
+            spdlog::info("MainWindow::saveFile: File {} successfully saved!", url);
         } else {
-            spdlog::info("File saving cancelled.");
+            spdlog::info("MainWindow::saveFile: File saving cancelled.");
         }
     } else {
-        spdlog::warn("SotoShop cannot save nothing! Load an image first!");
+        spdlog::warn("MainWindow::save: SotoShop cannot save nothing! Load an image first!");
     }
 }
 
 void MainWindow::makeNegativeImage() {
     if (drawSurface->isImageLoaded()) {
-        std::cout << "negative image" << std::endl;
+        spdlog::info("MainWindow::makeNegativeImage: Creating negative image...");
+        drawSurface->acquireLockImage();
+        drawSurface->getActiveImage()->invert();
+        drawSurface->releaseLockImage();
+        drawSurface->update();
     } else {
-        std::cout << "Please load an image first!" << std::endl;
+        spdlog::warn("MainWindow::makeNegativeImage: Please load an image first!");
     }
 }
 
 void MainWindow::convertToGrayscaleImage() {
     if (drawSurface->isImageLoaded()) {
-        std::cout << "make grayscale image" << std::endl;
+        spdlog::info("MainWindow::convertToGrayscaleImage: Creating grayscale image...");
+        drawSurface->acquireLockImage();
+        drawSurface->getActiveImage()->grayscale();
+        drawSurface->releaseLockImage();
+        drawSurface->update();
     } else {
-        std::cout << "Please load an image first!" << std::endl;
+        spdlog::warn("MainWindow::convertToGrayscaleImage: Please load an image first!");
     }
 }
 
 void MainWindow::moveImage() {
     if (drawSurface->isImageLoaded()) {
-        std::cout << "move image" << std::endl;
+        spdlog::info("MainWindow::moveImage: Moving image...");
+        spdlog::info("MainWindow::moveImage: stub function");
     } else {
-        std::cout << "Please load an image first!" << std::endl;
+        spdlog::warn("MainWindow::moveImage: Please load an image first!");
     }
 }
 
 void MainWindow::rotateImage() {
     if (drawSurface->isImageLoaded()) {
-        std::cout << "rotate image" << std::endl;
+        spdlog::info("MainWindow::rotateImage: Rotating image...");
+        spdlog::info("MainWindow::rotateImage: stub function");
     } else {
-        std::cout << "Please load an image first!" << std::endl;
+        spdlog::warn("MainWindow::rotateImage: Please load an image first!");
     }
 }
 
 void MainWindow::flipImage() {
     if (drawSurface->isImageLoaded()) {
-        std::cout << "flip image" << std::endl;
+        spdlog::info("MainWindow::flipImage: Flipping image...");
+        spdlog::info("MainWindow::flipImage: stub function");
     } else {
-        std::cout << "Please load an image first!" << std::endl;
+        spdlog::warn("MainWindow::rotateImage: Please load an image first!");
     }
 }
 
 void MainWindow::zoomImage() {
     if (drawSurface->isImageLoaded()) {
-        std::cout << "zoom image" << std::endl;
+        spdlog::info("MainWindow::zoomImage: Zooming image...");
+        spdlog::info("MainWindow::zoomImage: stub function");
     } else {
-        std::cout << "Please load an image first!" << std::endl;
+        spdlog::warn("MainWindow::zoomImage: Please load an image first!");
     }
 }
 
