@@ -1,5 +1,5 @@
-#include <iostream>
 #include <QApplication>
+#include <string>
 #include "frontend/MainWindow.hpp"
 #include "spdlog/spdlog.h"
 
