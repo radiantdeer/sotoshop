@@ -106,6 +106,12 @@ void Image::setPixelAt(int x, int y, Pixel pixel) {
     data[y][x] = pixel;
 }
 
+void Image::setPixelAt(int x, int y, unsigned char r, unsigned char g, unsigned char b) {
+    data[y][x].setRed(r);
+    data[y][x].setGreen(g);
+    data[y][x].setBlue(b);
+}
+
 void Image::setWidth(int width) {
     this->width = width;
 }

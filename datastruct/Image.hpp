@@ -24,6 +24,7 @@ class Image {
         std::string getFileUrl() const;
 
         void setPixelAt(int x, int y, Pixel pixel);
+        void setPixelAt(int x, int y, unsigned char r, unsigned char g, unsigned char b);
         void setWidth(int width);
         void setHeight(int height);
         void setOriginalFormat(std::string originalFormat);

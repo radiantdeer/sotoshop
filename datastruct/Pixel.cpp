@@ -1,5 +1,6 @@
 #include "Pixel.hpp"
 #include <sstream>
+#include "../spdlog/spdlog.h"
 
 int thresholding(int value);
 
@@ -36,15 +37,27 @@ unsigned char Pixel::getBlue() const {
 
 
 void Pixel::setRed(unsigned char red) {
-    this->red = red;
+    unsigned char val = (unsigned char) thresholding(red);
+    if (val != red) {
+        spdlog::warn("Pixel::setRed: Something is trying to set red value outside valid range. It has been readjusted.");
+    }
+    this->red = val;
 }
 
 void Pixel::setGreen(unsigned char green) {
-    this->green = green;
+    unsigned char val = (unsigned char) thresholding(green);
+    if (val != green) {
+        spdlog::warn("Pixel::setGreen: Something is trying to set green value outside valid range. It has been readjusted.");
+    }
+    this->green = val;
 }
 
 void Pixel::setBlue(unsigned char blue) {
-    this->blue = blue;
+    unsigned char val = (unsigned char) thresholding(blue);
+    if (val != blue) {
+        spdlog::warn("Pixel::setBlue: Something is trying to set blue value outside valid range. It has been readjusted.");
+    }
+    this->blue = val;
 }
 
 std::string Pixel::toString() const {

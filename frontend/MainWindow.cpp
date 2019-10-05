@@ -20,6 +20,8 @@ MainWindow::MainWindow() : QMainWindow() {
     negativeImageAction = editMenu->addAction("Negative Image");
     convertToGrayscaleAction = editMenu->addAction("Convert Image to Grayscale");
     editMenu->addSeparator();
+    brightenAction = editMenu->addAction("Brightening");
+    editMenu->addSeparator();
     moveAction = editMenu->addAction("Move image");
     QMenu * rotateMenu = editMenu->addMenu("Rotate");
     rotateCWAction = rotateMenu->addAction("90\370 CW (clock-wise)");
@@ -111,11 +113,26 @@ void MainWindow::convertToGrayscaleImage() {
         drawSurface->getActiveImage()->grayscale();
         drawSurface->releaseLockImage();
         drawSurface->update();
-
     } else {
         spdlog::warn("MainWindow::convertToGrayscaleImage: Please load an image first!");
     }
 }
+
+void MainWindow::brightenImage() {
+    if (drawSurface->isImageLoaded()) {
+        spdlog::debug("Prompting the user to input deltaX");
+        int delta = promptValue("Values needed", "Enter value : ");
+        spdlog::debug("User entered delta = {}", delta);
+        spdlog::info("MainWindow::convertToGrayscaleImage: Brightening image...");
+        drawSurface->acquireLockImage();
+        drawSurface->getActiveImage()->adjustBrightness(delta);
+        drawSurface->releaseLockImage();
+        drawSurface->update();
+    } else {
+        spdlog::warn("MainWindow::convertToGrayscaleImage: Please load an image first!");
+    }
+}
+
 
 void MainWindow::moveImage() {
     if (drawSurface->isImageLoaded()) {
@@ -132,7 +149,6 @@ void MainWindow::moveImage() {
         drawSurface->getActiveImage()->translate(deltaX, deltaY);
         drawSurface->releaseLockImage();
         drawSurface->update();
-
     } else {
         spdlog::warn("MainWindow::moveImage: Please load an image first!");
     }
@@ -207,6 +223,8 @@ void MainWindow::connectActionsToControllers() {
 
     connect(negativeImageAction, &QAction::triggered, this, &MainWindow::makeNegativeImage);
     connect(convertToGrayscaleAction, &QAction::triggered, this, &MainWindow::convertToGrayscaleImage);
+
+    connect(brightenAction, &QAction::triggered, this, &MainWindow::brightenImage);
 
     connect(moveAction, &QAction::triggered, this, &MainWindow::moveImage);
     connect(rotateCWAction, &QAction::triggered, this, &MainWindow::rotateImageCW);
