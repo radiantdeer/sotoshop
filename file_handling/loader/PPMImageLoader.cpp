@@ -62,7 +62,7 @@ Image * PPMImageLoader::loadASCII(std::string filename) {
         colorLevel = std::stoi(level);
         Pixel **data = new Pixel *[height];
         for (int j = 0; j < height; j++) {
-            data[j] = new Pixel[height];
+            data[j] = new Pixel[width];
         }
         unsigned char buff;
         int intBuff = 0;
@@ -131,7 +131,7 @@ Image * PPMImageLoader::loadBinary(std::string filename) {
 
         Pixel **data = new Pixel *[height];
         for (int j = 0; j < height; j++) {
-            data[j] = new Pixel[height];
+            data[j] = new Pixel[width];
         }
         unsigned char *buff = new unsigned char[width * height * MAX_CHANNEL];
         fileread.read((char*) buff, sizeof(unsigned char) * width * height * MAX_CHANNEL);
