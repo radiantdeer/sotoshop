@@ -2,6 +2,7 @@
 
 #include <iostream>
 #include <cmath>
+#include "../spdlog/spdlog.h"
 
 Image::Image() {
     width = 0;
@@ -64,8 +65,8 @@ Image::Image(int width, int height, Pixel ** data, std::string originalFormat) {
 }
 
 Image::Image(const Image& other) {
-    this->width = width;
-    this->height = height;
+    this->width = other.getWidth();
+    this->height = other.getHeight();
     for (int j = 0; j < height; j++) {
         std::vector<Pixel> tempData;
         for (int i = 0; i < width; i++) {
@@ -371,7 +372,7 @@ Image * Image::flipH() {
         for (int j = 0; j < tempImage->getHeight(); j++) {
             Pixel a = tempImage->getPixelAt(i,j);
             Pixel *b = new Pixel(a);
-            this->setPixelAt(tempImage->getWidth() - i, j, *b);
+            this->setPixelAt(tempImage->getWidth() - i - 1, j, *b);
             delete b;
         }
     }
@@ -387,7 +388,7 @@ Image * Image::flipV() {
         for (int j = 0; j < tempImage-> getHeight(); j++) {
             Pixel a = tempImage->getPixelAt(i, j);
             Pixel *b = new Pixel(a);
-            this->setPixelAt(i, tempImage->getHeight() - j, *b);
+            this->setPixelAt(i, tempImage->getHeight() - j - 1, *b);
             delete b;
         }
     }

@@ -24,7 +24,9 @@ MainWindow::MainWindow() : QMainWindow() {
     QMenu * rotateMenu = editMenu->addMenu("Rotate");
     rotateCWAction = rotateMenu->addAction("90\370 CW (clock-wise)");
     rotateCCWAction = rotateMenu->addAction("90\370 CCW (counterclock-wise)");
-    flipAction = editMenu->addAction("Flip");
+    QMenu * flipMenu = editMenu->addMenu("Flip");
+    flipHAction = flipMenu->addAction("Horizontal");
+    flipVAction = flipMenu->addAction("Vertical");
     zoomAction = editMenu->addAction("Zoom");
 
     connectActionsToControllers();
@@ -166,12 +168,27 @@ void MainWindow::rotateImageCCW() {
     }
 }
 
-void MainWindow::flipImage() {
+void MainWindow::flipImageHorizontal() {
     if (drawSurface->isImageLoaded()) {
-        spdlog::info("MainWindow::flipImage: Flipping image...");
-        spdlog::info("MainWindow::flipImage: stub function");
+        spdlog::info("MainWindow::flipImageHorizontal: Flipping image horizontally...");
+        drawSurface->acquireLockImage();
+        drawSurface->getActiveImage()->flipH();
+        drawSurface->releaseLockImage();
+        drawSurface->update();
     } else {
-        spdlog::warn("MainWindow::rotateImage: Please load an image first!");
+        spdlog::warn("MainWindow::flipImageHorizontal: Please load an image first!");
+    }
+}
+
+void MainWindow::flipImageVertical() {
+    if (drawSurface->isImageLoaded()) {
+        spdlog::info("MainWindow::flipImageVertical: Flipping image vertically...");
+        drawSurface->acquireLockImage();
+        drawSurface->getActiveImage()->flipV();
+        drawSurface->releaseLockImage();
+        drawSurface->update();
+    } else {
+        spdlog::warn("MainWindow::flipImageVertical: Please load an image first!");
     }
 }
 
@@ -190,10 +207,12 @@ void MainWindow::connectActionsToControllers() {
 
     connect(negativeImageAction, &QAction::triggered, this, &MainWindow::makeNegativeImage);
     connect(convertToGrayscaleAction, &QAction::triggered, this, &MainWindow::convertToGrayscaleImage);
+
     connect(moveAction, &QAction::triggered, this, &MainWindow::moveImage);
     connect(rotateCWAction, &QAction::triggered, this, &MainWindow::rotateImageCW);
     connect(rotateCCWAction, &QAction::triggered, this, &MainWindow::rotateImageCCW);
-    connect(flipAction, &QAction::triggered, this, &MainWindow::flipImage);
+    connect(flipHAction, &QAction::triggered, this, &MainWindow::flipImageHorizontal);
+    connect(flipVAction, &QAction::triggered, this, &MainWindow::flipImageVertical);
     connect(zoomAction, &QAction::triggered, this, &MainWindow::zoomImage);
 }
 

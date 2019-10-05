@@ -29,7 +29,8 @@ class MainWindow : public QMainWindow {
         void moveImage();
         void rotateImageCW();
         void rotateImageCCW();
-        void flipImage();
+        void flipImageHorizontal();
+        void flipImageVertical();
         void zoomImage();
         void refresh();
 
@@ -41,7 +42,8 @@ class MainWindow : public QMainWindow {
         QAction * moveAction;
         QAction * rotateCWAction;
         QAction * rotateCCWAction;
-        QAction * flipAction;
+        QAction * flipHAction;
+        QAction * flipVAction;
         QAction * zoomAction;
         DrawSurface * drawSurface;
 
