@@ -1,6 +1,7 @@
 #include "ImageSaverFactory.hpp"
 #include "PBMImageSaver.hpp"
 #include "PGMImageSaver.hpp"
+#include "PPMImageSaver.hpp"
 #include "RawImageSaver.hpp"
 #include <iostream>
 #include "../../spdlog/spdlog.h"
@@ -18,7 +19,7 @@ ImageSaver * ImageSaverFactory::getImageSaver(std::string fileUrl) {
         imageSaver = new PGMImageSaver();
     } else if ((format == "ppm") || (format == "PPM")) {
         spdlog::debug("ImageSaverFactory detects PPM image");
-        imageSaver = new RawImageSaver();
+        imageSaver = new PPMImageSaver();
     } else if ((format == "pbm") || (format == "PBM")) {
         spdlog::debug("ImageSaverFactory detects PBM image");
         imageSaver = new PBMImageSaver();
