@@ -19,4 +19,4 @@ DEFINES += QT_DEPRECATED_WARNINGS
 #DEFINES += QT_DISABLE_DEPRECATED_BEFORE=0x060000    # disables all the APIs deprecated before Qt 6.0.0
 
 # Input
-SOURCES += *.cpp ./file_handling/loader/*.cpp ./file_handling/saver/*.cpp ./datastruct/*.cpp ./frontend/*.cpp
+SOURCES += *.cpp ./file_handling/loader/*.cpp ./file_handling/saver/*.cpp ./datastruct/*.cpp ./frontend/*.cpp ./utilities/*.cpp
