@@ -33,6 +33,12 @@ class MainWindow : public QMainWindow {
         void flipImageHorizontal();
         void flipImageVertical();
         void zoomImage();
+        void addImage();
+        void substractImage();
+        void multiplyImage();
+        void operateAndImage();
+        void operateOrImage();
+        void operateNotImage();
         void refresh();
 
     private:
@@ -47,6 +53,12 @@ class MainWindow : public QMainWindow {
         QAction * flipVAction;
         QAction * zoomAction;
         QAction * brightenAction;
+        QAction * additionAction;
+        QAction * substractAction;
+        QAction * multiplyAction;
+        QAction * andAction;
+        QAction * orAction;
+        QAction * notAction;
         DrawSurface * drawSurface;
 
         void connectActionsToControllers();

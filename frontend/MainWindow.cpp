@@ -30,7 +30,15 @@ MainWindow::MainWindow() : QMainWindow() {
     flipHAction = flipMenu->addAction("Horizontal");
     flipVAction = flipMenu->addAction("Vertical");
     zoomAction = editMenu->addAction("Zoom");
-
+    editMenu->addSeparator();
+    QMenu * arithmeticMenu = editMenu->addMenu("Arithmetic Operations");
+    additionAction = arithmeticMenu->addAction("Addition");
+    substractAction = arithmeticMenu->addAction("Substract");
+    multiplyAction = arithmeticMenu->addAction("Multiply");
+    QMenu * booleanMenu = editMenu->addMenu("Boolean Operations");
+    andAction = booleanMenu->addAction("AND");
+    orAction = booleanMenu->addAction("OR");
+    notAction = booleanMenu->addAction("NOT");
     connectActionsToControllers();
 
     drawSurface = new DrawSurface(this);
@@ -217,6 +225,61 @@ void MainWindow::zoomImage() {
     }
 }
 
+void MainWindow::addImage() {
+    if (drawSurface->isImageLoaded()) {
+        spdlog::info("MainWindow::addImage: Adding newly loaded image to current image...");
+        spdlog::info("MainWindow::addImage: stub function");
+    } else {
+        spdlog::warn("MainWindow::addImage: Please load an image first!");
+    }
+}
+
+void MainWindow::substractImage() {
+    if (drawSurface->isImageLoaded()) {
+        spdlog::info("MainWindow::substractImage: Substracting current image with newly loaded image...");
+        spdlog::info("MainWindow::substractImage: stub function");
+    } else {
+        spdlog::warn("MainWindow::substractImage: Please load an image first!");
+    }
+}
+
+void MainWindow::multiplyImage() {
+    if (drawSurface->isImageLoaded()) {
+        spdlog::info("MainWindow::multiplyImage: Multiplying current image with newly loaded image...");
+        spdlog::info("MainWindow::multiplyImage: stub function");
+    } else {
+        spdlog::warn("MainWindow::multiplyImage: Please load an image first!");
+    }
+}
+
+void MainWindow::operateAndImage() {
+    if (drawSurface->isImageLoaded()) {
+        spdlog::info("MainWindow::operateAndImage: Running AND operation...");
+        spdlog::info("MainWindow::operateAndImage: stub function");
+    } else {
+        spdlog::warn("MainWindow::operateAndImage: Please load an image first!");
+    }
+}
+
+void MainWindow::operateOrImage() {
+    if (drawSurface->isImageLoaded()) {
+        spdlog::info("MainWindow::operateOrImage: Running OR operation...");
+        spdlog::info("MainWindow::operateOrImage: stub function");
+    } else {
+        spdlog::warn("MainWindow::operateOrImage: Please load an image first!");
+    }
+}
+
+void MainWindow::operateNotImage() {
+    if (drawSurface->isImageLoaded()) {
+        spdlog::info("MainWindow::operateNotImage: Running NOT operation...");
+        spdlog::info("MainWindow::operateNotImage: stub function");
+    } else {
+        spdlog::warn("MainWindow::operateNotImage: Please load an image first!");
+    }
+}
+
+
 void MainWindow::connectActionsToControllers() {
     connect(loadAction, &QAction::triggered, this, &MainWindow::loadFile);
     connect(saveAction, &QAction::triggered, this, &MainWindow::saveFile);
@@ -232,6 +295,14 @@ void MainWindow::connectActionsToControllers() {
     connect(flipHAction, &QAction::triggered, this, &MainWindow::flipImageHorizontal);
     connect(flipVAction, &QAction::triggered, this, &MainWindow::flipImageVertical);
     connect(zoomAction, &QAction::triggered, this, &MainWindow::zoomImage);
+
+    connect(additionAction, &QAction::triggered, this, &MainWindow::addImage);
+    connect(substractAction, &QAction::triggered, this, &MainWindow::substractImage);
+    connect(multiplyAction, &QAction::triggered, this, &MainWindow::multiplyImage);
+    connect(andAction, &QAction::triggered, this, &MainWindow::operateAndImage);
+    connect(orAction, &QAction::triggered, this, &MainWindow::operateOrImage);
+    connect(notAction, &QAction::triggered, this, &MainWindow::operateNotImage);
+
 }
 
 std::string MainWindow::getOpenFileUrl(std::string dialogTitle) {
