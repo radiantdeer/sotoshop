@@ -2,14 +2,13 @@
 #define __CONVOLUTION_HPP
 
 #include <vector>
+#include "ConvolutionMatrix.hpp"
 #include "../datastruct/Image.hpp"
 
 class Convolution {
 
     public:
-        static Image* convolve(Image* image, unsigned char* opMatrix, int operatorWidth, int operatorHeight, bool padImage);
-        static Image* convolve(Image* image, unsigned char** opMatrix, int operatorWidth, int operatorHeight, bool padImage);
-        static Image* convolve(Image* image, std::vector<std::vector<Pixel>>* opMatrix);
+        static Image* convolve(Image* image, ConvolutionMatrix opMatrix, bool padImage);
 
 };
 
