@@ -77,4 +77,5 @@ ConvolutionMatrix& ConvolutionMatrix::operator=(const ConvolutionMatrix& other) 
             this->opMatrix[j][i] = other.getElementAt(i, j);
         }
     }
+    return *this;
 }

@@ -6,6 +6,9 @@
 class CommonConvolutions {
 
     public:
-        static ConvolutionMatrix AVERAGE();
+        static const int averageMatrix[3][3];
+        static const ConvolutionMatrix Average;
 
 };
+
+#endif
