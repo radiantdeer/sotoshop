@@ -7,16 +7,16 @@ class ConvolutionMatrix {
 
     public:
         ConvolutionMatrix();
-        ConvolutionMatrix(int height, int width, unsigned char* opMatrix);
-        ConvolutionMatrix(int height, int width, unsigned char** opMatrix);
+        ConvolutionMatrix(int height, int width, int* opMatrix);
+        ConvolutionMatrix(int height, int width, int** opMatrix);
         ConvolutionMatrix(const ConvolutionMatrix& other);
 
-        unsigned char** getMatrix();
-        unsigned char getElementAt(int x, int y) const;
+        int** getMatrix();
+        int getElementAt(int x, int y) const;
         int getWidth() const;
         int getHeight() const;
         int getMatrixSum() const;
-        void setElementAt(int x, int y, unsigned char element);
+        void setElementAt(int x, int y, int element);
 
         ConvolutionMatrix& operator=(const ConvolutionMatrix& other);
 
@@ -24,7 +24,7 @@ class ConvolutionMatrix {
         int width;
         int height;
         int matrixSum;
-        unsigned char** opMatrix;
+        int** opMatrix;
 
 };
 
