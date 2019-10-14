@@ -24,10 +24,13 @@ MainWindow::MainWindow() : QMainWindow() {
     flipAction = editMenu->addAction("Flip");
     zoomAction = editMenu->addAction("Zoom");
 
+    histogramAction = this->menuBar()->addAction("Histogram");
+
     connectActionsToControllers();
 
     drawSurface = new DrawSurface(this);
     this->setCentralWidget(drawSurface);
+    histDialog = nullptr;
 }
 
 QAction * MainWindow::getLoadAction() {
@@ -145,6 +148,22 @@ void MainWindow::zoomImage() {
     }
 }
 
+void MainWindow::showHistogram(){
+    if (drawSurface->isImageLoaded()) {
+        spdlog::info("MainWindow::showHistogram: Showing histogram...");
+        std::vector<std::vector<int>> hist = drawSurface->getActiveImage()->histogram();
+        for (int i = 0; i < 256; i+=255) {
+            spdlog::info(hist.at(0).at(i));
+        }
+        if (histDialog != nullptr) {
+            delete histDialog;
+        }
+        histDialog = new HistogramDialog(hist);
+        histDialog->show();
+    } else {
+        spdlog::warn("MainWindow::showHistogram: Please load an image first!");
+    }
+}
 
 void MainWindow::connectActionsToControllers() {
     connect(loadAction, &QAction::triggered, this, &MainWindow::loadFile);
@@ -156,6 +175,8 @@ void MainWindow::connectActionsToControllers() {
     connect(rotateAction, &QAction::triggered, this, &MainWindow::rotateImage);
     connect(flipAction, &QAction::triggered, this, &MainWindow::flipImage);
     connect(zoomAction, &QAction::triggered, this, &MainWindow::zoomImage);
+
+    connect(histogramAction, &QAction::triggered, this, &MainWindow::showHistogram);
 }
 
 std::string MainWindow::getOpenFileUrl(std::string dialogTitle) {
