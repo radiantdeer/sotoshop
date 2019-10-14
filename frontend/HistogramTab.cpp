@@ -22,7 +22,7 @@ HistogramTab::HistogramTab(const std::vector<int> hist, std::string color, QWidg
     } else if (color == "Blue") {
         colorBarSet->setColor(Qt::blue);
     }
-    for (int i = 0; i < 255; i++) {
+    for (int i = 0; i < 256; i++) {
         *colorBarSet << hist.at(i);
     }
     QBarSeries *series = new QBarSeries();
