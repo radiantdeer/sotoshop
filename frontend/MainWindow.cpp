@@ -30,6 +30,7 @@ MainWindow::MainWindow() : QMainWindow() {
 
     drawSurface = new DrawSurface(this);
     this->setCentralWidget(drawSurface);
+    histDialog = nullptr;
 }
 
 QAction * MainWindow::getLoadAction() {
@@ -154,8 +155,11 @@ void MainWindow::showHistogram(){
         for (int i = 0; i < 256; i+=255) {
             spdlog::info(hist.at(0).at(i));
         }
-        HistogramDialog histogramDialog (hist, this);
-        histogramDialog.exec();
+        if (histDialog != nullptr) {
+            delete histDialog;
+        }
+        histDialog = new HistogramDialog(hist);
+        histDialog->show();
     } else {
         spdlog::warn("MainWindow::showHistogram: Please load an image first!");
     }

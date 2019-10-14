@@ -1,11 +1,10 @@
-#include <QtWidgets/QDialog>
 #include <QVBoxLayout>
 
 #include "HistogramDialog.hpp"
 #include "HistogramTab.hpp"
 #include "../spdlog/spdlog.h"
 
-HistogramDialog::HistogramDialog(const std::vector<std::vector<int>> hist, QWidget *parent) : QDialog (parent) {
+HistogramDialog::HistogramDialog(const std::vector<std::vector<int>> hist) : QWidget () {
     tabWidget = new QTabWidget();
     if (hist.size() == 1) {
         tabWidget->addTab(new HistogramTab(hist.at(0), "Gray"), tr("Gray"));

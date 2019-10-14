@@ -45,6 +45,7 @@ class MainWindow : public QMainWindow {
         QAction * zoomAction;
         QAction * histogramAction;
         DrawSurface * drawSurface;
+        HistogramDialog * histDialog;
 
         void connectActionsToControllers();
         std::string getOpenFileUrl(std::string dialogTitle);

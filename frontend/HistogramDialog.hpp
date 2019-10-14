@@ -4,11 +4,10 @@
 #include <QMainWindow>
 #include <QObject>
 #include <QWidget>
-#include <QDialog>
 
-class HistogramDialog : public QDialog {
+class HistogramDialog : public QWidget {
     public:
-        HistogramDialog(const std::vector<std::vector<int>> hist, QWidget *parent);
+        HistogramDialog(const std::vector<std::vector<int>> hist);
     private:
         QTabWidget *tabWidget;
 };
