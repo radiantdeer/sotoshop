@@ -23,6 +23,8 @@ MainWindow::MainWindow() : QMainWindow() {
     rotateAction = editMenu->addAction("Rotate");
     flipAction = editMenu->addAction("Flip");
     zoomAction = editMenu->addAction("Zoom");
+    editMenu->addSeparator();
+    equalizeAction = editMenu->addAction("Equalize Histogram");
 
     histogramAction = this->menuBar()->addAction("Histogram");
 
@@ -148,6 +150,15 @@ void MainWindow::zoomImage() {
     }
 }
 
+void MainWindow::equalizeImageHist() {
+    if (drawSurface->isImageLoaded()) {
+        spdlog::info("MainWindow::equalizeImageHist: Equalizing image histogram...");
+        spdlog::info("MainWindow::equalizeImageHist: stub function");
+    } else {
+        spdlog::warn("MainWindow::equalizeImageHist: Please load an image first!");
+    }
+}
+
 void MainWindow::showHistogram(){
     if (drawSurface->isImageLoaded()) {
         spdlog::info("MainWindow::showHistogram: Showing histogram...");
@@ -175,6 +186,7 @@ void MainWindow::connectActionsToControllers() {
     connect(rotateAction, &QAction::triggered, this, &MainWindow::rotateImage);
     connect(flipAction, &QAction::triggered, this, &MainWindow::flipImage);
     connect(zoomAction, &QAction::triggered, this, &MainWindow::zoomImage);
+    connect(equalizeAction, &QAction::triggered, this, &MainWindow::equalizeImageHist);
 
     connect(histogramAction, &QAction::triggered, this, &MainWindow::showHistogram);
 }

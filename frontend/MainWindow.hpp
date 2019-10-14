@@ -32,6 +32,7 @@ class MainWindow : public QMainWindow {
         void flipImage();
         void zoomImage();
         void refresh();
+        void equalizeImageHist();
         void showHistogram();
 
     private:
@@ -43,6 +44,7 @@ class MainWindow : public QMainWindow {
         QAction * rotateAction;
         QAction * flipAction;
         QAction * zoomAction;
+        QAction * equalizeAction;
         QAction * histogramAction;
         DrawSurface * drawSurface;
         HistogramDialog * histDialog;
