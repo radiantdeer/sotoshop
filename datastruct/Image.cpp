@@ -2,6 +2,7 @@
 
 #include <iostream>
 #include <cmath>
+#include <vector>
 
 Image::Image() {
     width = 0;
@@ -440,4 +441,37 @@ Image * Image::operator|(Image B) {
 Image * Image::operator~() {
     Image * C = new Image(*this);
     return C->not_op();
+}
+
+// Returns array of color histogram
+// Returns a matrix of 3 x 256 for colored images (PPM, BMP)
+// Returns a mateix of 1 x 256 for grayscaled images (PBM, PGM, RAW)
+std::vector<std::vector<int>> Image::histogram() {
+    std::vector<std::vector<int>> hist;
+    if (this->getOriginalFormat() == "bmp" || this->getOriginalFormat() == "ppm" ) {
+        // color
+        std::vector<int> red (256, 0);
+        std::vector<int> green (256, 0);
+        std::vector<int> blue (256, 0);
+        for (int i = 0; i < this->getWidth(); i++) {
+            for (int j = 0; j < this->getHeight(); j++) {
+                red[this->getPixelAt(i,j).getRed()]++;
+                green[this->getPixelAt(i,j).getGreen()]++;
+                blue[this->getPixelAt(i,j).getBlue()]++;
+            }
+        }
+        hist.push_back(red);
+        hist.push_back(green);
+        hist.push_back(blue);
+    } else {
+        // grayscale
+        std::vector<int> gray (256, 0);
+        for (int i = 0; i < this->getWidth(); i++) {
+            for (int j = 0; j < this->getHeight(); j++) {
+                gray[this->getPixelAt(i, j).getRed()]++;
+            }
+        }
+        hist.push_back(gray);
+    }
+    return hist;
 }

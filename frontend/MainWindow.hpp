@@ -8,6 +8,7 @@
 #include <string>
 
 #include "DrawSurface.hpp"
+#include "HistogramDialog.hpp"
 #include "../datastruct/Image.hpp"
 #include "../file_handling/loader/ImageLoaderFactory.hpp"
 #include "../file_handling/saver/ImageSaverFactory.hpp"
@@ -31,6 +32,7 @@ class MainWindow : public QMainWindow {
         void flipImage();
         void zoomImage();
         void refresh();
+        void showHistogram();
 
     private:
         QAction * loadAction;
@@ -41,6 +43,7 @@ class MainWindow : public QMainWindow {
         QAction * rotateAction;
         QAction * flipAction;
         QAction * zoomAction;
+        QAction * histogramAction;
         DrawSurface * drawSurface;
 
         void connectActionsToControllers();
