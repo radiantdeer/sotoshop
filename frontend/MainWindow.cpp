@@ -3,6 +3,7 @@
 #include <iostream>
 #include <QFileDialog>
 #include <QMenuBar>
+#include <QMessageBox>
 #include <QPaintEvent>
 #include <QRegion>
 #include <QUrl>
@@ -153,8 +154,9 @@ void MainWindow::zoomImage() {
 
 void MainWindow::doMeanFilterImage() {
     if (drawSurface->isImageLoaded()) {
+        bool padded = askForPadding();
         spdlog::info("MainWindow::doMeanFilterImage: Convolving with mean filter...");
-        Image * newImage = Convolution::convolve(drawSurface->getActiveImage(), CommonConvolutions::Average, false);
+        Image * newImage = Convolution::convolve(drawSurface->getActiveImage(), CommonConvolutions::Average, padded);
         drawSurface->acquireLockImage();
         drawSurface->purgeImage();
         drawSurface->setActiveImage(newImage);
@@ -194,6 +196,16 @@ std::string MainWindow::getSaveFileUrl(std::string dialogTitle) {
     string fileUrl = tempFileUrl.toLocalFile().toUtf8().constData();
     return fileUrl;
 }
+
+bool MainWindow::askForPadding() {
+    QMessageBox::StandardButton response = QMessageBox::question(this, "Convolution Padding", "Do you want to pad the image before convolution?");
+    if (response == QMessageBox::Yes) {
+        return true;
+    } else {
+        return false;
+    }
+}
+
 
 void MainWindow::setActiveImage(Image * image) {
     drawSurface->setActiveImage(image);

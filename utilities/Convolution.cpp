@@ -7,31 +7,34 @@ Image* Convolution::convolve(Image* image, const ConvolutionMatrix& opMatrix, bo
     int resultWidth, resultHeight;
     Image *sourceImage;
 
+    spdlog::debug("Convolution::convolve: Preparing...");
     if (padImage) {
+        spdlog::debug("Convolution::convolve: Adding padding to source image...");
         resultWidth = image->getWidth();
         resultHeight = image->getHeight();
-        int padWidth = (opMatrix.getWidth() / 2) * 2;
-        int padHeight = (opMatrix.getHeight() / 2) * 2;
-        int sourceWidth = image->getWidth() + padWidth;
-        int sourceHeight = image->getHeight() + padHeight;
+        int padWidth = opMatrix.getWidth() / 2;
+        int padHeight = opMatrix.getHeight() / 2;
+        int sourceWidth = image->getWidth() + (padWidth * 2);
+        int sourceHeight = image->getHeight() + (padHeight * 2);
         sourceImage = new Image(sourceWidth, sourceHeight);
+        spdlog::debug("New source image dimension : {}x{}", sourceImage->getWidth(), sourceImage->getHeight());
         for (int j = 0; j < padHeight; j++) {
             for (int i = 0; i < sourceWidth; i++) {
                 sourceImage->setPixelAt(i, j, Pixel(0, 0, 0));
             }
         }
-        for (int j = padHeight; j < sourceHeight + padHeight; j++) {
+        for (int j = padHeight; j < (resultHeight + padHeight); j++) {
             for (int i = 0; i < padWidth; i++) {
                 sourceImage->setPixelAt(i, j, Pixel(0, 0, 0));
             }
-            for (int i = padWidth; i < padWidth + sourceWidth; i++) {
-                sourceImage->setPixelAt(i, j, image->getPixelAt(i, j));
+            for (int i = padWidth; i < (resultWidth + padWidth); i++) {
+                sourceImage->setPixelAt(i, j, image->getPixelAt(i - padWidth, j - padHeight));
             }
-            for (int i = padWidth + sourceWidth; i < padWidth + (sourceWidth * 2); i++) {
+            for (int i = (resultWidth + padWidth); i < sourceWidth; i++) {
                 sourceImage->setPixelAt(i, j, Pixel(0, 0, 0));
             }
         }
-        for (int j = sourceHeight + padHeight; j < sourceHeight + (padHeight * 2); j++) {
+        for (int j = (resultHeight + padHeight); j < (resultHeight + (padHeight * 2)); j++) {
             for (int i = 0; i < sourceWidth; i++) {
                 sourceImage->setPixelAt(i, j, Pixel(0, 0, 0));
             }
@@ -43,7 +46,7 @@ Image* Convolution::convolve(Image* image, const ConvolutionMatrix& opMatrix, bo
     }
 
     Image * result = new Image(resultWidth, resultHeight);
-
+    spdlog::debug("Convolution::convolve: Starting convolution...");
     for (int j = 0; j < resultHeight; j++) {
         for (int i = 0; i < resultWidth; i++) {
             int redSum = 0;
@@ -65,6 +68,7 @@ Image* Convolution::convolve(Image* image, const ConvolutionMatrix& opMatrix, bo
             result->setPixelAt(i, j, thisPixel);
         }
     }
+    spdlog::debug("Convolution::convolve: Convolution done.");
 
     return result;
 }
