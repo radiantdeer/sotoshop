@@ -32,6 +32,7 @@ class MainWindow : public QMainWindow {
         void flipImage();
         void zoomImage();
         void refresh();
+        void doMeanFilterImage();
         void showHistogram();
 
     private:
@@ -43,6 +44,7 @@ class MainWindow : public QMainWindow {
         QAction * rotateAction;
         QAction * flipAction;
         QAction * zoomAction;
+        QAction * meanFilter;
         QAction * histogramAction;
         DrawSurface * drawSurface;
         HistogramDialog * histDialog;
@@ -50,6 +52,7 @@ class MainWindow : public QMainWindow {
         void connectActionsToControllers();
         std::string getOpenFileUrl(std::string dialogTitle);
         std::string getSaveFileUrl(std::string dialogTitle);
+        bool askForPadding();
         static std::string getFileExtension(std::string fileUrl);
 
 };

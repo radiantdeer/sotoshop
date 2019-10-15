@@ -8,3 +8,5 @@ SotoShop
 \.qmake\.stash
 
 \.vscode/
+
+*.gch
