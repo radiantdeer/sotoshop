@@ -8,7 +8,7 @@
 class Convolution {
 
     public:
-        static Image* convolve(Image* image, ConvolutionMatrix& opMatrix, bool padImage);
+        static Image* convolve(Image* image, const ConvolutionMatrix& opMatrix, bool padImage);
 
 };
 

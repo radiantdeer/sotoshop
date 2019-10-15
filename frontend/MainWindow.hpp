@@ -31,6 +31,7 @@ class MainWindow : public QMainWindow {
         void flipImage();
         void zoomImage();
         void refresh();
+        void doMeanFilterImage();
 
     private:
         QAction * loadAction;
@@ -47,6 +48,7 @@ class MainWindow : public QMainWindow {
         void connectActionsToControllers();
         std::string getOpenFileUrl(std::string dialogTitle);
         std::string getSaveFileUrl(std::string dialogTitle);
+        bool askForPadding();
         static std::string getFileExtension(std::string fileUrl);
 
 };

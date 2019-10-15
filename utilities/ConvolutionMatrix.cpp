@@ -7,9 +7,11 @@ ConvolutionMatrix::ConvolutionMatrix() {
     matrixSum = 1;
 }
 
-ConvolutionMatrix::ConvolutionMatrix(int height, int width, int* opMatrix) {
+ConvolutionMatrix::ConvolutionMatrix(int width, int height, int* opMatrix) {
     this->opMatrix = new int * [height];
     this->matrixSum = 0;
+    this->width = width;
+    this->height = height;
     for (int j = 0; j < height; j++) {
         this->opMatrix[j] = new int[width];
         for (int i = 0; i < width; i++) {
@@ -19,9 +21,11 @@ ConvolutionMatrix::ConvolutionMatrix(int height, int width, int* opMatrix) {
     }
 }
 
-ConvolutionMatrix::ConvolutionMatrix(int height, int width, int** opMatrix) {
+ConvolutionMatrix::ConvolutionMatrix(int width, int height, int** opMatrix) {
     this->opMatrix = new int*[height];
     this->matrixSum = 0;
+    this->width = width;
+    this->height = height;
     for (int j = 0; j < height; j++) {
         spdlog::info("Row {}",j);
         this->opMatrix[j] = new int[width];

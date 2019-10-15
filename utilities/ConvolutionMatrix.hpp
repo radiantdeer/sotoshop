@@ -7,8 +7,8 @@ class ConvolutionMatrix {
 
     public:
         ConvolutionMatrix();
-        ConvolutionMatrix(int height, int width, int* opMatrix);
-        ConvolutionMatrix(int height, int width, int** opMatrix);
+        ConvolutionMatrix(int width, int height, int* opMatrix);
+        ConvolutionMatrix(int width, int height, int** opMatrix);
         ConvolutionMatrix(const ConvolutionMatrix& other);
 
         int** getMatrix();

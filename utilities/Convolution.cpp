@@ -1,7 +1,8 @@
 #include "Convolution.hpp"
 #include <vector>
+#include "../spdlog/spdlog.h"
 
-Image* Convolution::convolve(Image* image, ConvolutionMatrix& opMatrix, bool padImage) {
+Image* Convolution::convolve(Image* image, const ConvolutionMatrix& opMatrix, bool padImage) {
 
     int resultWidth, resultHeight;
     Image *sourceImage;
@@ -60,7 +61,8 @@ Image* Convolution::convolve(Image* image, ConvolutionMatrix& opMatrix, bool pad
             redSum /= opMatrix.getMatrixSum();
             greenSum /= opMatrix.getMatrixSum();
             blueSum /= opMatrix.getMatrixSum();
-            result->setPixelAt(i, j, Pixel((unsigned char) redSum, (unsigned char) greenSum, (unsigned char) blueSum));
+            Pixel thisPixel (redSum, greenSum, blueSum);
+            result->setPixelAt(i, j, thisPixel);
         }
     }
 

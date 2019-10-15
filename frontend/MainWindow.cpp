@@ -6,6 +6,7 @@
 #include <QPaintEvent>
 #include <QRegion>
 #include <QUrl>
+#include <sstream>
 #include "../spdlog/spdlog.h"
 #include "../utilities/Convolution.hpp"
 #include "../utilities/CommonConvolutions.hpp"
@@ -150,6 +151,19 @@ void MainWindow::zoomImage() {
     }
 }
 
+void MainWindow::doMeanFilterImage() {
+    if (drawSurface->isImageLoaded()) {
+        spdlog::info("MainWindow::doMeanFilterImage: Convolving with mean filter...");
+        Image * newImage = Convolution::convolve(drawSurface->getActiveImage(), CommonConvolutions::Average, false);
+        drawSurface->acquireLockImage();
+        drawSurface->purgeImage();
+        drawSurface->setActiveImage(newImage);
+        drawSurface->releaseLockImage();
+        drawSurface->update();
+    } else {
+        spdlog::warn("MainWindow::doMeanFilterImage: Please load an image first!");
+    }
+}
 
 void MainWindow::connectActionsToControllers() {
     connect(loadAction, &QAction::triggered, this, &MainWindow::loadFile);
@@ -161,6 +175,8 @@ void MainWindow::connectActionsToControllers() {
     connect(rotateAction, &QAction::triggered, this, &MainWindow::rotateImage);
     connect(flipAction, &QAction::triggered, this, &MainWindow::flipImage);
     connect(zoomAction, &QAction::triggered, this, &MainWindow::zoomImage);
+
+    connect(meanFilter, &QAction::triggered, this, &MainWindow::doMeanFilterImage);
 }
 
 std::string MainWindow::getOpenFileUrl(std::string dialogTitle) {
