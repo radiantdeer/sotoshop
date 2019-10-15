@@ -2,6 +2,7 @@
 #include <iostream>
 #include <string>
 #include "PPMImageLoader.hpp"
+#include "../../spdlog/spdlog.h"
 
 #define MAX_COLOR 255
 #define MAX_CHANNEL 3
@@ -28,9 +29,11 @@ Image * PPMImageLoader::load(std::string filename) {
         } else if (filetype == PPM_BINARY) {
             return this->loadBinary(filename);
         } else {
+            spdlog::error("PPMImageLoader::load: {} is not a PPM file!", filename);
             throw std::runtime_error("PPMImageLoader::load: " + filename + " is not PPM file.");
         }
     } else {
+        spdlog::error("PPMImageLoader::load: {} is unreadable!", filename);
         throw std::runtime_error("PPMImageLoader::load: " + filename + " unreadable.");
     }
 }
@@ -47,6 +50,7 @@ Image * PPMImageLoader::loadASCII(std::string filename) {
             std::getline(fileread, filetype);
         }
         if (filetype != PPM_ASCII) {
+            spdlog::error("PPMImageLoader::loadASCII: {} is not a PPM file!", filename);
             throw std::runtime_error("PPMImageLoader::loadASCII: " + filename + " is not PPM file.");
         }
         std::getline(fileread, dimensions);
@@ -62,7 +66,7 @@ Image * PPMImageLoader::loadASCII(std::string filename) {
         colorLevel = std::stoi(level);
         Pixel **data = new Pixel *[height];
         for (int j = 0; j < height; j++) {
-            data[j] = new Pixel[height];
+            data[j] = new Pixel[width];
         }
         unsigned char buff;
         int intBuff = 0;
@@ -99,23 +103,24 @@ Image * PPMImageLoader::loadASCII(std::string filename) {
         }
         return new Image(width, height, data, "ppm");
     } else {
+        spdlog::error("PPMImageLoader::loadASCII: {} is unreadable!", filename);
         throw std::runtime_error("PPMImageLoader::loadASCII: " + filename + " unreadable.");
     }
 }
 
 Image * PPMImageLoader::loadBinary(std::string filename) {
-    std::ifstream fileread(filename);
+    std::ifstream fileread(filename, std::ios::binary);
     std::string filetype;
     std::string dimensions;
     std::string level;
     int height = 0, width = 0, colorLevel = 0;
-    unsigned char *buff;
     if (fileread.good()) {
         std::getline(fileread, filetype);
         while (filetype[0] == '#') {
             std::getline(fileread, filetype);
         }
         if (filetype != PPM_BINARY) {
+            spdlog::error("PPMImageLoader::loadBinary: {} is not a PPM file!", filename);
             throw std::runtime_error("PPMImageLoader::loadBinary: " + filename + " is not PPM file.");
         }
         std::getline(fileread, dimensions);
@@ -132,20 +137,21 @@ Image * PPMImageLoader::loadBinary(std::string filename) {
 
         Pixel **data = new Pixel *[height];
         for (int j = 0; j < height; j++) {
-            data[j] = new Pixel[height];
+            data[j] = new Pixel[width];
         }
-        buff = new unsigned char[width * height * MAX_CHANNEL];
-        fileread.read((char*) buff, sizeof(char) * width * height * MAX_CHANNEL);
+        unsigned char *buff = new unsigned char[width * height * MAX_CHANNEL];
+        fileread.read((char*) buff, sizeof(unsigned char) * width * height * MAX_CHANNEL);
         for (int i = 0; i < height; i++) {
                 for (int j = 0; j < width; j++) {
-                    data[i][j].setRed((int) buff[MAX_CHANNEL*(i*width + j)] * MAX_COLOR / colorLevel);
-                    data[i][j].setGreen((int) buff[MAX_CHANNEL*(i*width + j) + 1] * MAX_COLOR / colorLevel);
-                    data[i][j].setBlue((int) buff[MAX_CHANNEL*(i*width + j) + 2] * MAX_COLOR / colorLevel);
+                    data[i][j].setRed((unsigned char) buff[MAX_CHANNEL*(i*width + j)] * MAX_COLOR / colorLevel);
+                    data[i][j].setGreen((unsigned char) buff[MAX_CHANNEL*(i*width + j) + 1] * MAX_COLOR / colorLevel);
+                    data[i][j].setBlue((unsigned char) buff[MAX_CHANNEL*(i*width + j) + 2] * MAX_COLOR / colorLevel);
                 }
             }
             fileread.close();
         return new Image(width, height, data, "ppm");
     } else {
-        throw std::runtime_error("PPMImageLoader::loadASCII: " + filename + " unreadable.");
+        spdlog::error("PPMImageLoader::loadBinary: {} is unreadable!", filename);
+        throw std::runtime_error("PPMImageLoader::loadBinary: " + filename + " unreadable.");
     }
 }

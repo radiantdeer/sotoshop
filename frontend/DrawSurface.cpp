@@ -5,18 +5,24 @@
 #include <QPainter>
 
 #include "../datastruct/Pixel.hpp"
+#include "../spdlog/spdlog.h"
 
 DrawSurface::DrawSurface() : QWidget() {
+    activeImage = nullptr;
     imageLoaded = false;
+    activeImageLock = new std::mutex();
 }
 
 DrawSurface::DrawSurface(QWidget * parentWidget) : QWidget(parentWidget) {
+    activeImage = nullptr;
     imageLoaded = false;
+    activeImageLock = new std::mutex();
 }
 
 DrawSurface::DrawSurface(QWidget * parentWidget, Image * activeImage) : QWidget(parentWidget) {
     this->activeImage = activeImage;
     imageLoaded = true;
+    activeImageLock = new std::mutex();
 }
 
 Image * DrawSurface::getActiveImage() {
@@ -29,15 +35,33 @@ bool DrawSurface::isImageLoaded() {
 
 void DrawSurface::setActiveImage(Image * newImage) {
     activeImage = newImage;
-}
-
-void DrawSurface::setActiveImage(Image& newImage) {
-    delete activeImage;
-    activeImage = new Image(newImage);
+    if (newImage != nullptr) {
+        this->imageLoaded = true;
+    } else {
+        this->imageLoaded = false;
+    }
 }
 
 void DrawSurface::setImageLoaded(bool imageLoaded) {
     this->imageLoaded = imageLoaded;
+}
+
+void DrawSurface::acquireLockImage() {
+    spdlog::debug("A thread is trying to lock the active image");
+    this->activeImageLock->lock();
+    spdlog::debug("A thread is now granted the active image lock");
+}
+
+void DrawSurface::releaseLockImage() {
+    spdlog::debug("A thread is releasing the active image lock");
+    this->activeImageLock->unlock();
+}
+
+void DrawSurface::purgeImage() {
+    if (activeImage != nullptr) {
+        delete activeImage;
+        imageLoaded = false;
+    }
 }
 
 // Implementing protected virtual method from QWidget
@@ -46,6 +70,7 @@ void DrawSurface::setImageLoaded(bool imageLoaded) {
 void DrawSurface::paintEvent(QPaintEvent * event) {
     QPainter painter(this);
     if (this->isImageLoaded()) {
+        acquireLockImage();
         for (int i = 0; i < activeImage->getHeight(); i++) {
             for (int j = 0; j < activeImage->getWidth(); j++) {
                 Pixel thisPixel = activeImage->getPixelAt(j, i);
@@ -54,7 +79,8 @@ void DrawSurface::paintEvent(QPaintEvent * event) {
                 painter.drawPoint(j, i);
             }
         }
+        releaseLockImage();
     } else {
-        std::cout << "[WARN] No active image in DrawSurface!" << std::endl;
+        spdlog::warn("No active image in DrawSurface!");
     }
 }

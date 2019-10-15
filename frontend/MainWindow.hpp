@@ -8,12 +8,13 @@
 #include <string>
 
 #include "DrawSurface.hpp"
+#include "HistogramDialog.hpp"
 #include "../datastruct/Image.hpp"
 #include "../file_handling/loader/ImageLoaderFactory.hpp"
 #include "../file_handling/saver/ImageSaverFactory.hpp"
 
 class MainWindow : public QMainWindow {
-    
+
     public:
         MainWindow();
         QAction * getLoadAction();
@@ -24,16 +25,36 @@ class MainWindow : public QMainWindow {
     public slots:
         void loadFile();
         void saveFile();
+        void makeNegativeImage();
+        void convertToGrayscaleImage();
+        void moveImage();
+        void rotateImage();
+        void flipImage();
+        void zoomImage();
         void refresh();
+        void doMeanFilterImage();
+        void showHistogram();
 
     private:
         QAction * loadAction;
         QAction * saveAction;
+        QAction * negativeImageAction;
+        QAction * convertToGrayscaleAction;
+        QAction * moveAction;
+        QAction * rotateAction;
+        QAction * flipAction;
+        QAction * zoomAction;
+        QAction * meanFilter;
+        QAction * histogramAction;
         DrawSurface * drawSurface;
-        
+        HistogramDialog * histDialog;
+
         void connectActionsToControllers();
-        std::string getFileUrl(std::string dialogTitle);
-        
+        std::string getOpenFileUrl(std::string dialogTitle);
+        std::string getSaveFileUrl(std::string dialogTitle);
+        bool askForPadding();
+        static std::string getFileExtension(std::string fileUrl);
+
 };
 
 #endif
