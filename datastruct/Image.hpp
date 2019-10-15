@@ -53,6 +53,8 @@ class Image {
         Image * operator|(Image B);
         Image * operator~();
 
+        std::vector<std::vector<int>> histogram();
+
     private:
         int width;
         int height;

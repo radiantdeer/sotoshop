@@ -28,6 +28,8 @@ MainWindow::MainWindow() : QMainWindow() {
     flipAction = editMenu->addAction("Flip");
     zoomAction = editMenu->addAction("Zoom");
 
+    histogramAction = this->menuBar()->addAction("Histogram");
+  
     QMenu * convolutionMenu = this->menuBar()->addMenu("Convolution");
     meanFilter = convolutionMenu->addAction("Mean Filter");
 
@@ -35,6 +37,7 @@ MainWindow::MainWindow() : QMainWindow() {
 
     drawSurface = new DrawSurface(this);
     this->setCentralWidget(drawSurface);
+    histDialog = nullptr;
 }
 
 QAction * MainWindow::getLoadAction() {
@@ -167,6 +170,23 @@ void MainWindow::doMeanFilterImage() {
     }
 }
 
+void MainWindow::showHistogram() {
+    if (drawSurface->isImageLoaded()) {
+        spdlog::info("MainWindow::showHistogram: Showing histogram...");
+        std::vector<std::vector<int>> hist = drawSurface->getActiveImage()->histogram();
+        for (int i = 0; i < 256; i+=255) {
+            spdlog::info(hist.at(0).at(i));
+        }
+        if (histDialog != nullptr) {
+            delete histDialog;
+        }
+        histDialog = new HistogramDialog(hist);
+        histDialog->show();
+    } else {
+        spdlog::warn("MainWindow::showHistogram: Please load an image first!");
+    }
+}
+
 void MainWindow::connectActionsToControllers() {
     connect(loadAction, &QAction::triggered, this, &MainWindow::loadFile);
     connect(saveAction, &QAction::triggered, this, &MainWindow::saveFile);
@@ -179,6 +199,7 @@ void MainWindow::connectActionsToControllers() {
     connect(zoomAction, &QAction::triggered, this, &MainWindow::zoomImage);
 
     connect(meanFilter, &QAction::triggered, this, &MainWindow::doMeanFilterImage);
+    connect(histogramAction, &QAction::triggered, this, &MainWindow::showHistogram);
 }
 
 std::string MainWindow::getOpenFileUrl(std::string dialogTitle) {
@@ -205,7 +226,6 @@ bool MainWindow::askForPadding() {
         return false;
     }
 }
-
 
 void MainWindow::setActiveImage(Image * image) {
     drawSurface->setActiveImage(image);

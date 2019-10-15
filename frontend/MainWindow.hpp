@@ -8,6 +8,7 @@
 #include <string>
 
 #include "DrawSurface.hpp"
+#include "HistogramDialog.hpp"
 #include "../datastruct/Image.hpp"
 #include "../file_handling/loader/ImageLoaderFactory.hpp"
 #include "../file_handling/saver/ImageSaverFactory.hpp"
@@ -32,6 +33,7 @@ class MainWindow : public QMainWindow {
         void zoomImage();
         void refresh();
         void doMeanFilterImage();
+        void showHistogram();
 
     private:
         QAction * loadAction;
@@ -43,7 +45,9 @@ class MainWindow : public QMainWindow {
         QAction * flipAction;
         QAction * zoomAction;
         QAction * meanFilter;
+        QAction * histogramAction;
         DrawSurface * drawSurface;
+        HistogramDialog * histDialog;
 
         void connectActionsToControllers();
         std::string getOpenFileUrl(std::string dialogTitle);
