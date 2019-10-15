@@ -2,6 +2,7 @@
 #include "PBMImageLoader.hpp"
 #include "PPMImageLoader.hpp"
 #include "PGMImageLoader.hpp"
+#include "BMPImageLoader.hpp"
 #include "RawImageLoader.hpp"
 #include <locale>
 #include "../../spdlog/spdlog.h"
@@ -17,7 +18,7 @@ ImageLoader * ImageLoaderFactory::getImageLoader(std::string filename) {
         imageLoader = new RawImageLoader();
     } else if ((extension == "pgm") || (extension == "PGM")) {
         spdlog::debug("ImageLoaderFactory detects PGM image");
-        imageLoader = new PGMImageLoader;
+        imageLoader = new PGMImageLoader();
     } else if ((extension == "ppm") || (extension == "PPM")) {
         spdlog::debug("ImageLoaderFactory detects PPM image");
         imageLoader = new PPMImageLoader();
@@ -26,7 +27,7 @@ ImageLoader * ImageLoaderFactory::getImageLoader(std::string filename) {
         imageLoader = new PBMImageLoader();
     } else if ((extension == "bmp") || (extension == "BMP")) {
         spdlog::debug("ImageLoaderFactory detects BMP image");
-        imageLoader = new RawImageLoader();
+        imageLoader = new BMPImageLoader();
     } else {
         spdlog::warn("ImageLoaderFactory receives an unsupported image format!");
         imageLoader = new RawImageLoader();
