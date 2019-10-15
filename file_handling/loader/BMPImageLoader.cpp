@@ -3,12 +3,11 @@
 #include <fstream>
 #include <string>
 #include <sstream>
+#include "../../spdlog/spdlog.h"
 
 #define BMP_HEADER_WINDOWS "BM"
 
 int buffertoInteger(char* buffer, int start, int size);
-int UnsignedCharToInteger(unsigned char* buffer, int start, int size);
-void PrintPixel(Pixel pixel);
 
 BMPImageLoader::BMPImageLoader() {
 
@@ -25,7 +24,7 @@ Image * BMPImageLoader::load(std::string fileUrl) {
 
     /* GET FILE FORMAT */
     std::string fileformat(fileheader, 2);
-    std::cout << "Bitmap format: " << fileformat << std::endl;
+    spdlog::debug("BMPImageLoader::load: Bitmap format: {}", fileformat);
 
     if (fileformat == BMP_HEADER_WINDOWS) {
       return loadBM(fileUrl);
@@ -49,7 +48,7 @@ Image * BMPImageLoader::loadBM(std::string fileUrl) {
   unsigned char* buff;
   std::ifstream fileread(fileUrl.c_str());
   if (fileread.good()) {
-    std::cout << "Opened" << std::endl;
+    spdlog::debug("BMPImageLoader::loadBM: Opened");
 
     /**********************************************/
     /* THIS SECTION READS */
@@ -61,11 +60,11 @@ Image * BMPImageLoader::loadBM(std::string fileUrl) {
     /* READ SIZE */
     // fileread.read(sizebuffer, 4);
     int filesize = buffertoInteger(fileheader, 2, 4);
-    std::cout << "File size: " << filesize << std::endl;
+    spdlog::debug("BMPImageLoader::loadBM: File size: {}", filesize);
 
     /* READ OFFSET */
     int offset = buffertoInteger(fileheader, 10, 4);
-    std::cout << "Offset: " << offset << std::endl;
+    spdlog::debug("BMPImageLoader::loadBM: Offset: {}", offset);
 
     /**********************************************/
     /* THIS SECTION READS */
@@ -74,7 +73,7 @@ Image * BMPImageLoader::loadBM(std::string fileUrl) {
     /**********************************************/
     fileread.read(BitmapHeaderSize, 4);
     int headersize = buffertoInteger(BitmapHeaderSize, 0, 4);
-    std::cout << "Header size: " << headersize << std::endl;
+    spdlog::debug("BMPImageLoader::loadBM: Header size: {}", headersize);
     fileread.seekg(14);
     char *bitmapheader = new char[headersize];
 
@@ -85,43 +84,43 @@ Image * BMPImageLoader::loadBM(std::string fileUrl) {
     int width = buffertoInteger(bitmapheader, 4, 4);
     // picture height
     int height = buffertoInteger(bitmapheader, 8, 4);
-    std::cout << "Dimension: " << width << " x " << height << std::endl;
+    spdlog::debug("BMPImageLoader::loadBM: Dimension: {}x{}", width, height);
 
     // picture plane
     int plane = buffertoInteger(bitmapheader, 12, 2);
-    std::cout << "Plane: " << plane << std::endl;
+    spdlog::debug("BMPImageLoader::loadBM: Plane: {}", plane);
 
     // picture pixel count
     int pixelcount = buffertoInteger(bitmapheader, 14, 2);
-    std::cout << "Pixel count in bits: " << pixelcount << std::endl;
+    spdlog::debug("BMPImageLoader::loadBM: Pixel count in bits: {}", pixelcount);
 
     // picture compression
     int compression = buffertoInteger(bitmapheader, 16, 4);
     if (compression) {
-      std::cout << "Compressed" << std::endl;
+      spdlog::debug("BMPImageLoader::loadBM: Compressed");
     } else {
-      std::cout << "Uncompressed" << std::endl;
+      spdlog::debug("BMPImageLoader::loadBM: Uncompressed");
     }
 
     // picture image size
     int imgsize = buffertoInteger(bitmapheader, 20, 4);
-    std::cout << "Bitmap size in byte: " << imgsize << std::endl;
+    spdlog::debug("BMPImageLoader::loadBM: Bitmap size in byte: {}", imgsize);
 
     // picture horizontal resolution
     int resolutionh = buffertoInteger(bitmapheader, 24, 4);
-    std::cout << "Resolution (horizontal): " << resolutionh << std::endl;
+    spdlog::debug("BMPImageLoader::loadBM: Resolution (horizontal): {}", resolutionh);
 
     // picture vertical resolution
     int resolutionv = buffertoInteger(bitmapheader, 28, 4);
-    std::cout << "Resolution (vertical): " << resolutionv << std::endl;
+    spdlog::debug("BMPImageLoader::loadBM: Resolution (vertical): {}", resolutionv);
 
     // picture color count
     int colorcount = buffertoInteger(bitmapheader, 32, 4);
-    std::cout << "Color count: " << colorcount << std::endl;
+    spdlog::debug("BMPImageLoader::loadBM: Color count: {}", colorcount);
 
     // picture important color count
     int importantcolorcount = buffertoInteger(bitmapheader, 36, 4);
-    std::cout << "Color count (I): " << importantcolorcount << std::endl;
+    spdlog::debug("BMPImageLoader::loadBM: Color count (I): {}", importantcolorcount);
 
     /**********************************************/
     /* THIS SECTION READS */
@@ -135,7 +134,7 @@ Image * BMPImageLoader::loadBM(std::string fileUrl) {
 
     if (colorcount > 0) {
 
-      std::cout << "With color table format" << std::endl;
+      spdlog::debug("BMPImageLoader::loadBM: With color table format");
 
       int bitsize = pixelcount /  8;
       buff = new unsigned char[width * height * bitsize];
@@ -163,7 +162,7 @@ Image * BMPImageLoader::loadBM(std::string fileUrl) {
         color[i].setGreen((unsigned char) colorbuff[i*4 + 1]);
         color[i].setRed((unsigned char) colorbuff[i*4 + 2]);
 
-         PrintPixel(color[i]);
+        spdlog::debug("{}", color[i].toString());
       }
 
       // READ INDEX
@@ -186,7 +185,7 @@ Image * BMPImageLoader::loadBM(std::string fileUrl) {
     /**********************************************/
 
     else {
-      std::cout << "Color format" << std::endl;
+      spdlog::debug("BMPImageLoader::loadBM: Color format");
       int bitsize = pixelcount /  8;
       buff = new unsigned char[bitsize * height * width];
       fileread.seekg(offset);
@@ -208,12 +207,11 @@ Image * BMPImageLoader::loadBM(std::string fileUrl) {
     return new Image(width, height, data, "bmp");
 
   } else {
-    // std::cout << "Not Opened" << std::endl;
-    throw std::runtime_error("BMPIMageLoader::loadBM: " + fileUrl + " is unreadable.");
+    throw std::runtime_error("BMPImageLoader::loadBM: " + fileUrl + " is unreadable.");
   }
 }
 
-int buffertoInteger(char* buffer, int start, int size) {
+int BMPImageLoader::buffertoInteger(char* buffer, int start, int size) {
   int total = 0;
   for (int i = 0; i < size; i++) {
     total += int((unsigned char)(buffer[start + i]) << (8 * i));
@@ -221,23 +219,4 @@ int buffertoInteger(char* buffer, int start, int size) {
 
   int z = total;
   return z;
-}
-
-int UnsignedCharToInteger(unsigned char* buffer, int start, int size) {
-    int total = 0;
-    for (int i = 0; i < size; i++) {
-      total += int(buffer[start + i] << (8 * i));
-    }
-
-    int z = total;
-    return z;
-}
-
-void PrintPixel(Pixel pixel) {
-    unsigned char color = pixel.getRed();
-    std::cout << buffertoInteger((char *) &color, 0, 1) << " ";
-    color = pixel.getGreen();
-    std::cout << buffertoInteger((char *) &color, 0, 1) << " ";
-    color = pixel.getBlue();
-    std::cout << buffertoInteger((char *) &color, 0, 1) << std::endl;;
 }
