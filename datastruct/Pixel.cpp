@@ -39,11 +39,11 @@ void Pixel::setRed(unsigned char red) {
     this->red = red;
 }
 
-void Pixel::setGreen(unsigned char) {
+void Pixel::setGreen(unsigned char green) {
     this->green = green;
 }
 
-void Pixel::setBlue(unsigned char) {
+void Pixel::setBlue(unsigned char blue) {
     this->blue = blue;
 }
 
@@ -59,6 +59,10 @@ Pixel * Pixel::operator*(Pixel B) {
     int valueBlue = thresholding(this->getBlue() * B.getBlue());
     Pixel * C = new Pixel(valueRed, valueGreen, valueBlue);
     return C;
+}
+
+bool Pixel::operator==(Pixel B) {
+    return (this->getRed() == B.getRed()) && (this->getGreen() == B.getGreen()) && (this->getBlue() == B.getBlue());
 }
 
 int thresholding(int value) {

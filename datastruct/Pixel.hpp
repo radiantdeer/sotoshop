@@ -26,6 +26,7 @@ class Pixel {
         std::string toString() const;
 
         Pixel * operator*(Pixel B);
+        bool operator==(Pixel B);
 };
 
 #endif

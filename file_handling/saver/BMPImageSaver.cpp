@@ -8,7 +8,7 @@
 #define EXT ".bmp"
 
 // Reverse Byte, array size is either 2 or four
-unsigned char* ReverseByte(int value, int arraysize);
+char* ReverseByte(int value, int arraysize);
 
 BMPImageSaver::BMPImageSaver()
 {
@@ -16,8 +16,11 @@ BMPImageSaver::BMPImageSaver()
 }
 
 int BMPImageSaver::save(const Image &image, std::string fileUrl) {
-    std::string filename = fileUrl + EXT;
+    std::string filename = fileUrl;
     std::ofstream outfile(filename);
+
+    char *fourbytecontainer;
+    char *twobytecontainer;
 
     if (outfile.good()) {
         int height = image.getHeight();
@@ -29,7 +32,7 @@ int BMPImageSaver::save(const Image &image, std::string fileUrl) {
         /* INDEXING COLOR TABLE */
         /**********************************************/
 
-        int colorcount;
+        int colorcount = 0;
         std::vector<Pixel> colortable;
         std::vector<Pixel>::iterator it;
         std::vector<int> colorindex;
@@ -40,8 +43,8 @@ int BMPImageSaver::save(const Image &image, std::string fileUrl) {
                 it = std::find(colortable.begin(), colortable.end(), p);
 
                 if (it != colortable.end()) {
-
                     colorindex.push_back((int) std::distance(colortable.begin(), it));
+                    colorcount++;
                 } else {
                     // ADD PIXEL TO COLOR TABLE
                     colortable.push_back(p);
@@ -51,13 +54,27 @@ int BMPImageSaver::save(const Image &image, std::string fileUrl) {
             }
         }
 
+        // BIT PER PIXEL
+        int bitperpixel = 1;
+
+        // BITMAP COLOR TABLE SIZE
+        // ROUND COLORTABLE SIZE TO NEAREST 2*2*2*2*2.......
+        int bitmapcolortablesize = 1;
+        while (bitmapcolortablesize < colortable.size()) {
+            bitmapcolortablesize *= 2;
+            bitperpixel++;
+        }
+
+        // ROUND BIT PER PIXEL SIZE TO NEAREST BYTE SIZE
+        bitperpixel = bitperpixel + (bitperpixel) % 4;
+
         /**********************************************/
         /* THIS SECTION CALCULATES */
         /* BMP FILE SIZE */
         /* BMP FILE SIZE IS BITMAP BYTES + HEADERS + COLOR TABLES */
         /**********************************************/
 
-        int bmpfilesize = 14 + 40 + width*height + colortable.size()*4;
+        int bmpfilesize = 14 + 40 + width*height + bitmapcolortablesize*4;
 
         /**********************************************/
         /* THIS SECTION WRITES */
@@ -69,11 +86,11 @@ int BMPImageSaver::save(const Image &image, std::string fileUrl) {
         outfile << BMP_MAGICNUMBER;
 
         // WRITES SIZES OF BMP IN BYTES
-        unsigned char* bmpfilesizechar = ReverseByte(bmpfilesize, 4);
-        outfile << bmpfilesizechar;
+        fourbytecontainer = ReverseByte(bmpfilesize, 4);
+        outfile << fourbytecontainer;
 
         // WRITES 4 BYTES RESERVED
-        unsigned char reserved[] = {0x00, 0x00, 0x00, 0x00};
+        char reserved[] = {0x00, 0x00, 0x00, 0x00};
         outfile << reserved;
 
         // WRITES OFFSET OF PIXEL ARRAY
@@ -84,21 +101,88 @@ int BMPImageSaver::save(const Image &image, std::string fileUrl) {
         /* BITMAP HEADER SIZE IS 40 BYTES */
         /**********************************************/
 
+        // WRITE HEADER SIZE = 40
+        fourbytecontainer = ReverseByte(40, 4);
+        outfile << fourbytecontainer;
+
+        // WRITE BITMAP WIDTH
+        fourbytecontainer = ReverseByte(width, 4);
+        outfile << fourbytecontainer;
+
+        //WRITE BITMAP HEIGHT
+        fourbytecontainer = ReverseByte(height, 4);
+        outfile << fourbytecontainer;
+
+        // WRITE COLOR PLANES
+        twobytecontainer = ReverseByte(1, 2);
+        outfile << twobytecontainer;
+
+        // WRITE BITS PER PIXEL
+        fourbytecontainer = ReverseByte(bitperpixel, 4);
+        outfile << fourbytecontainer;
+
+        // WRITE COMPRESSION METHOD = 0
+        fourbytecontainer = ReverseByte(0, 4);
+        outfile << fourbytecontainer;
+
+        // WRITE IMAGE SIZE
+        // DUMMY IMAGE SIZE = 0
+        fourbytecontainer = ReverseByte(0, 4);
+        outfile << fourbytecontainer;
+
+        // WRITE HORIZONTAL RESOLUTION
+        // DEFAULT VALUE 2835
+        fourbytecontainer = ReverseByte(2835, 4);
+        outfile << fourbytecontainer;
+
+        // WRITE VERTICAL RESOLUTION
+        // DEFAULT VALUE 2835
+        fourbytecontainer = ReverseByte(2835, 4);
+        outfile << fourbytecontainer;
+
+        // WRITE NUMBER OF COLOR AND IMPORTANT COLOR IN COLOR PALLETE
+        // WRITE TWICE SINCE COLOR AND IMPORTANT COLOR ARE SAME AMOUNT
+        fourbytecontainer = ReverseByte(bitmapcolortablesize, 4);
+        outfile << fourbytecontainer;
+        outfile << fourbytecontainer;
 
 
         /**********************************************/
         /* THIS SECTION WRITES */
         /* BITMAP COLOR TABLE */
-        /* BITMAP COLOR TABLE IS UNDEFINED */
+        /* EACH BITMAP COLOR COMPRISES OF B, G, R, A */
         /**********************************************/
+        char colorcontainer[4];
+        int bitmapcolortablebuffsize = 0;
+        for(int i = 0; i < colortable.size(); i++) {
+            colorcontainer[3] = 0x00;                       // ALPHA
+            colorcontainer[2] = colortable[i].getRed();     // RED
+            colorcontainer[1] = colortable[i].getGreen();   // GREEN
+            colorcontainer[0] = colortable[i].getBlue();    // BLUE
+            outfile << colorcontainer;
+            bitmapcolortablebuffsize++;
+        }
+
+        // PADDING COLOR TABLE
+        if (bitmapcolortablebuffsize != bitmapcolortablesize - 1) {
+            fourbytecontainer = ReverseByte(0, 4);
+            for (int i = 0; i < bitmapcolortablesize - bitmapcolortablebuffsize; i++) {
+                outfile << fourbytecontainer;
+            }
+        }
 
         /**********************************************/
         /* THIS SECTION WRITES */
-        /* BITMAP COLOR */
-        /* BITMAP COLOR STORED WITH PIXEL IF COLOR TABLE DOES NOT EXIST */
+        /* BITMAP COLOR INDEX */
+        /* BITMAP COLOR INDEX REFER TO COLOR TABLE */
         /**********************************************/
 
+        char bitmapcoloridx;
         // OUTPUT CONTENT
+        for (int i = 0; i < colorindex.size(); i++) {
+            bitmapcoloridx = (char) colorindex[i];
+            outfile << bitmapcoloridx;
+        }
 
         outfile.close();
         return 0;
@@ -110,9 +194,8 @@ int BMPImageSaver::save(const Image &image, std::string fileUrl) {
     }
 }
 
-unsigned char* ReverseByte(int value, int arraysize) {
-    int i;
-    unsigned char inversedbyte[arraysize];
+char* ReverseByte(int value, int arraysize) {
+    char *inversedbyte = (char *) malloc(sizeof (char) * arraysize);
 
     inversedbyte[0] = value << 24;
     inversedbyte[1] = value << 8 & 0x00ff0000;
