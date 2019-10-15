@@ -41,6 +41,7 @@ class MainWindow : public QMainWindow {
         QAction * rotateAction;
         QAction * flipAction;
         QAction * zoomAction;
+        QAction * meanFilter;
         DrawSurface * drawSurface;
 
         void connectActionsToControllers();

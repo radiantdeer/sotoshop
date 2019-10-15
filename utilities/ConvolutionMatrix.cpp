@@ -1,4 +1,5 @@
 #include "ConvolutionMatrix.hpp"
+#include "../spdlog/spdlog.h"
 
 ConvolutionMatrix::ConvolutionMatrix() {
     width = 0;
@@ -10,7 +11,7 @@ ConvolutionMatrix::ConvolutionMatrix(int height, int width, int* opMatrix) {
     this->opMatrix = new int * [height];
     this->matrixSum = 0;
     for (int j = 0; j < height; j++) {
-        this->opMatrix[j] = new int [width];
+        this->opMatrix[j] = new int[width];
         for (int i = 0; i < width; i++) {
             this->opMatrix[j][i] = opMatrix[(j * width) + i];
             this->matrixSum += opMatrix[(j * width) + i];
@@ -19,11 +20,14 @@ ConvolutionMatrix::ConvolutionMatrix(int height, int width, int* opMatrix) {
 }
 
 ConvolutionMatrix::ConvolutionMatrix(int height, int width, int** opMatrix) {
-    this->opMatrix = new int * [height];
+    this->opMatrix = new int*[height];
     this->matrixSum = 0;
     for (int j = 0; j < height; j++) {
-        this->opMatrix[j] = new int [width];
+        spdlog::info("Row {}",j);
+        this->opMatrix[j] = new int[width];
         for (int i = 0; i < width; i++) {
+            spdlog::info("Column {}", i);
+            spdlog::info(opMatrix[j][i]);
             this->opMatrix[j][i] = opMatrix[j][i];
             this->matrixSum += opMatrix[j][i];
         }

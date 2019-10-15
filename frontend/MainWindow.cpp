@@ -7,6 +7,8 @@
 #include <QRegion>
 #include <QUrl>
 #include "../spdlog/spdlog.h"
+#include "../utilities/Convolution.hpp"
+#include "../utilities/CommonConvolutions.hpp"
 
 MainWindow::MainWindow() : QMainWindow() {
     this->setWindowTitle("SotoShop");
@@ -23,6 +25,9 @@ MainWindow::MainWindow() : QMainWindow() {
     rotateAction = editMenu->addAction("Rotate");
     flipAction = editMenu->addAction("Flip");
     zoomAction = editMenu->addAction("Zoom");
+
+    QMenu * convolutionMenu = this->menuBar()->addMenu("Convolution");
+    meanFilter = convolutionMenu->addAction("Mean Filter");
 
     connectActionsToControllers();
 
