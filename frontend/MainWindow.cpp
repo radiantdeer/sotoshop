@@ -4,10 +4,14 @@
 #include <QFileDialog>
 #include <QInputDialog>
 #include <QMenuBar>
+#include <QMessageBox>
 #include <QPaintEvent>
 #include <QRegion>
 #include <QUrl>
+#include <sstream>
 #include "../spdlog/spdlog.h"
+#include "../utilities/Convolution.hpp"
+#include "../utilities/CommonConvolutions.hpp"
 
 MainWindow::MainWindow() : QMainWindow() {
     this->setWindowTitle("SotoShop");
@@ -39,10 +43,19 @@ MainWindow::MainWindow() : QMainWindow() {
     andAction = booleanMenu->addAction("AND");
     orAction = booleanMenu->addAction("OR");
     notAction = booleanMenu->addAction("NOT");
+
+    QMenu * histogramMenu = this->menuBar()->addMenu("Histogram");
+    histogramAction = histogramMenu->addAction("Show");
+    equalizeAction = histogramMenu->addAction("Equalize");
+
+    QMenu * convolutionMenu = this->menuBar()->addMenu("Convolution");
+    meanFilter = convolutionMenu->addAction("Mean Filter");
+
     connectActionsToControllers();
 
     drawSurface = new DrawSurface(this);
     this->setCentralWidget(drawSurface);
+    histDialog = nullptr;
 }
 
 QAction * MainWindow::getLoadAction() {
@@ -342,6 +355,49 @@ void MainWindow::operateNotImage() {
     }
 }
 
+void MainWindow::equalizeImageHist() {
+    if (drawSurface->isImageLoaded()) {
+        spdlog::info("MainWindow::equalizeImageHist: Equalizing image histogram...");
+        drawSurface->acquireLockImage();
+        drawSurface->getActiveImage()->histogramEqualization();
+        drawSurface->releaseLockImage();
+        drawSurface->update();
+    } else {
+        spdlog::warn("MainWindow::equalizeImageHist: Please load an image first!");
+    }
+}
+
+void MainWindow::doMeanFilterImage() {
+    if (drawSurface->isImageLoaded()) {
+        bool padded = askForPadding();
+        spdlog::info("MainWindow::doMeanFilterImage: Convolving with mean filter...");
+        Image * newImage = Convolution::convolve(drawSurface->getActiveImage(), CommonConvolutions::Average, padded);
+        drawSurface->acquireLockImage();
+        drawSurface->purgeImage();
+        drawSurface->setActiveImage(newImage);
+        drawSurface->releaseLockImage();
+        drawSurface->update();
+    } else {
+        spdlog::warn("MainWindow::doMeanFilterImage: Please load an image first!");
+    }
+}
+
+void MainWindow::showHistogram() {
+    if (drawSurface->isImageLoaded()) {
+        spdlog::info("MainWindow::showHistogram: Showing histogram...");
+        std::vector<std::vector<int>> hist = drawSurface->getActiveImage()->histogram();
+        for (int i = 0; i < 256; i+=255) {
+            spdlog::info(hist.at(0).at(i));
+        }
+        if (histDialog != nullptr) {
+            delete histDialog;
+        }
+        histDialog = new HistogramDialog(hist);
+        histDialog->show();
+    } else {
+        spdlog::warn("MainWindow::showHistogram: Please load an image first!");
+    }
+}
 
 void MainWindow::connectActionsToControllers() {
     connect(loadAction, &QAction::triggered, this, &MainWindow::loadFile);
@@ -366,6 +422,10 @@ void MainWindow::connectActionsToControllers() {
     connect(orAction, &QAction::triggered, this, &MainWindow::operateOrImage);
     connect(notAction, &QAction::triggered, this, &MainWindow::operateNotImage);
 
+    connect(equalizeAction, &QAction::triggered, this, &MainWindow::equalizeImageHist);
+
+    connect(meanFilter, &QAction::triggered, this, &MainWindow::doMeanFilterImage);
+    connect(histogramAction, &QAction::triggered, this, &MainWindow::showHistogram);
 }
 
 std::string MainWindow::getOpenFileUrl(std::string dialogTitle) {
@@ -387,6 +447,15 @@ std::string MainWindow::getSaveFileUrl(std::string dialogTitle) {
 int MainWindow::promptValue(std::string promptTitle, std::string promptText) {
     int value = QInputDialog::getInt(this, promptTitle.c_str(), promptText.c_str(), 0);
     return value;
+}
+
+bool MainWindow::askForPadding() {
+    QMessageBox::StandardButton response = QMessageBox::question(this, "Convolution Padding", "Do you want to pad the image before convolution?");
+    if (response == QMessageBox::Yes) {
+        return true;
+    } else {
+        return false;
+    }
 }
 
 void MainWindow::setActiveImage(Image * image) {

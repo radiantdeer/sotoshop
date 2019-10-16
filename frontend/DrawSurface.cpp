@@ -58,12 +58,10 @@ void DrawSurface::releaseLockImage() {
 }
 
 void DrawSurface::purgeImage() {
-    acquireLockImage();
     if (activeImage != nullptr) {
         delete activeImage;
         imageLoaded = false;
     }
-    releaseLockImage();
 }
 
 // Implementing protected virtual method from QWidget

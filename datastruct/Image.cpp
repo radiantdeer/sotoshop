@@ -2,6 +2,7 @@
 
 #include <iostream>
 #include <cmath>
+#include <vector>
 #include "../spdlog/spdlog.h"
 
 Image::Image() {
@@ -70,7 +71,7 @@ Image::Image(const Image& other) {
     for (int j = 0; j < height; j++) {
         std::vector<Pixel> tempData;
         for (int i = 0; i < width; i++) {
-            tempData.push_back(other.getPixelAt(i,j));
+            tempData.push_back(data[j][i]);
         }
         this->data.push_back(tempData);
     }
@@ -424,4 +425,85 @@ Image * Image::operator|(Image& B) {
 Image * Image::operator~() {
     Image * C = new Image(*this);
     return C->not_op();
+}
+
+// Returns array of color histogram
+// Returns a matrix of 3 x 256 for colored images (PPM, BMP)
+// Returns a mateix of 1 x 256 for grayscaled images (PBM, PGM, RAW)
+std::vector<std::vector<int>> Image::histogram() {
+    std::vector<std::vector<int>> hist;
+    if (this->getOriginalFormat() == "bmp" || this->getOriginalFormat() == "ppm" ) {
+        // color
+        std::vector<int> red (256, 0);
+        std::vector<int> green (256, 0);
+        std::vector<int> blue (256, 0);
+        for (int i = 0; i < this->getWidth(); i++) {
+            for (int j = 0; j < this->getHeight(); j++) {
+                red[this->getPixelAt(i,j).getRed()]++;
+                green[this->getPixelAt(i,j).getGreen()]++;
+                blue[this->getPixelAt(i,j).getBlue()]++;
+            }
+        }
+        hist.push_back(red);
+        hist.push_back(green);
+        hist.push_back(blue);
+    } else {
+        // grayscale
+        std::vector<int> gray (256, 0);
+        for (int i = 0; i < this->getWidth(); i++) {
+            for (int j = 0; j < this->getHeight(); j++) {
+                gray[this->getPixelAt(i, j).getRed()]++;
+            }
+        }
+        hist.push_back(gray);
+    }
+    return hist;
+}
+
+Image * Image::histogramEqualization() {
+    std::vector<std::vector<int>> hist = this->histogram();
+    int totalPixel = this->getHeight() * this->getWidth();
+    if (this->getOriginalFormat() == "bmp" || this->getOriginalFormat() == "ppm" ) {
+        std::cout << hist.size() << std::endl;
+        std::vector<int> redMap = hist.at(0);
+        std::vector<int> greenMap = hist.at(1);
+        std::vector<int> blueMap = hist.at(2);
+        for (int i = 1; i < COLOR_LEVEL; i++) {
+            redMap[i] += redMap[i-1];
+            greenMap[i] += greenMap[i-1];
+            blueMap[i] += blueMap[i-1];
+        }
+        for (int i = 0; i < COLOR_LEVEL; i++) {
+            redMap[i] = redMap[i] * (COLOR_LEVEL-1) / totalPixel;
+            greenMap[i] = greenMap[i] * (COLOR_LEVEL-1) / totalPixel;
+            blueMap[i] = blueMap[i] * (COLOR_LEVEL-1) / totalPixel;
+        }
+        for (int i = 0; i < this->getWidth(); i++) {
+            for (int j = 0; j < this->getHeight(); j++) {
+                Pixel a = this->getPixelAt(i,j);
+                Pixel *p = new Pixel(redMap[a.getRed()], greenMap[a.getGreen()], blueMap[a.getBlue()]);
+                this->setPixelAt(i,j,*p);
+                delete p;
+            }
+        }
+    } else {
+        std::vector<int> grayMap = hist.at(0);
+        for (int i = 1; i < COLOR_LEVEL; i++) {
+            grayMap[i] += grayMap[i-1];
+        }
+
+        for (int i = 0; i < COLOR_LEVEL; i++) {
+            grayMap[i] = grayMap[i] * (COLOR_LEVEL-1) / totalPixel;
+        }
+
+        for (int i = 0; i < this->getWidth(); i++) {
+            for (int j = 0; j < this->getHeight(); j++) {
+                Pixel a = this->getPixelAt(i,j);
+                Pixel *p = new Pixel(grayMap[a.getRed()], grayMap[a.getGreen()], grayMap[a.getBlue()]);
+                this->setPixelAt(i,j,*p);
+                delete p;
+            }
+        }
+    }
+    return this;
 }

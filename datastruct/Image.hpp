@@ -5,6 +5,8 @@
 #include <vector>
 #include "Pixel.hpp"
 
+#define COLOR_LEVEL 256
+
 class Image {
 
     public:
@@ -53,6 +55,9 @@ class Image {
         Image * operator&(Image& B);
         Image * operator|(Image& B);
         Image * operator~();
+
+        std::vector<std::vector<int>> histogram();
+        Image * histogramEqualization();
 
     private:
         int width;
