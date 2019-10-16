@@ -58,7 +58,7 @@ class Image {
         std::vector<std::vector<int>> histogram();
         std::vector<std::vector<int>> equalizedHistogram();
         Image * histogramEqualization();
-        Image * histogramSpecification(Image B);
+        Image * histogramSpecification(Image& B);
     private:
         int width;
         int height;

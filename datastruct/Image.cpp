@@ -559,35 +559,63 @@ Image * Image::histogramEqualization() {
     return this;
 }
 
+std::vector<int> histSpecHelper(std::vector<int> &a, std::vector<int> &b) {
+    for (int i = 0; i < COLOR_LEVEL; i++) {
+        int minval = abs(a[i] - b[0]);
+        int minj = 0;
+        for (int j = 0; j < COLOR_LEVEL; j++) {
+            if (abs(a[i] - b[j]) < minval) {
+                minval = abs(a[i] - b[j]);
+                minj = j;
+            }
+        }
+        a[i] = minj;
+    }
+    return a;
+}
+
 // Match histogram of this image into something like B image.
-Image * Image::histogramSpecification(Image B) {
+Image * Image::histogramSpecification(Image& B) {
     // Equalize this image first.
     std::vector<std::vector<int>> histThis = this->equalizedHistogram();
     std::vector<std::vector<int>> histOp = B.equalizedHistogram();
-    if (this->getOriginalFormat() == "bmp" || this->getOriginalFormat() == "ppm" ) {
-        // TO DO
-        // CREATE FOR COLOR IMAGE
-    } else {
-        std::vector<int> grayMapThis = histThis.at(0);
-        std::vector<int> grayMapOp = histOp.at(0);
-        int minj = 0;
-        for (int i = 0; i < COLOR_LEVEL; i++) {
-            int minval = abs(grayMapThis[i] - grayMapOp[minj]);
-            int j = minj;
-            while(abs(grayMapThis[i]-grayMapOp[j]) >= minval && j < COLOR_LEVEL) {
-                j++;
-            }
-            minj = j;
-            grayMapThis[i] = j;
-        }
+    std::vector<int> redMapThis;
+    std::vector<int> greenMapThis;
+    std::vector<int> blueMapThis;
+    std::vector<int> redMapOp;
+    std::vector<int> greenMapOp;
+    std::vector<int> blueMapOp;
 
-        for (int i = 0; i < this->getWidth(); i++) {
-            for (int j = 0; j < this->getHeight(); j++) {
-                Pixel a = this->getPixelAt(i,j);
-                Pixel *p = new Pixel(grayMapThis[a.getRed()], grayMapThis[a.getGreen()], grayMapThis[a.getBlue()]);
-                this->setPixelAt(i,j,*p);
-                delete p;
-            }
+    if (this->getOriginalFormat() == "bmp" || this->getOriginalFormat() == "ppm" ) {
+        redMapThis = histThis.at(0);
+        greenMapThis = histThis.at(1);
+        blueMapThis = histThis.at(2);
+    } else {
+        redMapThis = histThis.at(0);
+        greenMapThis = histThis.at(0);
+        blueMapThis = histThis.at(0);
+    }
+
+    if (B.getOriginalFormat() == "bmp" || B.getOriginalFormat() == "ppm") {
+        redMapOp = histOp.at(0);
+        greenMapOp = histOp.at(1);
+        blueMapOp = histOp.at(2);
+    } else {
+        redMapOp = histOp.at(0);
+        greenMapOp = histOp.at(0);
+        blueMapOp = histOp.at(0);
+    }
+
+    redMapThis = histSpecHelper(redMapThis, redMapOp);
+    greenMapThis = histSpecHelper(greenMapThis, greenMapOp);
+    blueMapThis = histSpecHelper(blueMapThis, blueMapOp);
+
+    for (int i = 0; i < this->getWidth(); i++) {
+        for (int j = 0; j < this->getHeight(); j++) {
+            Pixel a = this->getPixelAt(i,j);
+            Pixel *p = new Pixel(redMapThis[a.getRed()], greenMapThis[a.getGreen()], blueMapThis[a.getBlue()]);
+            this->setPixelAt(i,j,*p);
+            delete p;
         }
     }
     return this;

@@ -171,10 +171,10 @@ void MainWindow::specifyHist() {
         if (url != "") {
             ImageLoader * imageLoader = ImageLoaderFactory::getImageLoader(url);
             Image * specImage = imageLoader->load(url);
-//            drawSurface->acquireLockImage();
-//            drawSurface->getActiveImage()->histogramSpecification(*specImage);
-//            drawSurface->releaseLockImage();
-//            drawSurface->update();
+            drawSurface->acquireLockImage();
+            drawSurface->getActiveImage()->histogramSpecification(*specImage);
+            drawSurface->releaseLockImage();
+            drawSurface->update();
             delete specImage;
             delete imageLoader;
         } else {
