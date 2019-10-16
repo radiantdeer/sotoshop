@@ -27,7 +27,11 @@ MainWindow::MainWindow() : QMainWindow() {
     rotateAction = editMenu->addAction("Rotate");
     flipAction = editMenu->addAction("Flip");
     zoomAction = editMenu->addAction("Zoom");
+    editMenu->addSeparator();
 
+    QMenu * histogramMenu = this->menuBar()->addMenu("Histogram");
+    histogramAction = histogramMenu->addAction("Show");
+    equalizeAction = histogramMenu->addAction("Equalize");
     histogramAction = this->menuBar()->addAction("Histogram");
   
     QMenu * convolutionMenu = this->menuBar()->addMenu("Convolution");
@@ -155,6 +159,18 @@ void MainWindow::zoomImage() {
     }
 }
 
+void MainWindow::equalizeImageHist() {
+    if (drawSurface->isImageLoaded()) {
+        spdlog::info("MainWindow::equalizeImageHist: Equalizing image histogram...");
+        drawSurface->acquireLockImage();
+        drawSurface->getActiveImage()->histogramEqualization();
+        drawSurface->releaseLockImage();
+        drawSurface->update();
+    } else {
+        spdlog::warn("MainWindow::equalizeImageHist: Please load an image first!");
+    }
+}
+
 void MainWindow::doMeanFilterImage() {
     if (drawSurface->isImageLoaded()) {
         bool padded = askForPadding();
@@ -197,6 +213,7 @@ void MainWindow::connectActionsToControllers() {
     connect(rotateAction, &QAction::triggered, this, &MainWindow::rotateImage);
     connect(flipAction, &QAction::triggered, this, &MainWindow::flipImage);
     connect(zoomAction, &QAction::triggered, this, &MainWindow::zoomImage);
+    connect(equalizeAction, &QAction::triggered, this, &MainWindow::equalizeImageHist);
 
     connect(meanFilter, &QAction::triggered, this, &MainWindow::doMeanFilterImage);
     connect(histogramAction, &QAction::triggered, this, &MainWindow::showHistogram);

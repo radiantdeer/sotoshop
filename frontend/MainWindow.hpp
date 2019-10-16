@@ -32,6 +32,7 @@ class MainWindow : public QMainWindow {
         void flipImage();
         void zoomImage();
         void refresh();
+        void equalizeImageHist();
         void doMeanFilterImage();
         void showHistogram();
 
@@ -44,6 +45,7 @@ class MainWindow : public QMainWindow {
         QAction * rotateAction;
         QAction * flipAction;
         QAction * zoomAction;
+        QAction * equalizeAction;
         QAction * meanFilter;
         QAction * histogramAction;
         DrawSurface * drawSurface;
