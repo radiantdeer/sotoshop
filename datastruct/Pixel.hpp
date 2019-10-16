@@ -25,8 +25,13 @@ class Pixel {
 
         std::string toString() const;
 
-        Pixel * operator+(Pixel B);
-        Pixel * operator*(Pixel B);
+        Pixel * operator+(Pixel& B);
+        Pixel * operator+(unsigned char delta);
+        Pixel * operator-(Pixel& B);
+        Pixel * operator*(Pixel& B);
+        Pixel * operator&(Pixel& B);
+        Pixel * operator|(Pixel& B);
+        Pixel * operator~();
 };
 
 #endif

@@ -32,16 +32,16 @@ class Image {
 
         Image * add(Image& B);
         Image * adjustBrightness(unsigned char delta);
-        Image * substract(Image B, int width, int height);
+        Image * substract(Image& B);
+        Image * multiply(Image& b);
         Image * invert();
         Image * grayscale();
-        Image * and_op(Image B);
-        Image * or_op(Image B, int width, int height);
+        Image * and_op(Image& B);
+        Image * or_op(Image& B);
         Image * not_op();
         Image * translate(int dx, int dy);
         Image * rotate90CW();
         Image * rotate90CCW();
-        Image * multiply(Image b);
         Image * flipH();
         Image * flipV();
 

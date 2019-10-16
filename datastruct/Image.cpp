@@ -149,18 +149,31 @@ Image * Image::add(Image& B) {
 
 // TODO
 // DEBUG METHOD
-Image * Image::substract(Image B, int width, int height) {
-    for (int i = 0; i < width; i++) {
-        for (int j = 0; j < height; j++) {
+Image * Image::adjustBrightness(unsigned char delta) {
+    for (int i = 0; i < this->getWidth(); i++) {
+        for (int j = 0; j < this->getHeight(); j++) {
+            Pixel a = this->getPixelAt(i, j);
+            Pixel *pixel = a + delta;
+
+            this->setPixelAt(i, j, *pixel);
+            delete pixel;
+        }
+    }
+    return this;
+}
+
+// TODO
+// DEBUG METHOD
+Image * Image::substract(Image& B) {
+    int opWidth = this->getWidth() > B.getWidth() ? B.getWidth() : this->getWidth();
+    int opHeight = this->getHeight() > B.getHeight() ? B.getHeight() : this->getHeight();
+    for (int j = 0; j < opHeight; j++) {
+        for (int i = 0; i < opWidth; i++) {
             Pixel a = this->getPixelAt(i, j);
             Pixel b = B.getPixelAt(i, j);
-            Pixel *pixel = new Pixel();
+            Pixel *pixel = a - b;
 
-            pixel->setRed(a.getRed() - b.getRed());
-            pixel->setBlue(a.getBlue() - b.getBlue());
-            pixel->setGreen(a.getGreen() - b.getGreen());
-
-            this->setPixelAt(width, height, *pixel);
+            this->setPixelAt(i, j, *pixel);
             delete pixel;
         }
     }
@@ -169,19 +182,26 @@ Image * Image::substract(Image B, int width, int height) {
 }
 
 // TODO
-// DEBUG METHOD
-Image * Image::adjustBrightness(unsigned char delta) {
-    for (int i = 0; i < this->getWidth(); i++) {
-        for (int j = 0; j < this->getHeight(); j++) {
+// TESTING AND DEBUG
+Image * Image::multiply(Image& B) {
+    int opWidth, opHeight;
+    if (B.getWidth() < this->getWidth()) {
+        opWidth = B.getWidth();
+    } else {
+        opWidth = this->getWidth();
+    }
+    if (B.getHeight() < this->getHeight()) {
+        opHeight = B.getHeight();
+    } else {
+        opHeight = this->getHeight();
+    }
+    for (int j = 0; j < opHeight; j++) {
+        for (int i = 0; i < opWidth; i++) {
             Pixel a = this->getPixelAt(i, j);
-            Pixel *pixel = new Pixel();
-
-            pixel->setRed(a.getRed() + delta);
-            pixel->setBlue(a.getBlue() + delta);
-            pixel->setGreen(a.getGreen() + delta);
-
-            this->setPixelAt(i, j, *pixel);
-            delete pixel;
+            Pixel b = B.getPixelAt(i,j);
+            Pixel * c = a * b;
+            this->setPixelAt(i, j, *c);
+            delete c;
         }
     }
     return this;
@@ -226,17 +246,14 @@ Image * Image::grayscale() {
 
 // TODO
 // TESTING AND DEBUG
-Image * Image::and_op(Image B) {
-    for (int i = 0; i < this->getWidth(); i++) {
-        for (int j = 0; j < this->getHeight(); j++) {
+Image * Image::and_op(Image& B) {
+    int opWidth = this->getWidth() > B.getWidth() ? B.getWidth() : this->getWidth();
+    int opHeight = this->getHeight() > B.getHeight() ? B.getHeight() : this->getHeight();
+    for (int j = 0; j < opHeight; j++) {
+        for (int i = 0; i < opWidth; i++) {
             Pixel a = this->getPixelAt(i, j);
             Pixel b = B.getPixelAt(i, j);
-            Pixel *pixel = new Pixel();
-
-            pixel->setRed(a.getRed() & b.getRed());
-            pixel->setGreen(a.getGreen() & b.getGreen());
-            pixel->setBlue(a.getBlue() & b.getBlue());
-
+            Pixel *pixel = a & b;
             this->setPixelAt(i, j, *pixel);
             delete pixel;
         }
@@ -246,16 +263,14 @@ Image * Image::and_op(Image B) {
 
 // TODO
 // TESTING AND DEBUG
-Image * Image::or_op(Image B, int width, int height) {
-    for (int i = 0; i < this->getWidth(); i++) {
-        for (int j = 0; j < this->getHeight(); j++) {
+Image * Image::or_op(Image& B) {
+    int opWidth = this->getWidth() > B.getWidth() ? B.getWidth() : this->getWidth();
+    int opHeight = this->getHeight() > B.getHeight() ? B.getHeight() : this->getHeight();
+    for (int j = 0; j < opHeight; j++) {
+        for (int i = 0; i < opWidth; i++) {
             Pixel a = this->getPixelAt(i, j);
             Pixel b = B.getPixelAt(i, j);
-            Pixel *pixel = new Pixel();
-
-            pixel->setRed(a.getRed() | b.getRed());
-            pixel->setGreen(a.getGreen() | b.getGreen());
-            pixel->setBlue(a.getBlue() | b.getBlue());
+            Pixel *pixel = a | b;
 
             this->setPixelAt(i, j, *pixel);
             delete pixel;
@@ -270,12 +285,7 @@ Image * Image::not_op() {
     for (int i = 0; i < this->getWidth(); i++) {
         for (int j = 0; j < this->getHeight(); j++) {
             Pixel a = this->getPixelAt(i, j);
-            Pixel *pixel = new Pixel();
-
-            pixel->setRed(~a.getRed());
-            pixel->setGreen(~a.getGreen());
-            pixel->setBlue(~a.getBlue());
-
+            Pixel *pixel = ~a;
             this->setPixelAt(i, j, *pixel);
             delete pixel;
         }
@@ -344,32 +354,6 @@ Image * Image::rotate90CCW(){
 
 // TODO
 // TESTING AND DEBUG
-Image * Image::multiply(Image B) {
-    int opWidth, opHeight;
-    if (B.getWidth() < this->getWidth()) {
-        opWidth = B.getWidth();
-    } else {
-        opWidth = this->getWidth();
-    }
-    if (B.getHeight() < this->getHeight()) {
-        opHeight = B.getHeight();
-    } else {
-        opHeight = this->getHeight();
-    }
-    for (int i = 0; i < opWidth; i++) {
-        for (int j = 0; j < opHeight; i++) {
-            Pixel a = this->getPixelAt(i, j);
-            Pixel b = B.getPixelAt(i,j);
-            Pixel * c = a * b;
-            this->setPixelAt(i,j, *c);
-            delete c;
-        }
-    }
-    return this;
-}
-
-// TODO
-// TESTING AND DEBUG
 Image * Image::flipH() {
     Image * tempImage = new Image(*this);
     for (int i = 0; i < tempImage->getWidth(); i++) {
@@ -412,7 +396,7 @@ Image * Image::operator+(unsigned char deltaBrightness) {
 
 Image * Image::operator-(Image B) {
     Image * C = new Image(*this);
-    return C->substract(B, B.getWidth(), B.getHeight());
+    return C->substract(B);
 }
 
 Image * Image::operator-(unsigned char deltaBrightness) {
@@ -434,7 +418,7 @@ Image * Image::operator&(Image B) {
 
 Image * Image::operator|(Image B) {
     Image * C = new Image(*this);
-    return C->or_op(B, B.getWidth(), B.getHeight());
+    return C->or_op(B);
 }
 
 Image * Image::operator~() {

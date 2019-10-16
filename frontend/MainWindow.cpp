@@ -248,8 +248,20 @@ void MainWindow::addImage() {
 
 void MainWindow::substractImage() {
     if (drawSurface->isImageLoaded()) {
-        spdlog::info("MainWindow::substractImage: Substracting current image with newly loaded image...");
-        spdlog::info("MainWindow::substractImage: stub function");
+        spdlog::debug("MainWindow::substractImage: Asking for other image...");
+        std::string url = getOpenFileUrl("Please load another image");
+        if (url != "") {
+            spdlog::info("MainWindow::substractImage: Substracting newly loaded image to current image...");
+            ImageLoader * imageLoader = ImageLoaderFactory::getImageLoader(url);
+            Image * secondImage = imageLoader->load(url);
+            delete imageLoader;
+            drawSurface->acquireLockImage();
+            drawSurface->getActiveImage()->substract(*secondImage);
+            drawSurface->releaseLockImage();
+            drawSurface->update();
+        } else {
+            spdlog::info("MainWindow::substractImage: Operation cancelled");
+        }
     } else {
         spdlog::warn("MainWindow::substractImage: Please load an image first!");
     }
@@ -257,8 +269,20 @@ void MainWindow::substractImage() {
 
 void MainWindow::multiplyImage() {
     if (drawSurface->isImageLoaded()) {
-        spdlog::info("MainWindow::multiplyImage: Multiplying current image with newly loaded image...");
-        spdlog::info("MainWindow::multiplyImage: stub function");
+        spdlog::debug("MainWindow::substractImage: Asking for other image...");
+        std::string url = getOpenFileUrl("Please load another image");
+        if (url != "") {
+            spdlog::info("MainWindow::multiplyImage: Multiplying current image with newly loaded image...");
+            ImageLoader * imageLoader = ImageLoaderFactory::getImageLoader(url);
+            Image * secondImage = imageLoader->load(url);
+            delete imageLoader;
+            drawSurface->acquireLockImage();
+            drawSurface->getActiveImage()->multiply(*secondImage);
+            drawSurface->releaseLockImage();
+            drawSurface->update();
+        } else {
+            spdlog::info("MainWindow::multiplyImage: Operation cancelled");
+        }
     } else {
         spdlog::warn("MainWindow::multiplyImage: Please load an image first!");
     }
@@ -266,8 +290,20 @@ void MainWindow::multiplyImage() {
 
 void MainWindow::operateAndImage() {
     if (drawSurface->isImageLoaded()) {
-        spdlog::info("MainWindow::operateAndImage: Running AND operation...");
-        spdlog::info("MainWindow::operateAndImage: stub function");
+        spdlog::debug("MainWindow::operateAndImage: Asking for other image...");
+        std::string url = getOpenFileUrl("Please load another image");
+        if (url != "") {
+            spdlog::info("MainWindow::operateAndImage: Running AND operation...");
+            ImageLoader * imageLoader = ImageLoaderFactory::getImageLoader(url);
+            Image * secondImage = imageLoader->load(url);
+            delete imageLoader;
+            drawSurface->acquireLockImage();
+            drawSurface->getActiveImage()->and_op(*secondImage);
+            drawSurface->releaseLockImage();
+            drawSurface->update();
+        } else {
+            spdlog::info("MainWindow::operateAndImage: Operation cancelled");
+        }
     } else {
         spdlog::warn("MainWindow::operateAndImage: Please load an image first!");
     }
@@ -275,8 +311,20 @@ void MainWindow::operateAndImage() {
 
 void MainWindow::operateOrImage() {
     if (drawSurface->isImageLoaded()) {
-        spdlog::info("MainWindow::operateOrImage: Running OR operation...");
-        spdlog::info("MainWindow::operateOrImage: stub function");
+        spdlog::debug("MainWindow::operateOrImage: Asking for other image...");
+        std::string url = getOpenFileUrl("Please load another image");
+        if (url != "") {
+            spdlog::info("MainWindow::operateOrImage: Running OR operation...");
+            ImageLoader * imageLoader = ImageLoaderFactory::getImageLoader(url);
+            Image * secondImage = imageLoader->load(url);
+            delete imageLoader;
+            drawSurface->acquireLockImage();
+            drawSurface->getActiveImage()->or_op(*secondImage);
+            drawSurface->releaseLockImage();
+            drawSurface->update();
+        } else {
+            spdlog::info("MainWindow::operateOrImage: Operation cancelled");
+        }
     } else {
         spdlog::warn("MainWindow::operateOrImage: Please load an image first!");
     }
