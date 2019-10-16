@@ -46,10 +46,14 @@ class MainWindow : public QMainWindow {
         QAction * rotateAction;
         QAction * flipAction;
         QAction * zoomAction;
+
         QAction * meanFilterAction;
         QAction * medianFilterAction;
         QAction * highPassFilter1Action;
         QAction * highPassFilter2Action;
+        QAction * highPassFilter3Action;
+        QAction * highPassFilter4Action;
+
         QAction * histogramAction;
         DrawSurface * drawSurface;
         HistogramDialog * histDialog;

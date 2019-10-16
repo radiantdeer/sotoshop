@@ -37,6 +37,8 @@ MainWindow::MainWindow() : QMainWindow() {
     QMenu * highPass = convolutionMenu->addMenu("High-pass Filter");
     highPassFilter1Action = highPass->addAction("Variation 1");
     highPassFilter2Action = highPass->addAction("Variation 2");
+    highPassFilter3Action = highPass->addAction("Variation 3");
+    highPassFilter4Action = highPass->addAction("Variation 4");
 
     connectActionsToControllers();
 
@@ -203,8 +205,14 @@ void MainWindow::doHighPassFilter(int filterVariation) {
             case 2:
                 opMatrix = &CommonConvolutions::HighFilter2;
                 break;
+            case 3:
+                opMatrix = &CommonConvolutions::HighFilter3;
+                break;
+            case 4:
+                opMatrix = &CommonConvolutions::HighFilter4;
+                break;
             default:
-                spdlog::warn("MainWindow::doHighPassFilter: Number variation is not recognized, using variation 1 instead.");
+                spdlog::warn("MainWindow::doHighPassFilter: Number variation is not recognized, using variation 2 instead.");
                 opMatrix = &CommonConvolutions::HighFilter1;
         }
         Image * newImage = Convolution::convolve(drawSurface->getActiveImage(), *opMatrix, padded);
@@ -250,6 +258,8 @@ void MainWindow::connectActionsToControllers() {
     connect(medianFilterAction, &QAction::triggered, this, &MainWindow::doMedianFilter);
     connect(highPassFilter1Action, &QAction::triggered, this, [this]{doHighPassFilter(1); });
     connect(highPassFilter2Action, &QAction::triggered, this, [this]{doHighPassFilter(2); });
+    connect(highPassFilter3Action, &QAction::triggered, this, [this]{doHighPassFilter(3); });
+    connect(highPassFilter4Action, &QAction::triggered, this, [this]{doHighPassFilter(4); });
 
     connect(histogramAction, &QAction::triggered, this, &MainWindow::showHistogram);
 }
