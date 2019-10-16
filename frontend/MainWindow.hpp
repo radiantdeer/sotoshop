@@ -42,16 +42,32 @@ class MainWindow : public QMainWindow {
         void operateOrImage();
         void operateNotImage();
         void refresh();
+        void doMeanFilter();
+        void doMedianFilter();
+        void doHighPassFilter(int filterVariation);
+  
         void equalizeImageHist();
-        void doMeanFilterImage();
         void showHistogram();
         void specifyHist();
+  
     private:
         QAction * loadAction;
         QAction * saveAction;
+  
         QAction * negativeImageAction;
         QAction * convertToGrayscaleAction;
         QAction * moveAction;
+        QAction * rotateAction;
+        QAction * flipAction;
+        QAction * zoomAction;
+
+        QAction * meanFilterAction;
+        QAction * medianFilterAction;
+        QAction * highPassFilter1Action;
+        QAction * highPassFilter2Action;
+        QAction * highPassFilter3Action;
+        QAction * highPassFilter4Action;
+
         QAction * rotateCWAction;
         QAction * rotateCCWAction;
         QAction * flipHAction;
@@ -65,10 +81,11 @@ class MainWindow : public QMainWindow {
         QAction * andAction;
         QAction * orAction;
         QAction * notAction;
+  
         QAction * equalizeAction;
-        QAction * meanFilter;
         QAction * histogramAction;
         QAction * specifyHistAction;
+  
         DrawSurface * drawSurface;
         HistogramDialog * histDialog;
 

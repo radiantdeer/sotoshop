@@ -7,6 +7,7 @@
 #include <QMessageBox>
 #include <QPaintEvent>
 #include <QRegion>
+#include <QSignalMapper>
 #include <QUrl>
 #include <sstream>
 #include "../spdlog/spdlog.h"
@@ -51,7 +52,13 @@ MainWindow::MainWindow() : QMainWindow() {
     specifyHistAction = histogramMenu->addAction("Specify");
 
     QMenu * convolutionMenu = this->menuBar()->addMenu("Convolution");
-    meanFilter = convolutionMenu->addAction("Mean Filter");
+    meanFilterAction = convolutionMenu->addAction("Mean Filter");
+    medianFilterAction = convolutionMenu->addAction("Median Filter");
+    QMenu * highPass = convolutionMenu->addMenu("High-pass Filter");
+    highPassFilter1Action = highPass->addAction("Variation 1");
+    highPassFilter2Action = highPass->addAction("Variation 2");
+    highPassFilter3Action = highPass->addAction("Variation 3");
+    highPassFilter4Action = highPass->addAction("Variation 4");
 
     connectActionsToControllers();
 
@@ -227,7 +234,71 @@ void MainWindow::flipImageVertical() {
         drawSurface->releaseLockImage();
         drawSurface->update();
     } else {
-        spdlog::warn("MainWindow::flipImageVertical: Please load an image first!");
+      spdlog::warn("MainWindow::flipImageVertical: Please load an image first!");
+    }
+}
+
+void MainWindow::doMeanFilter() {
+    if (drawSurface->isImageLoaded()) {
+        bool padded = askForPadding();
+        spdlog::info("MainWindow::doMeanFilter: Convolving with mean filter...");
+        Image * newImage = Convolution::convolve(drawSurface->getActiveImage(), CommonConvolutions::Average, padded);
+        drawSurface->acquireLockImage();
+        drawSurface->purgeImage();
+        drawSurface->setActiveImage(newImage);
+        drawSurface->releaseLockImage();
+        drawSurface->update();
+    } else {
+        spdlog::warn("MainWindow::doMeanFilter: Please load an image first!");
+    }
+}
+
+void MainWindow::doMedianFilter() {
+    if (drawSurface->isImageLoaded()) {
+        bool padded = askForPadding();
+        spdlog::info("MainWindow::doMedianFilter: Convolving with median filter...");
+        Image * newImage = Convolution::medianConvolve(drawSurface->getActiveImage(), 3, 3, padded);
+        drawSurface->acquireLockImage();
+        drawSurface->purgeImage();
+        drawSurface->setActiveImage(newImage);
+        drawSurface->releaseLockImage();
+        drawSurface->update();
+    } else {
+        spdlog::warn("MainWindow::doMedianFilter: Please load an image first!");
+    }
+}
+
+void MainWindow::doHighPassFilter(int filterVariation) {
+    if (drawSurface->isImageLoaded()) {
+        bool padded = askForPadding();
+        spdlog::info("MainWindow::doHighPassFilter: Convolving with high-pass filter #{}...", filterVariation);
+
+        const ConvolutionMatrix * opMatrix;
+        switch(filterVariation) {
+            case 1:
+                opMatrix = &CommonConvolutions::HighFilter1;
+                break;
+            case 2:
+                opMatrix = &CommonConvolutions::HighFilter2;
+                break;
+            case 3:
+                opMatrix = &CommonConvolutions::HighFilter3;
+                break;
+            case 4:
+                opMatrix = &CommonConvolutions::HighFilter4;
+                break;
+            default:
+                spdlog::warn("MainWindow::doHighPassFilter: Number variation is not recognized, using variation 2 instead.");
+                opMatrix = &CommonConvolutions::HighFilter1;
+        }
+        Image * newImage = Convolution::convolve(drawSurface->getActiveImage(), *opMatrix, padded);
+        drawSurface->acquireLockImage();
+        drawSurface->purgeImage();
+        drawSurface->setActiveImage(newImage);
+        drawSurface->releaseLockImage();
+        drawSurface->update();
+    } else {
+        spdlog::warn("MainWindow::doHighPassFilter: Please load an image first!");
     }
 }
 
@@ -422,21 +493,6 @@ void MainWindow::showHistogram() {
     }
 }
 
-void MainWindow::doMeanFilterImage() {
-    if (drawSurface->isImageLoaded()) {
-        bool padded = askForPadding();
-        spdlog::info("MainWindow::doMeanFilterImage: Convolving with mean filter...");
-        Image * newImage = Convolution::convolve(drawSurface->getActiveImage(), CommonConvolutions::Average, padded);
-        drawSurface->acquireLockImage();
-        drawSurface->purgeImage();
-        drawSurface->setActiveImage(newImage);
-        drawSurface->releaseLockImage();
-        drawSurface->update();
-    } else {
-        spdlog::warn("MainWindow::doMeanFilterImage: Please load an image first!");
-    }
-}
-
 void MainWindow::connectActionsToControllers() {
     connect(loadAction, &QAction::triggered, this, &MainWindow::loadFile);
     connect(saveAction, &QAction::triggered, this, &MainWindow::saveFile);
@@ -464,7 +520,13 @@ void MainWindow::connectActionsToControllers() {
     connect(equalizeAction, &QAction::triggered, this, &MainWindow::equalizeImageHist);
     connect(specifyHistAction, &QAction::triggered, this, &MainWindow::specifyHist);
 
-    connect(meanFilter, &QAction::triggered, this, &MainWindow::doMeanFilterImage);
+    connect(meanFilterAction, &QAction::triggered, this, &MainWindow::doMeanFilter);
+    connect(medianFilterAction, &QAction::triggered, this, &MainWindow::doMedianFilter);
+    connect(highPassFilter1Action, &QAction::triggered, this, [this]{doHighPassFilter(1); });
+    connect(highPassFilter2Action, &QAction::triggered, this, [this]{doHighPassFilter(2); });
+    connect(highPassFilter3Action, &QAction::triggered, this, [this]{doHighPassFilter(3); });
+    connect(highPassFilter4Action, &QAction::triggered, this, [this]{doHighPassFilter(4); });
+
     connect(histogramAction, &QAction::triggered, this, &MainWindow::showHistogram);
 }
 

@@ -2,7 +2,15 @@
 #include <sstream>
 #include "../spdlog/spdlog.h"
 
-int thresholding(int value);
+int Pixel::thresholding(int value) {
+    if (value > 255) {
+        return 255;
+    } else if (value < 0) {
+        return 0;
+    } else {
+        return value;
+    }
+}
 
 Pixel::Pixel() {
     red = 0;
@@ -60,6 +68,28 @@ void Pixel::setBlue(unsigned char blue) {
     this->blue = val;
 }
 
+unsigned char Pixel::grayscaleValue() const {
+    return (0.299f * getRed()) + (0.587f * getGreen()) + (0.144f * getBlue());
+}
+
+unsigned char Pixel::meanGrayscaleValue() const {
+    return ((int) getRed() + (int) getGreen() + (int) getBlue()) / 3;
+}
+
+void Pixel::makeGrayscale() {
+    unsigned char grayValue = grayscaleValue();
+    this->setRed(grayValue);
+    this->setBlue(grayValue);
+    this->setGreen(grayValue);
+}
+
+void Pixel::makeMeanGrayscale() {
+    unsigned char grayValue = meanGrayscaleValue();
+    this->setRed(grayValue);
+    this->setBlue(grayValue);
+    this->setGreen(grayValue);
+}
+
 std::string Pixel::toString() const {
     std::ostringstream stream;
     stream << "(" << (int) red << "," << (int) green << "," << (int) blue << ")";
@@ -98,6 +128,26 @@ Pixel * Pixel::operator*(Pixel& B) {
     return C;
 }
 
+bool Pixel::operator==(Pixel& B) {
+    return (this->getRed() == B.getRed()) && (this->getGreen() == B.getGreen()) && (this->getBlue() == B.getBlue());
+}
+
+bool Pixel::operator>(Pixel& B) {
+    return (this->meanGrayscaleValue() > B.meanGrayscaleValue());
+}
+
+bool Pixel::operator>=(Pixel& B) {
+    return (this->meanGrayscaleValue() >= B.meanGrayscaleValue());
+}
+
+bool Pixel::operator<(Pixel& B) {
+    return (this->meanGrayscaleValue() < B.meanGrayscaleValue());
+}
+
+bool Pixel::operator<=(Pixel& B) {
+    return (this->meanGrayscaleValue() <= B.meanGrayscaleValue());
+}
+
 Pixel * Pixel::operator&(Pixel& B) {
     int red = this->getRed() & B.getRed();
     int green = this->getGreen() & B.getGreen();
@@ -120,14 +170,4 @@ Pixel * Pixel::operator~() {
     int blue = ~(this->getBlue());
     Pixel * C = new Pixel(red, green, blue);
     return C;
-}
-
-int thresholding(int value) {
-    if (value > 255) {
-        return 255;
-    } else if (value < 0) {
-        return 0;
-    } else {
-        return value;
-    }
 }

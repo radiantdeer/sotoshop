@@ -230,16 +230,9 @@ Image * Image::invert() {
 Image * Image::grayscale() {
     for (int i = 0; i < this->getWidth(); i++) {
         for (int j = 0; j < this->getHeight(); j++) {
-            Pixel oldPixel = this->getPixelAt(i, j);
-            Pixel * newPixel = new Pixel();
-
-            int grayValue = (0.299f * oldPixel.getRed()) + (0.587f * oldPixel.getGreen()) + (0.144f * oldPixel.getBlue());
-            newPixel->setRed(grayValue);
-            newPixel->setBlue(grayValue);
-            newPixel->setGreen(grayValue);
-
-            this->setPixelAt(i,j, *newPixel);
-            delete newPixel;
+            Pixel newPixel = this->getPixelAt(i, j);
+            newPixel.makeGrayscale();
+            this->setPixelAt(i,j, newPixel);
         }
     }
     return this;
@@ -478,10 +471,10 @@ Image * Image::operator~() {
 
 // Returns array of color histogram
 // Returns a matrix of 3 x 256 for colored images (PPM, BMP)
-// Returns a mateix of 1 x 256 for grayscaled images (PBM, PGM, RAW)
+// Returns a matrix of 1 x 256 for grayscaled images (PBM, PGM, RAW)
 std::vector<std::vector<int>> Image::histogram() {
     std::vector<std::vector<int>> hist;
-    if (this->getOriginalFormat() == "bmp" || this->getOriginalFormat() == "ppm" ) {
+    if (this->getOriginalFormat() == "bmp" || this->getOriginalFormat() == "ppm") {
         // color
         std::vector<int> red (256, 0);
         std::vector<int> green (256, 0);

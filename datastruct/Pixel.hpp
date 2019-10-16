@@ -11,6 +11,7 @@ class Pixel {
         unsigned char blue;
 
     public:
+        static int thresholding(int value);
         Pixel();
         Pixel(unsigned char, unsigned char, unsigned char);
         Pixel(const Pixel&);
@@ -23,8 +24,19 @@ class Pixel {
         void setGreen(unsigned char);
         void setBlue(unsigned char);
 
+        unsigned char grayscaleValue() const;
+        unsigned char meanGrayscaleValue() const;
+        void makeGrayscale();
+        void makeMeanGrayscale();
+
         std::string toString() const;
 
+        bool operator==(Pixel& B);
+        bool operator>(Pixel& B);
+        bool operator>=(Pixel& B);
+        bool operator<(Pixel& B);
+        bool operator<=(Pixel& B);
+  
         Pixel * operator+(Pixel& B);
         Pixel * operator+(unsigned char delta);
         Pixel * operator-(Pixel& B);
@@ -32,6 +44,7 @@ class Pixel {
         Pixel * operator&(Pixel& B);
         Pixel * operator|(Pixel& B);
         Pixel * operator~();
+
 };
 
 #endif

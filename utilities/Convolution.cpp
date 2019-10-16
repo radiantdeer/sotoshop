@@ -1,4 +1,7 @@
 #include "Convolution.hpp"
+#include <algorithm>
+#include <sstream>
+#include <string>
 #include <vector>
 #include "../spdlog/spdlog.h"
 
@@ -32,26 +35,69 @@ Image* Convolution::convolve(Image* image, const ConvolutionMatrix& opMatrix, bo
                 for (int x = 0; x < opMatrix.getWidth(); x++) {
                     int opConstant = opMatrix.getElementAt(x, y);
                     Pixel currentPixel = sourceImage->getPixelAt(i + x, j + y);
-                    redSum += (currentPixel.getRed() * opConstant);
-                    greenSum += (currentPixel.getGreen() * opConstant);
-                    blueSum += (currentPixel.getBlue() * opConstant);
+                    redSum += (opConstant * (int) currentPixel.getRed());
+                    greenSum += (opConstant * (int) currentPixel.getGreen());
+                    blueSum += (opConstant * (int) currentPixel.getBlue());
                 }
             }
             redSum /= opMatrix.getMatrixSum();
             greenSum /= opMatrix.getMatrixSum();
             blueSum /= opMatrix.getMatrixSum();
-            Pixel thisPixel (redSum, greenSum, blueSum);
+            Pixel thisPixel (Pixel::thresholding(redSum), Pixel::thresholding(greenSum), Pixel::thresholding(blueSum));
             result->setPixelAt(i, j, thisPixel);
         }
     }
     spdlog::debug("Convolution::convolve: Convolution done.");
-
     return result;
 }
 
-Image* Convolution::medianConvolve(Image* image, bool padImage) {
-    Image * result;
+Image* Convolution::medianConvolve(Image* image, int filterWidth, int filterHeight, bool padImage) {
 
+    int resultWidth, resultHeight;
+    Image * sourceImage;
+
+    spdlog::debug("Convolution::medianConvolve: Preparing...");
+    if (padImage) {
+        spdlog::debug("Convolution::medianConvolve: Adding padding to source image...");
+        resultWidth = image->getWidth();
+        resultHeight = image->getHeight();
+        int padWidth = filterWidth / 2;
+        int padHeight = filterHeight / 2;
+        sourceImage = Convolution::padImage(image, padWidth, padHeight);
+    } else {
+        resultWidth = image->getWidth() - ((filterWidth / 2) * 2);
+        resultHeight = image->getHeight() - ((filterHeight / 2) * 2);
+        sourceImage = image;
+    }
+
+    Image * result = new Image(resultWidth, resultHeight);
+    result->setOriginalFormat(sourceImage->getOriginalFormat());
+    spdlog::debug("Convolution::medianConvolve: Starting convolution...");
+    for (int j = 0; j < resultHeight; j++) {
+        for (int i = 0; i < resultWidth; i++) {
+            std::vector<Pixel> filter;
+            for (int y = 0; y < filterHeight; y++) {
+                for (int x = 0; x < filterWidth; x++) {
+                    filter.push_back(sourceImage->getPixelAt(i + x, j + y));
+                }
+            }
+            std::sort(filter.begin(), filter.end());
+            Pixel * thisPixel;
+            if ((filter.size() % 2) == 1) {
+                thisPixel = new Pixel(filter[filter.size() / 2]);
+            } else {
+                Pixel firstPixel = filter[filter.size() / 2];
+                Pixel secondPixel = filter[(filter.size() / 2) + 1];
+                int red = ((int) firstPixel.getRed() + (int) secondPixel.getRed()) / 2;
+                int green = ((int) firstPixel.getGreen() + (int) secondPixel.getGreen()) / 2;
+                int blue = ((int) firstPixel.getBlue() + (int) secondPixel.getBlue()) / 2;
+                thisPixel = new Pixel(red, green, blue);
+            }
+            result->setPixelAt(i, j, *thisPixel);
+            delete thisPixel;
+        }
+    }
+    spdlog::debug("Convolution::medianConvolve: Convolution done.");
     return result;
 }
 
@@ -62,6 +108,7 @@ Image* Convolution::padImage(Image* image, int padWidth, int padHeight) {
     int paddedWidth = originalWidth + (padWidth * 2);
     int paddedHeight = originalHeight + (padHeight * 2);
     Image * paddedImage = new Image(paddedWidth, paddedHeight);
+    paddedImage->setOriginalFormat(image->getOriginalFormat());
 
     spdlog::debug("Convolution::padImage: Padded image dimension : {}x{}", paddedImage->getWidth(), paddedImage->getHeight());
     for (int j = 0; j < padHeight; j++) {

@@ -19,6 +19,9 @@ ConvolutionMatrix::ConvolutionMatrix(int width, int height, int* opMatrix) {
             this->matrixSum += opMatrix[(j * width) + i];
         }
     }
+    if (this->matrixSum == 0) {
+        this->matrixSum = 1;
+    }
 }
 
 ConvolutionMatrix::ConvolutionMatrix(int width, int height, int** opMatrix) {
@@ -35,6 +38,9 @@ ConvolutionMatrix::ConvolutionMatrix(int width, int height, int** opMatrix) {
             this->opMatrix[j][i] = opMatrix[j][i];
             this->matrixSum += opMatrix[j][i];
         }
+    }
+    if (this->matrixSum == 0) {
+        this->matrixSum = 1;
     }
 }
 
