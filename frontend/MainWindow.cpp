@@ -36,6 +36,7 @@ MainWindow::MainWindow() : QMainWindow() {
     flipVAction = flipMenu->addAction("Vertical");
     zoomInAction = editMenu->addAction("Zoom In");
     zoomOutAction = editMenu->addAction("Zoom Out");
+    grayLevelSlicingAction = editMenu->addAction("Graylevel Slicing");
     editMenu->addSeparator();
     QMenu * arithmeticMenu = editMenu->addMenu("Arithmetic Operations");
     additionAction = arithmeticMenu->addAction("Addition");
@@ -45,7 +46,6 @@ MainWindow::MainWindow() : QMainWindow() {
     andAction = booleanMenu->addAction("AND");
     orAction = booleanMenu->addAction("OR");
     notAction = booleanMenu->addAction("NOT");
-
     QMenu * histogramMenu = this->menuBar()->addMenu("Histogram");
     histogramAction = histogramMenu->addAction("Show");
     equalizeAction = histogramMenu->addAction("Equalize");
@@ -326,6 +326,27 @@ void MainWindow::zoomOut() {
     }
 }
 
+void MainWindow::grayLevelSlicing() {
+    if (drawSurface->isImageLoaded()) {
+        spdlog::debug("Prompting the user to input a");
+        int a = promptValue("Slicing Start Point", "Insert a value between 0 and 255");
+        spdlog::debug("User entered a = {}", a);
+        spdlog::debug("Prompting the user to input b");
+        int b = promptValue("Slicing End Point", "Insert a value between 0 and 255");
+        spdlog::debug("User entered b = {}", b);
+        spdlog::debug("Prompting the user to input val");
+        int val = promptValue("Slicing Value", "Insert a value between 0 and 255");
+        spdlog::debug("User entered val = {}", val);
+        spdlog::info("MainWindow::grayLevelSlicing: Slicing Gray Level...");
+        drawSurface->acquireLockImage();
+        drawSurface->setActiveImage(drawSurface->getActiveImage()->grayLevelSlicing(a,b,val));
+        drawSurface->releaseLockImage();
+        drawSurface->update();
+    } else {
+        spdlog::warn("MainWindow::grayLevelSlicing: Please load an image first!");
+    }
+}
+
 void MainWindow::addImage() {
     if (drawSurface->isImageLoaded()) {
         spdlog::debug("MainWindow::addImage: Asking for other image...");
@@ -509,6 +530,7 @@ void MainWindow::connectActionsToControllers() {
     connect(flipVAction, &QAction::triggered, this, &MainWindow::flipImageVertical);
     connect(zoomInAction, &QAction::triggered, this, &MainWindow::zoomIn);
     connect(zoomOutAction, &QAction::triggered, this, &MainWindow::zoomOut);
+    connect(grayLevelSlicingAction, &QAction::triggered, this, &MainWindow::grayLevelSlicing);
 
     connect(additionAction, &QAction::triggered, this, &MainWindow::addImage);
     connect(substractAction, &QAction::triggered, this, &MainWindow::substractImage);
