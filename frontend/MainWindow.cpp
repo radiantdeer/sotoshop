@@ -50,7 +50,7 @@ MainWindow::MainWindow() : QMainWindow() {
     histogramAction = histogramMenu->addAction("Show");
     equalizeAction = histogramMenu->addAction("Equalize");
     specifyHistAction = histogramMenu->addAction("Specify");
-  
+
     QMenu * convolutionMenu = this->menuBar()->addMenu("Convolution");
     meanFilterAction = convolutionMenu->addAction("Mean Filter");
     medianFilterAction = convolutionMenu->addAction("Median Filter");
@@ -252,7 +252,7 @@ void MainWindow::doMeanFilter() {
         spdlog::warn("MainWindow::doMeanFilter: Please load an image first!");
     }
 }
-        
+
 void MainWindow::doMedianFilter() {
     if (drawSurface->isImageLoaded()) {
         bool padded = askForPadding();

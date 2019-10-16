@@ -71,6 +71,7 @@ Image* Convolution::medianConvolve(Image* image, int filterWidth, int filterHeig
     }
 
     Image * result = new Image(resultWidth, resultHeight);
+    result->setOriginalFormat(sourceImage->getOriginalFormat());
     spdlog::debug("Convolution::medianConvolve: Starting convolution...");
     for (int j = 0; j < resultHeight; j++) {
         for (int i = 0; i < resultWidth; i++) {
