@@ -32,8 +32,7 @@ MainWindow::MainWindow() : QMainWindow() {
     QMenu * histogramMenu = this->menuBar()->addMenu("Histogram");
     histogramAction = histogramMenu->addAction("Show");
     equalizeAction = histogramMenu->addAction("Equalize");
-    histogramAction = this->menuBar()->addAction("Histogram");
-  
+
     QMenu * convolutionMenu = this->menuBar()->addMenu("Convolution");
     meanFilter = convolutionMenu->addAction("Mean Filter");
 
