@@ -503,11 +503,13 @@ void MainWindow::showBitPlanes() {
         if ((currentImage->getOriginalFormat() == "ppm") || (currentImage->getOriginalFormat() == "bmp")) {
             spdlog::warn("MainWindow::showBitPlanes: Bit Plane slicing currently only available to grayscale images");
         } else {
-            spdlog::info("Generating bit planes...");
+            spdlog::debug("MainWindow::showBitPlanes: Generating bit planes...");
             std::vector<Image> bitPlanes = BitPlaneSlicing::generate(currentImage);
+            spdlog::debug("MainWindow::showBitPlanes: Planes generated...");
             if (bitPlaneDialog != nullptr) {
                 delete bitPlaneDialog;
             }
+            spdlog::info("MainWindow::showBitPlanes: Showing bit planes...");
             bitPlaneDialog = new BitPlaneDialog(bitPlanes);
             bitPlaneDialog->show();
         }

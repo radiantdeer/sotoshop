@@ -9,8 +9,10 @@
 
 class BitPlaneDialog : public QWidget {
     public:
-        BitPlaneDialog(const std::vector<Image> bitPlanes);
+        BitPlaneDialog(const std::vector<Image>& bitPlanes);
+
     private:
+        std::vector<Image> bitPlanes;
         QTabWidget *tabWidget;
 };
 
