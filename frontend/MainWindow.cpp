@@ -32,7 +32,8 @@ MainWindow::MainWindow() : QMainWindow() {
     histogramAction = this->menuBar()->addAction("Histogram");
 
     QMenu * convolutionMenu = this->menuBar()->addMenu("Convolution");
-    meanFilter = convolutionMenu->addAction("Mean Filter");
+    meanFilterAction = convolutionMenu->addAction("Mean Filter");
+    medianFilterAction = convolutionMenu->addAction("Median Filter");
     QMenu * highPass = convolutionMenu->addMenu("High-pass Filter");
     highPassFilter1Action = highPass->addAction("Variation 1");
     highPassFilter2Action = highPass->addAction("Variation 2");
@@ -159,10 +160,10 @@ void MainWindow::zoomImage() {
     }
 }
 
-void MainWindow::doMeanFilterImage() {
+void MainWindow::doMeanFilter() {
     if (drawSurface->isImageLoaded()) {
         bool padded = askForPadding();
-        spdlog::info("MainWindow::doMeanFilterImage: Convolving with mean filter...");
+        spdlog::info("MainWindow::doMeanFilter: Convolving with mean filter...");
         Image * newImage = Convolution::convolve(drawSurface->getActiveImage(), CommonConvolutions::Average, padded);
         drawSurface->acquireLockImage();
         drawSurface->purgeImage();
@@ -170,7 +171,22 @@ void MainWindow::doMeanFilterImage() {
         drawSurface->releaseLockImage();
         drawSurface->update();
     } else {
-        spdlog::warn("MainWindow::doMeanFilterImage: Please load an image first!");
+        spdlog::warn("MainWindow::doMeanFilter: Please load an image first!");
+    }
+}
+
+void MainWindow::doMedianFilter() {
+    if (drawSurface->isImageLoaded()) {
+        bool padded = askForPadding();
+        spdlog::info("MainWindow::doMedianFilter: Convolving with median filter...");
+        Image * newImage = Convolution::medianConvolve(drawSurface->getActiveImage(), 3, 3, padded);
+        drawSurface->acquireLockImage();
+        drawSurface->purgeImage();
+        drawSurface->setActiveImage(newImage);
+        drawSurface->releaseLockImage();
+        drawSurface->update();
+    } else {
+        spdlog::warn("MainWindow::doMedianFilter: Please load an image first!");
     }
 }
 
@@ -230,7 +246,8 @@ void MainWindow::connectActionsToControllers() {
     connect(flipAction, &QAction::triggered, this, &MainWindow::flipImage);
     connect(zoomAction, &QAction::triggered, this, &MainWindow::zoomImage);
 
-    connect(meanFilter, &QAction::triggered, this, &MainWindow::doMeanFilterImage);
+    connect(meanFilterAction, &QAction::triggered, this, &MainWindow::doMeanFilter);
+    connect(medianFilterAction, &QAction::triggered, this, &MainWindow::doMedianFilter);
     connect(highPassFilter1Action, &QAction::triggered, this, [this]{doHighPassFilter(1); });
     connect(highPassFilter2Action, &QAction::triggered, this, [this]{doHighPassFilter(2); });
 

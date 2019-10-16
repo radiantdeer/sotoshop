@@ -32,7 +32,8 @@ class MainWindow : public QMainWindow {
         void flipImage();
         void zoomImage();
         void refresh();
-        void doMeanFilterImage();
+        void doMeanFilter();
+        void doMedianFilter();
         void doHighPassFilter(int filterVariation);
         void showHistogram();
 
@@ -45,7 +46,8 @@ class MainWindow : public QMainWindow {
         QAction * rotateAction;
         QAction * flipAction;
         QAction * zoomAction;
-        QAction * meanFilter;
+        QAction * meanFilterAction;
+        QAction * medianFilterAction;
         QAction * highPassFilter1Action;
         QAction * highPassFilter2Action;
         QAction * histogramAction;

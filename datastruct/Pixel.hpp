@@ -24,9 +24,19 @@ class Pixel {
         void setGreen(unsigned char);
         void setBlue(unsigned char);
 
+        unsigned char grayscaleValue() const;
+        unsigned char meanGrayscaleValue() const;
+        void makeGrayscale();
+        void makeMeanGrayscale();
+
         std::string toString() const;
 
         Pixel * operator*(Pixel B);
+        bool operator==(Pixel& B);
+        bool operator>(Pixel& B);
+        bool operator>=(Pixel& B);
+        bool operator<(Pixel& B);
+        bool operator<=(Pixel& B);
 };
 
 #endif

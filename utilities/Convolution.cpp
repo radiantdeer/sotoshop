@@ -1,4 +1,5 @@
 #include "Convolution.hpp"
+#include <algorithm>
 #include <sstream>
 #include <string>
 #include <vector>
@@ -50,9 +51,52 @@ Image* Convolution::convolve(Image* image, const ConvolutionMatrix& opMatrix, bo
     return result;
 }
 
-Image* Convolution::medianConvolve(Image* image, bool padImage) {
-    Image * result;
+Image* Convolution::medianConvolve(Image* image, int filterWidth, int filterHeight, bool padImage) {
 
+    int resultWidth, resultHeight;
+    Image * sourceImage;
+
+    spdlog::debug("Convolution::medianConvolve: Preparing...");
+    if (padImage) {
+        spdlog::debug("Convolution::medianConvolve: Adding padding to source image...");
+        resultWidth = image->getWidth();
+        resultHeight = image->getHeight();
+        int padWidth = filterWidth / 2;
+        int padHeight = filterHeight / 2;
+        sourceImage = Convolution::padImage(image, padWidth, padHeight);
+    } else {
+        resultWidth = image->getWidth() - ((filterWidth / 2) * 2);
+        resultHeight = image->getHeight() - ((filterHeight / 2) * 2);
+        sourceImage = image;
+    }
+
+    Image * result = new Image(resultWidth, resultHeight);
+    spdlog::debug("Convolution::medianConvolve: Starting convolution...");
+    for (int j = 0; j < resultHeight; j++) {
+        for (int i = 0; i < resultWidth; i++) {
+            std::vector<Pixel> filter;
+            for (int y = 0; y < filterHeight; y++) {
+                for (int x = 0; x < filterWidth; x++) {
+                    filter.push_back(sourceImage->getPixelAt(i + x, j + y));
+                }
+            }
+            std::sort(filter.begin(), filter.end());
+            Pixel * thisPixel;
+            if ((filter.size() % 2) == 1) {
+                thisPixel = new Pixel(filter[filter.size() / 2]);
+            } else {
+                Pixel firstPixel = filter[filter.size() / 2];
+                Pixel secondPixel = filter[(filter.size() / 2) + 1];
+                int red = ((int) firstPixel.getRed() + (int) secondPixel.getRed()) / 2;
+                int green = ((int) firstPixel.getGreen() + (int) secondPixel.getGreen()) / 2;
+                int blue = ((int) firstPixel.getBlue() + (int) secondPixel.getBlue()) / 2;
+                thisPixel = new Pixel(red, green, blue);
+            }
+            result->setPixelAt(i, j, *thisPixel);
+            delete thisPixel;
+        }
+    }
+    spdlog::debug("Convolution::medianConvolve: Convolution done.");
     return result;
 }
 
