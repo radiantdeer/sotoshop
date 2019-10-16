@@ -7,6 +7,7 @@
 #include <QSignalMapper>
 #include <string>
 
+#include "BitPlaneDialog.hpp"
 #include "DrawSurface.hpp"
 #include "HistogramDialog.hpp"
 #include "../datastruct/Image.hpp"
@@ -45,15 +46,17 @@ class MainWindow : public QMainWindow {
         void doMeanFilter();
         void doMedianFilter();
         void doHighPassFilter(int filterVariation);
-  
+
         void equalizeImageHist();
         void showHistogram();
         void specifyHist();
-  
+
+        void showBitPlanes();
+
     private:
         QAction * loadAction;
         QAction * saveAction;
-  
+
         QAction * negativeImageAction;
         QAction * convertToGrayscaleAction;
         QAction * moveAction;
@@ -81,13 +84,16 @@ class MainWindow : public QMainWindow {
         QAction * andAction;
         QAction * orAction;
         QAction * notAction;
-  
+
         QAction * equalizeAction;
         QAction * histogramAction;
         QAction * specifyHistAction;
-  
+
+        QAction * bitPlaneAction;
+
         DrawSurface * drawSurface;
         HistogramDialog * histDialog;
+        BitPlaneDialog * bitPlaneDialog;
 
         void connectActionsToControllers();
         std::string getOpenFileUrl(std::string dialogTitle);

@@ -11,6 +11,7 @@
 #include <QUrl>
 #include <sstream>
 #include "../spdlog/spdlog.h"
+#include "../utilities/BitPlaneSlicing.hpp"
 #include "../utilities/Convolution.hpp"
 #include "../utilities/CommonConvolutions.hpp"
 
@@ -60,11 +61,14 @@ MainWindow::MainWindow() : QMainWindow() {
     highPassFilter3Action = highPass->addAction("Variation 3");
     highPassFilter4Action = highPass->addAction("Variation 4");
 
+    QMenu * other = this->menuBar()->addMenu("Other");
+    bitPlaneAction = other->addAction("Bit Planes");
     connectActionsToControllers();
 
     drawSurface = new DrawSurface(this);
     this->setCentralWidget(drawSurface);
     histDialog = nullptr;
+    bitPlaneDialog = nullptr;
 }
 
 QAction * MainWindow::getLoadAction() {
@@ -493,6 +497,25 @@ void MainWindow::showHistogram() {
     }
 }
 
+void MainWindow::showBitPlanes() {
+    if (drawSurface->isImageLoaded()) {
+        Image * currentImage = drawSurface->getActiveImage();
+        if ((currentImage->getOriginalFormat() == "ppm") || (currentImage->getOriginalFormat() == "bmp")) {
+            spdlog::warn("MainWindow::showBitPlanes: Bit Plane slicing currently only available to grayscale images");
+        } else {
+            spdlog::info("Generating bit planes...");
+            std::vector<Image> bitPlanes = BitPlaneSlicing::generate(currentImage);
+            if (bitPlaneDialog != nullptr) {
+                delete bitPlaneDialog;
+            }
+            bitPlaneDialog = new BitPlaneDialog(bitPlanes);
+            bitPlaneDialog->show();
+        }
+    } else {
+        spdlog::warn("MainWindow::showBitPlanes: Please load an image first!");
+    }
+}
+
 void MainWindow::connectActionsToControllers() {
     connect(loadAction, &QAction::triggered, this, &MainWindow::loadFile);
     connect(saveAction, &QAction::triggered, this, &MainWindow::saveFile);
@@ -517,6 +540,7 @@ void MainWindow::connectActionsToControllers() {
     connect(orAction, &QAction::triggered, this, &MainWindow::operateOrImage);
     connect(notAction, &QAction::triggered, this, &MainWindow::operateNotImage);
 
+    connect(histogramAction, &QAction::triggered, this, &MainWindow::showHistogram);
     connect(equalizeAction, &QAction::triggered, this, &MainWindow::equalizeImageHist);
     connect(specifyHistAction, &QAction::triggered, this, &MainWindow::specifyHist);
 
@@ -527,7 +551,8 @@ void MainWindow::connectActionsToControllers() {
     connect(highPassFilter3Action, &QAction::triggered, this, [this]{doHighPassFilter(3); });
     connect(highPassFilter4Action, &QAction::triggered, this, [this]{doHighPassFilter(4); });
 
-    connect(histogramAction, &QAction::triggered, this, &MainWindow::showHistogram);
+    connect(bitPlaneAction, &QAction::triggered, this, &MainWindow::showBitPlanes);
+
 }
 
 std::string MainWindow::getOpenFileUrl(std::string dialogTitle) {
