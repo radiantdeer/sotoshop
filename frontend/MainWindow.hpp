@@ -33,7 +33,8 @@ class MainWindow : public QMainWindow {
         void rotateImageCCW();
         void flipImageHorizontal();
         void flipImageVertical();
-        void zoomImage();
+        void zoomIn();
+        void zoomOut();
         void addImage();
         void substractImage();
         void multiplyImage();
@@ -55,7 +56,8 @@ class MainWindow : public QMainWindow {
         QAction * rotateCCWAction;
         QAction * flipHAction;
         QAction * flipVAction;
-        QAction * zoomAction;
+        QAction * zoomInAction;
+        QAction * zoomOutAction;
         QAction * brightenAction;
         QAction * additionAction;
         QAction * substractAction;

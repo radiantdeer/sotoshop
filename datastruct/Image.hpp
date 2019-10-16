@@ -46,6 +46,8 @@ class Image {
         Image * rotate90CCW();
         Image * flipH();
         Image * flipV();
+        Image * magnify2();
+        Image * shrink2();
 
         Image * operator+(Image& B);
         Image * operator+(unsigned char deltaBrightness);

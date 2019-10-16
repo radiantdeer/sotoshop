@@ -24,7 +24,7 @@ MainWindow::MainWindow() : QMainWindow() {
     negativeImageAction = editMenu->addAction("Negative Image");
     convertToGrayscaleAction = editMenu->addAction("Convert Image to Grayscale");
     editMenu->addSeparator();
-    brightenAction = editMenu->addAction("Brightening");
+    brightenAction = editMenu->addAction("Brighten Image");
     editMenu->addSeparator();
     moveAction = editMenu->addAction("Move image");
     QMenu * rotateMenu = editMenu->addMenu("Rotate");
@@ -33,7 +33,8 @@ MainWindow::MainWindow() : QMainWindow() {
     QMenu * flipMenu = editMenu->addMenu("Flip");
     flipHAction = flipMenu->addAction("Horizontal");
     flipVAction = flipMenu->addAction("Vertical");
-    zoomAction = editMenu->addAction("Zoom");
+    zoomInAction = editMenu->addAction("Zoom In");
+    zoomOutAction = editMenu->addAction("Zoom Out");
     editMenu->addSeparator();
     QMenu * arithmeticMenu = editMenu->addMenu("Arithmetic Operations");
     additionAction = arithmeticMenu->addAction("Addition");
@@ -230,12 +231,27 @@ void MainWindow::flipImageVertical() {
     }
 }
 
-void MainWindow::zoomImage() {
+void MainWindow::zoomIn() {
     if (drawSurface->isImageLoaded()) {
-        spdlog::info("MainWindow::zoomImage: Zooming image...");
-        spdlog::info("MainWindow::zoomImage: stub function");
+        spdlog::info("MainWindow::zoomIn: Zooming in image...");
+        drawSurface->acquireLockImage();
+        drawSurface->setActiveImage(drawSurface->getActiveImage()->magnify2());
+        drawSurface->releaseLockImage();
+        drawSurface->update();
     } else {
-        spdlog::warn("MainWindow::zoomImage: Please load an image first!");
+        spdlog::warn("MainWindow::zoomIn: Please load an image first!");
+    }
+}
+
+void MainWindow::zoomOut() {
+    if (drawSurface->isImageLoaded()) {
+        spdlog::info("MainWindow::zoomOut: Zooming out image...");
+        drawSurface->acquireLockImage();
+        drawSurface->setActiveImage(drawSurface->getActiveImage()->shrink2());
+        drawSurface->releaseLockImage();
+        drawSurface->update();
+    } else {
+        spdlog::warn("MainWindow::zoomOut: Please load an image first!");
     }
 }
 
@@ -435,7 +451,8 @@ void MainWindow::connectActionsToControllers() {
     connect(rotateCCWAction, &QAction::triggered, this, &MainWindow::rotateImageCCW);
     connect(flipHAction, &QAction::triggered, this, &MainWindow::flipImageHorizontal);
     connect(flipVAction, &QAction::triggered, this, &MainWindow::flipImageVertical);
-    connect(zoomAction, &QAction::triggered, this, &MainWindow::zoomImage);
+    connect(zoomInAction, &QAction::triggered, this, &MainWindow::zoomIn);
+    connect(zoomOutAction, &QAction::triggered, this, &MainWindow::zoomOut);
 
     connect(additionAction, &QAction::triggered, this, &MainWindow::addImage);
     connect(substractAction, &QAction::triggered, this, &MainWindow::substractImage);
