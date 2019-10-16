@@ -28,6 +28,7 @@ MainWindow::MainWindow() : QMainWindow() {
     QMenu * histogramMenu = this->menuBar()->addMenu("Histogram");
     histogramAction = histogramMenu->addAction("Show");
     equalizeAction = histogramMenu->addAction("Equalize");
+    specifyHistAction = histogramMenu->addAction("Specify");
 
     connectActionsToControllers();
 
@@ -163,6 +164,27 @@ void MainWindow::equalizeImageHist() {
     }
 }
 
+void MainWindow::specifyHist() {
+    if (drawSurface->isImageLoaded()) {
+        spdlog::info("MainWindow::specifyHist: Specifying image histogram...");
+        std::string url = getOpenFileUrl("Load Specification Image");
+        if (url != "") {
+            ImageLoader * imageLoader = ImageLoaderFactory::getImageLoader(url);
+            Image * specImage = imageLoader->load(url);
+//            drawSurface->acquireLockImage();
+//            drawSurface->getActiveImage()->histogramSpecification(*specImage);
+//            drawSurface->releaseLockImage();
+//            drawSurface->update();
+            delete specImage;
+            delete imageLoader;
+        } else {
+            spdlog::info("Specification cancelled");
+        }
+    } else {
+        spdlog::warn("MainWindow::specifyHist: Please load an image first!");
+    }
+}
+
 void MainWindow::showHistogram(){
     if (drawSurface->isImageLoaded()) {
         spdlog::info("MainWindow::showHistogram: Showing histogram...");
@@ -191,6 +213,7 @@ void MainWindow::connectActionsToControllers() {
     connect(flipAction, &QAction::triggered, this, &MainWindow::flipImage);
     connect(zoomAction, &QAction::triggered, this, &MainWindow::zoomImage);
     connect(equalizeAction, &QAction::triggered, this, &MainWindow::equalizeImageHist);
+    connect(specifyHistAction, &QAction::triggered, this, &MainWindow::specifyHist);
 
     connect(histogramAction, &QAction::triggered, this, &MainWindow::showHistogram);
 }
