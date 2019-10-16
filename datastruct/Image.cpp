@@ -385,7 +385,7 @@ Image * Image::flipV() {
     return this;
 }
 
-Image * Image::zoomIn2() {
+Image * Image::magnify2() {
     Image * result = new Image(this->getWidth() * 2, this->getHeight() * 2);
     for (int j = 0; j < this->getHeight(); j++) {
         for (int i = 0; i < this->getWidth(); i++) {
@@ -399,9 +399,39 @@ Image * Image::zoomIn2() {
     return result;
 }
 
-Image * Image::zoomOut2() {
-
-    return this;
+Image * Image::shrink2() {
+    Image * result = new Image((this->getWidth() / 2), (this->getHeight() / 2));
+    for (int j = 0; j < this->getHeight(); j+=2) {
+        for (int i = 0; i < this->getWidth(); i+=2) {
+            int numPixel = 1;
+            int red = this->getPixelAt(i, j).getRed();
+            int green = this->getPixelAt(i, j).getGreen();
+            int blue = this->getPixelAt(i, j).getBlue();
+            if ((i + 1) < this->getWidth()) {
+                red += this->getPixelAt(i + 1, j).getRed();
+                green += this->getPixelAt(i + 1, j).getGreen();
+                blue += this->getPixelAt(i + 1, j).getBlue();
+                numPixel++;
+            }
+            if ((j + 1) < this->getHeight()) {
+                red += this->getPixelAt(i, j+1).getRed();
+                green += this->getPixelAt(i, j+1).getGreen();
+                blue += this->getPixelAt(i, j+1).getBlue();
+                numPixel++;
+            }
+            if (numPixel >= 3) { // this means that (i+1, j+1) is not out of bounds
+                red += this->getPixelAt(i+1, j+1).getRed();
+                green += this->getPixelAt(i+1, j+1).getGreen();
+                blue += this->getPixelAt(i+1, j+1).getBlue();
+                numPixel++;
+            }
+            red /= numPixel;
+            green /= numPixel;
+            blue /= numPixel;
+            result->setPixelAt(i / 2, j / 2, Pixel((unsigned char)red, (unsigned char)green, (unsigned char)blue));
+        }
+    }
+    return result;
 }
 
 Image * Image::operator+(Image& B) {
