@@ -30,12 +30,12 @@ class Image {
         void setOriginalFormat(std::string originalFormat);
         void setFileUrl(std::string fileUrl);
 
-        Image * add(Image B, int width, int height);
+        Image * add(Image& B);
         Image * adjustBrightness(unsigned char delta);
         Image * substract(Image B, int width, int height);
         Image * invert();
         Image * grayscale();
-        Image * and_op(Image B, int width, int height);
+        Image * and_op(Image B);
         Image * or_op(Image B, int width, int height);
         Image * not_op();
         Image * translate(int dx, int dy);

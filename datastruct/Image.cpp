@@ -130,18 +130,16 @@ void Image::setFileUrl(std::string fileUrl) {
 
 // TODO
 // DEBUG METHOD
-Image * Image::add(Image B, int width, int height) {
-    for (int i = 0; i < width; i++) {
-        for (int j = 0; j < height; j++) {
+Image * Image::add(Image& B) {
+    int opWidth = this->getWidth() > B.getWidth() ? B.getWidth() : this->getWidth();
+    int opHeight = this->getHeight() > B.getHeight() ? B.getHeight() : this->getHeight();
+    for (int j = 0; j < opWidth; j++) {
+        for (int i = 0; i < opHeight; i++) {
             Pixel a = this->getPixelAt(i, j);
             Pixel b = B.getPixelAt(i, j);
-            Pixel *pixel = new Pixel();
+            Pixel *pixel = a + b;
 
-            pixel->setRed(a.getRed() + b.getRed());
-            pixel->setBlue(a.getBlue() + b.getBlue());
-            pixel->setGreen(a.getGreen() + b.getGreen());
-
-            this->setPixelAt(width, height, *pixel);
+            this->setPixelAt(i, j, *pixel);
             delete pixel;
         }
     }
@@ -228,7 +226,7 @@ Image * Image::grayscale() {
 
 // TODO
 // TESTING AND DEBUG
-Image * Image::and_op(Image B, int width, int height) {
+Image * Image::and_op(Image B) {
     for (int i = 0; i < this->getWidth(); i++) {
         for (int j = 0; j < this->getHeight(); j++) {
             Pixel a = this->getPixelAt(i, j);
@@ -404,7 +402,7 @@ Image * Image::flipV() {
 
 Image * Image::operator+(Image B) {
     Image * C = new Image(*this);
-    return C->add(B, B.getWidth(), B.getHeight());
+    return C->add(B);
 }
 
 Image * Image::operator+(unsigned char deltaBrightness) {
@@ -431,7 +429,7 @@ Image * Image::operator*(Image B) {
 
 Image * Image::operator&(Image B) {
     Image * C = new Image(*this);
-    return C->and_op(B, B.getWidth(), B.getHeight());
+    return C->and_op(B);
 }
 
 Image * Image::operator|(Image B) {

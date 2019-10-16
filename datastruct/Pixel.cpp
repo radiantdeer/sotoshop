@@ -66,6 +66,14 @@ std::string Pixel::toString() const {
     return stream.str();
 }
 
+Pixel * Pixel::operator+(Pixel B) {
+    int valueRed = thresholding(this->getRed() + B.getRed());
+    int valueGreen = thresholding(this->getGreen() + B.getGreen());
+    int valueBlue = thresholding(this->getBlue() + B.getBlue());
+    Pixel * C = new Pixel(valueRed, valueGreen, valueBlue);
+    return C;
+}
+
 Pixel * Pixel::operator*(Pixel B) {
     int valueRed = thresholding(this->getRed() * B.getRed());
     int valueGreen = thresholding(this->getGreen() * B.getGreen());

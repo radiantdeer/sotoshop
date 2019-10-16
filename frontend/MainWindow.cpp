@@ -227,9 +227,21 @@ void MainWindow::zoomImage() {
 
 void MainWindow::addImage() {
     if (drawSurface->isImageLoaded()) {
-        spdlog::info("MainWindow::addImage: Adding newly loaded image to current image...");
-        spdlog::info("MainWindow::addImage: stub function");
-    } else {
+        spdlog::debug("MainWindow::addImage: Asking for other image...");
+        std::string url = getOpenFileUrl("Please load another image.");
+        if (url != "") {
+            spdlog::info("MainWindow::addImage: Adding newly loaded image to current image...");
+            ImageLoader * imageLoader = ImageLoaderFactory::getImageLoader(url);
+            Image * secondImage = imageLoader->load(url);
+            delete imageLoader;
+            drawSurface->acquireLockImage();
+            drawSurface->getActiveImage()->add(*secondImage);
+            drawSurface->releaseLockImage();
+            drawSurface->update();
+        } else {
+            spdlog::info("MainWindow::addImage: Operation cancelled");
+        }
+     } else {
         spdlog::warn("MainWindow::addImage: Please load an image first!");
     }
 }
@@ -273,7 +285,10 @@ void MainWindow::operateOrImage() {
 void MainWindow::operateNotImage() {
     if (drawSurface->isImageLoaded()) {
         spdlog::info("MainWindow::operateNotImage: Running NOT operation...");
-        spdlog::info("MainWindow::operateNotImage: stub function");
+        drawSurface->acquireLockImage();
+        drawSurface->getActiveImage()->not_op();
+        drawSurface->releaseLockImage();
+        drawSurface->update();
     } else {
         spdlog::warn("MainWindow::operateNotImage: Please load an image first!");
     }

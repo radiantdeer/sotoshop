@@ -9,7 +9,7 @@ class Pixel {
         unsigned char red;
         unsigned char green;
         unsigned char blue;
-    
+
     public:
         Pixel();
         Pixel(unsigned char, unsigned char, unsigned char);
@@ -25,6 +25,7 @@ class Pixel {
 
         std::string toString() const;
 
+        Pixel * operator+(Pixel B);
         Pixel * operator*(Pixel B);
 };
 
