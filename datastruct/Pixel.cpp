@@ -1,7 +1,15 @@
 #include "Pixel.hpp"
 #include <sstream>
 
-int thresholding(int value);
+int Pixel::thresholding(int value) {
+    if (value > 255) {
+        return 255;
+    } else if (value < 0) {
+        return 0;
+    } else {
+        return value;
+    }
+}
 
 Pixel::Pixel() {
     red = 0;
@@ -59,14 +67,4 @@ Pixel * Pixel::operator*(Pixel B) {
     int valueBlue = thresholding(this->getBlue() * B.getBlue());
     Pixel * C = new Pixel(valueRed, valueGreen, valueBlue);
     return C;
-}
-
-int thresholding(int value) {
-    if (value > 255) {
-        return 255;
-    } else if (value < 0) {
-        return 0;
-    } else {
-        return value;
-    }
 }

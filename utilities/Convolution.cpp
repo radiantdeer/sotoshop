@@ -1,4 +1,6 @@
 #include "Convolution.hpp"
+#include <sstream>
+#include <string>
 #include <vector>
 #include "../spdlog/spdlog.h"
 
@@ -23,7 +25,9 @@ Image* Convolution::convolve(Image* image, const ConvolutionMatrix& opMatrix, bo
 
     Image * result = new Image(resultWidth, resultHeight);
     spdlog::debug("Convolution::convolve: Starting convolution...");
+    std::ostringstream stream;
     for (int j = 0; j < resultHeight; j++) {
+        stream.str(std::string());
         for (int i = 0; i < resultWidth; i++) {
             int redSum = 0;
             int greenSum = 0;
@@ -32,17 +36,19 @@ Image* Convolution::convolve(Image* image, const ConvolutionMatrix& opMatrix, bo
                 for (int x = 0; x < opMatrix.getWidth(); x++) {
                     int opConstant = opMatrix.getElementAt(x, y);
                     Pixel currentPixel = sourceImage->getPixelAt(i + x, j + y);
-                    redSum += (currentPixel.getRed() * opConstant);
-                    greenSum += (currentPixel.getGreen() * opConstant);
-                    blueSum += (currentPixel.getBlue() * opConstant);
+                    redSum += (opConstant * (int) currentPixel.getRed());
+                    greenSum += (opConstant * (int) currentPixel.getGreen());
+                    blueSum += (opConstant * (int) currentPixel.getBlue());
                 }
             }
             redSum /= opMatrix.getMatrixSum();
             greenSum /= opMatrix.getMatrixSum();
             blueSum /= opMatrix.getMatrixSum();
-            Pixel thisPixel (redSum, greenSum, blueSum);
+            Pixel thisPixel (Pixel::thresholding(redSum), Pixel::thresholding(greenSum), Pixel::thresholding(blueSum));
+            stream << thisPixel.toString() << " ";
             result->setPixelAt(i, j, thisPixel);
         }
+        spdlog::debug("{}",stream.str());
     }
     spdlog::debug("Convolution::convolve: Convolution done.");
 

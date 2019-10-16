@@ -9,8 +9,9 @@ class Pixel {
         unsigned char red;
         unsigned char green;
         unsigned char blue;
-    
+
     public:
+        static int thresholding(int value);
         Pixel();
         Pixel(unsigned char, unsigned char, unsigned char);
         Pixel(const Pixel&);

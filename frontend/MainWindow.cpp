@@ -6,6 +6,7 @@
 #include <QMessageBox>
 #include <QPaintEvent>
 #include <QRegion>
+#include <QSignalMapper>
 #include <QUrl>
 #include <sstream>
 #include "../spdlog/spdlog.h"
@@ -29,9 +30,12 @@ MainWindow::MainWindow() : QMainWindow() {
     zoomAction = editMenu->addAction("Zoom");
 
     histogramAction = this->menuBar()->addAction("Histogram");
-  
+
     QMenu * convolutionMenu = this->menuBar()->addMenu("Convolution");
     meanFilter = convolutionMenu->addAction("Mean Filter");
+    QMenu * highPass = convolutionMenu->addMenu("High-pass Filter");
+    highPassFilter1Action = highPass->addAction("Variation 1");
+    highPassFilter2Action = highPass->addAction("Variation 2");
 
     connectActionsToControllers();
 
@@ -170,6 +174,34 @@ void MainWindow::doMeanFilterImage() {
     }
 }
 
+void MainWindow::doHighPassFilter(int filterVariation) {
+    if (drawSurface->isImageLoaded()) {
+        bool padded = askForPadding();
+        spdlog::info("MainWindow::doHighPassFilter: Convolving with high-pass filter #{}...", filterVariation);
+
+        const ConvolutionMatrix * opMatrix;
+        switch(filterVariation) {
+            case 1:
+                opMatrix = &CommonConvolutions::HighFilter1;
+                break;
+            case 2:
+                opMatrix = &CommonConvolutions::HighFilter2;
+                break;
+            default:
+                spdlog::warn("MainWindow::doHighPassFilter: Number variation is not recognized, using variation 1 instead.");
+                opMatrix = &CommonConvolutions::HighFilter1;
+        }
+        Image * newImage = Convolution::convolve(drawSurface->getActiveImage(), *opMatrix, padded);
+        drawSurface->acquireLockImage();
+        drawSurface->purgeImage();
+        drawSurface->setActiveImage(newImage);
+        drawSurface->releaseLockImage();
+        drawSurface->update();
+    } else {
+        spdlog::warn("MainWindow::doHighPassFilter: Please load an image first!");
+    }
+}
+
 void MainWindow::showHistogram() {
     if (drawSurface->isImageLoaded()) {
         spdlog::info("MainWindow::showHistogram: Showing histogram...");
@@ -199,6 +231,9 @@ void MainWindow::connectActionsToControllers() {
     connect(zoomAction, &QAction::triggered, this, &MainWindow::zoomImage);
 
     connect(meanFilter, &QAction::triggered, this, &MainWindow::doMeanFilterImage);
+    connect(highPassFilter1Action, &QAction::triggered, this, [this]{doHighPassFilter(1); });
+    connect(highPassFilter2Action, &QAction::triggered, this, [this]{doHighPassFilter(2); });
+
     connect(histogramAction, &QAction::triggered, this, &MainWindow::showHistogram);
 }
 

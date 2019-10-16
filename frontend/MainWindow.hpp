@@ -33,6 +33,7 @@ class MainWindow : public QMainWindow {
         void zoomImage();
         void refresh();
         void doMeanFilterImage();
+        void doHighPassFilter(int filterVariation);
         void showHistogram();
 
     private:
@@ -45,6 +46,8 @@ class MainWindow : public QMainWindow {
         QAction * flipAction;
         QAction * zoomAction;
         QAction * meanFilter;
+        QAction * highPassFilter1Action;
+        QAction * highPassFilter2Action;
         QAction * histogramAction;
         DrawSurface * drawSurface;
         HistogramDialog * histDialog;
