@@ -47,6 +47,7 @@ MainWindow::MainWindow() : QMainWindow() {
     QMenu * histogramMenu = this->menuBar()->addMenu("Histogram");
     histogramAction = histogramMenu->addAction("Show");
     equalizeAction = histogramMenu->addAction("Equalize");
+    specifyHistAction = histogramMenu->addAction("Specify");
 
     QMenu * convolutionMenu = this->menuBar()->addMenu("Convolution");
     meanFilter = convolutionMenu->addAction("Mean Filter");
@@ -367,18 +368,24 @@ void MainWindow::equalizeImageHist() {
     }
 }
 
-void MainWindow::doMeanFilterImage() {
+void MainWindow::specifyHist() {
     if (drawSurface->isImageLoaded()) {
-        bool padded = askForPadding();
-        spdlog::info("MainWindow::doMeanFilterImage: Convolving with mean filter...");
-        Image * newImage = Convolution::convolve(drawSurface->getActiveImage(), CommonConvolutions::Average, padded);
-        drawSurface->acquireLockImage();
-        drawSurface->purgeImage();
-        drawSurface->setActiveImage(newImage);
-        drawSurface->releaseLockImage();
-        drawSurface->update();
+        spdlog::info("MainWindow::specifyHist: Specifying image histogram...");
+        std::string url = getOpenFileUrl("Load Specification Image");
+        if (url != "") {
+            ImageLoader * imageLoader = ImageLoaderFactory::getImageLoader(url);
+            Image * specImage = imageLoader->load(url);
+            drawSurface->acquireLockImage();
+            drawSurface->getActiveImage()->histogramSpecification(*specImage);
+            drawSurface->releaseLockImage();
+            drawSurface->update();
+            delete specImage;
+            delete imageLoader;
+        } else {
+            spdlog::info("Specification cancelled");
+        }
     } else {
-        spdlog::warn("MainWindow::doMeanFilterImage: Please load an image first!");
+        spdlog::warn("MainWindow::specifyHist: Please load an image first!");
     }
 }
 
@@ -396,6 +403,21 @@ void MainWindow::showHistogram() {
         histDialog->show();
     } else {
         spdlog::warn("MainWindow::showHistogram: Please load an image first!");
+    }
+}
+
+void MainWindow::doMeanFilterImage() {
+    if (drawSurface->isImageLoaded()) {
+        bool padded = askForPadding();
+        spdlog::info("MainWindow::doMeanFilterImage: Convolving with mean filter...");
+        Image * newImage = Convolution::convolve(drawSurface->getActiveImage(), CommonConvolutions::Average, padded);
+        drawSurface->acquireLockImage();
+        drawSurface->purgeImage();
+        drawSurface->setActiveImage(newImage);
+        drawSurface->releaseLockImage();
+        drawSurface->update();
+    } else {
+        spdlog::warn("MainWindow::doMeanFilterImage: Please load an image first!");
     }
 }
 
@@ -423,6 +445,7 @@ void MainWindow::connectActionsToControllers() {
     connect(notAction, &QAction::triggered, this, &MainWindow::operateNotImage);
 
     connect(equalizeAction, &QAction::triggered, this, &MainWindow::equalizeImageHist);
+    connect(specifyHistAction, &QAction::triggered, this, &MainWindow::specifyHist);
 
     connect(meanFilter, &QAction::triggered, this, &MainWindow::doMeanFilterImage);
     connect(histogramAction, &QAction::triggered, this, &MainWindow::showHistogram);

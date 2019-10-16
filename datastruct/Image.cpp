@@ -460,11 +460,45 @@ std::vector<std::vector<int>> Image::histogram() {
     return hist;
 }
 
+std::vector<std::vector<int>> Image::equalizedHistogram() {
+    std::vector<std::vector<int>> hist = this->histogram();
+    std::vector<std::vector<int>> histEq;
+    int totalPixel = this->getHeight() * this->getWidth();
+    if (this->getOriginalFormat() == "bmp" || this->getOriginalFormat() == "ppm" ) {
+        std::vector<int> redMap = hist.at(0);
+        std::vector<int> greenMap = hist.at(1);
+        std::vector<int> blueMap = hist.at(2);
+        for (int i = 1; i < COLOR_LEVEL; i++) {
+            redMap[i] += redMap[i-1];
+            greenMap[i] += greenMap[i-1];
+            blueMap[i] += blueMap[i-1];
+        }
+        for (int i = 0; i < COLOR_LEVEL; i++) {
+            redMap[i] = redMap[i] * (COLOR_LEVEL-1) / totalPixel;
+            greenMap[i] = greenMap[i] * (COLOR_LEVEL-1) / totalPixel;
+            blueMap[i] = blueMap[i] * (COLOR_LEVEL-1) / totalPixel;
+        }
+        histEq.push_back(redMap);
+        histEq.push_back(greenMap);
+        histEq.push_back(blueMap);
+    } else {
+        std::vector<int> grayMap = hist.at(0);
+        for (int i = 1; i < COLOR_LEVEL; i++) {
+            grayMap[i] += grayMap[i-1];
+        }
+
+        for (int i = 0; i < COLOR_LEVEL; i++) {
+            grayMap[i] = grayMap[i] * (COLOR_LEVEL-1) / totalPixel;
+        }
+        histEq.push_back(grayMap);
+    }
+    return histEq;
+}
+
 Image * Image::histogramEqualization() {
     std::vector<std::vector<int>> hist = this->histogram();
     int totalPixel = this->getHeight() * this->getWidth();
     if (this->getOriginalFormat() == "bmp" || this->getOriginalFormat() == "ppm" ) {
-        std::cout << hist.size() << std::endl;
         std::vector<int> redMap = hist.at(0);
         std::vector<int> greenMap = hist.at(1);
         std::vector<int> blueMap = hist.at(2);
@@ -503,6 +537,68 @@ Image * Image::histogramEqualization() {
                 this->setPixelAt(i,j,*p);
                 delete p;
             }
+        }
+    }
+    return this;
+}
+
+std::vector<int> histSpecHelper(std::vector<int> &a, std::vector<int> &b) {
+    for (int i = 0; i < COLOR_LEVEL; i++) {
+        int minval = abs(a[i] - b[0]);
+        int minj = 0;
+        for (int j = 0; j < COLOR_LEVEL; j++) {
+            if (abs(a[i] - b[j]) < minval) {
+                minval = abs(a[i] - b[j]);
+                minj = j;
+            }
+        }
+        a[i] = minj;
+    }
+    return a;
+}
+
+// Match histogram of this image into something like B image.
+Image * Image::histogramSpecification(Image& B) {
+    // Equalize this image first.
+    std::vector<std::vector<int>> histThis = this->equalizedHistogram();
+    std::vector<std::vector<int>> histOp = B.equalizedHistogram();
+    std::vector<int> redMapThis;
+    std::vector<int> greenMapThis;
+    std::vector<int> blueMapThis;
+    std::vector<int> redMapOp;
+    std::vector<int> greenMapOp;
+    std::vector<int> blueMapOp;
+
+    if (this->getOriginalFormat() == "bmp" || this->getOriginalFormat() == "ppm" ) {
+        redMapThis = histThis.at(0);
+        greenMapThis = histThis.at(1);
+        blueMapThis = histThis.at(2);
+    } else {
+        redMapThis = histThis.at(0);
+        greenMapThis = histThis.at(0);
+        blueMapThis = histThis.at(0);
+    }
+
+    if (B.getOriginalFormat() == "bmp" || B.getOriginalFormat() == "ppm") {
+        redMapOp = histOp.at(0);
+        greenMapOp = histOp.at(1);
+        blueMapOp = histOp.at(2);
+    } else {
+        redMapOp = histOp.at(0);
+        greenMapOp = histOp.at(0);
+        blueMapOp = histOp.at(0);
+    }
+
+    redMapThis = histSpecHelper(redMapThis, redMapOp);
+    greenMapThis = histSpecHelper(greenMapThis, greenMapOp);
+    blueMapThis = histSpecHelper(blueMapThis, blueMapOp);
+
+    for (int i = 0; i < this->getWidth(); i++) {
+        for (int j = 0; j < this->getHeight(); j++) {
+            Pixel a = this->getPixelAt(i,j);
+            Pixel *p = new Pixel(redMapThis[a.getRed()], greenMapThis[a.getGreen()], blueMapThis[a.getBlue()]);
+            this->setPixelAt(i,j,*p);
+            delete p;
         }
     }
     return this;

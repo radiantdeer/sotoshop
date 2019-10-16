@@ -57,8 +57,9 @@ class Image {
         Image * operator~();
 
         std::vector<std::vector<int>> histogram();
+        std::vector<std::vector<int>> equalizedHistogram();
         Image * histogramEqualization();
-
+        Image * histogramSpecification(Image& B);
     private:
         int width;
         int height;

@@ -44,7 +44,7 @@ class MainWindow : public QMainWindow {
         void equalizeImageHist();
         void doMeanFilterImage();
         void showHistogram();
-
+        void specifyHist();
     private:
         QAction * loadAction;
         QAction * saveAction;
@@ -66,6 +66,7 @@ class MainWindow : public QMainWindow {
         QAction * equalizeAction;
         QAction * meanFilter;
         QAction * histogramAction;
+        QAction * specifyHistAction;
         DrawSurface * drawSurface;
         HistogramDialog * histDialog;
 
