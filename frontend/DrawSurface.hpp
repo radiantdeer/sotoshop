@@ -17,6 +17,8 @@ class DrawSurface : public QWidget {
 
         Image * getActiveImage();
         bool isImageLoaded();
+        // Changing active image is not thread-safe, please call acquireLockImage before changing &
+        // releaseLockImage after changing
         void setActiveImage(Image * newImage);
         void setActiveImage(Image& newImage);
         void setImageLoaded(bool imageLoaded);

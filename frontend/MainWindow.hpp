@@ -27,19 +27,33 @@ class MainWindow : public QMainWindow {
         void saveFile();
         void makeNegativeImage();
         void convertToGrayscaleImage();
+        void brightenImage();
         void moveImage();
-        void rotateImage();
-        void flipImage();
-        void zoomImage();
+        void rotateImageCW();
+        void rotateImageCCW();
+        void flipImageHorizontal();
+        void flipImageVertical();
+        void zoomIn();
+        void zoomOut();
+        void addImage();
+        void substractImage();
+        void multiplyImage();
+        void operateAndImage();
+        void operateOrImage();
+        void operateNotImage();
         void refresh();
         void doMeanFilter();
         void doMedianFilter();
         void doHighPassFilter(int filterVariation);
+  
+        void equalizeImageHist();
         void showHistogram();
-
+        void specifyHist();
+  
     private:
         QAction * loadAction;
         QAction * saveAction;
+  
         QAction * negativeImageAction;
         QAction * convertToGrayscaleAction;
         QAction * moveAction;
@@ -54,7 +68,24 @@ class MainWindow : public QMainWindow {
         QAction * highPassFilter3Action;
         QAction * highPassFilter4Action;
 
+        QAction * rotateCWAction;
+        QAction * rotateCCWAction;
+        QAction * flipHAction;
+        QAction * flipVAction;
+        QAction * zoomInAction;
+        QAction * zoomOutAction;
+        QAction * brightenAction;
+        QAction * additionAction;
+        QAction * substractAction;
+        QAction * multiplyAction;
+        QAction * andAction;
+        QAction * orAction;
+        QAction * notAction;
+  
+        QAction * equalizeAction;
         QAction * histogramAction;
+        QAction * specifyHistAction;
+  
         DrawSurface * drawSurface;
         HistogramDialog * histDialog;
 
@@ -63,6 +94,7 @@ class MainWindow : public QMainWindow {
         std::string getSaveFileUrl(std::string dialogTitle);
         bool askForPadding();
         static std::string getFileExtension(std::string fileUrl);
+        int promptValue(std::string promptTitle, std::string promptText);
 
 };
 

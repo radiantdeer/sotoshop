@@ -5,6 +5,8 @@
 #include <vector>
 #include "Pixel.hpp"
 
+#define COLOR_LEVEL 256
+
 class Image {
 
     public:
@@ -24,37 +26,42 @@ class Image {
         std::string getFileUrl() const;
 
         void setPixelAt(int x, int y, Pixel pixel);
+        void setPixelAt(int x, int y, unsigned char r, unsigned char g, unsigned char b);
         void setWidth(int width);
         void setHeight(int height);
         void setOriginalFormat(std::string originalFormat);
         void setFileUrl(std::string fileUrl);
 
-        Image * add(Image B, int width, int height);
+        Image * add(Image& B);
         Image * adjustBrightness(unsigned char delta);
-        Image * substract(Image B, int width, int height);
+        Image * substract(Image& B);
+        Image * multiply(Image& b);
         Image * invert();
         Image * grayscale();
-        Image * and_op(Image B, int width, int height);
-        Image * or_op(Image B, int width, int height);
+        Image * and_op(Image& B);
+        Image * or_op(Image& B);
         Image * not_op();
         Image * translate(int dx, int dy);
         Image * rotate90CW();
         Image * rotate90CCW();
-        Image * multiply(Image b);
         Image * flipH();
         Image * flipV();
+        Image * magnify2();
+        Image * shrink2();
 
-        Image * operator+(Image B);
+        Image * operator+(Image& B);
         Image * operator+(unsigned char deltaBrightness);
-        Image * operator-(Image B);
+        Image * operator-(Image& B);
         Image * operator-(unsigned char deltaBrightness);
-        Image * operator*(Image B);
-        Image * operator&(Image B);
-        Image * operator|(Image B);
+        Image * operator*(Image& B);
+        Image * operator&(Image& B);
+        Image * operator|(Image& B);
         Image * operator~();
 
         std::vector<std::vector<int>> histogram();
-
+        std::vector<std::vector<int>> equalizedHistogram();
+        Image * histogramEqualization();
+        Image * histogramSpecification(Image& B);
     private:
         int width;
         int height;
