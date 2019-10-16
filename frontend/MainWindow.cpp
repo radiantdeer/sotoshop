@@ -3,10 +3,14 @@
 #include <iostream>
 #include <QFileDialog>
 #include <QMenuBar>
+#include <QMessageBox>
 #include <QPaintEvent>
 #include <QRegion>
 #include <QUrl>
+#include <sstream>
 #include "../spdlog/spdlog.h"
+#include "../utilities/Convolution.hpp"
+#include "../utilities/CommonConvolutions.hpp"
 
 MainWindow::MainWindow() : QMainWindow() {
     this->setWindowTitle("SotoShop");
@@ -28,6 +32,10 @@ MainWindow::MainWindow() : QMainWindow() {
     QMenu * histogramMenu = this->menuBar()->addMenu("Histogram");
     histogramAction = histogramMenu->addAction("Show");
     equalizeAction = histogramMenu->addAction("Equalize");
+    histogramAction = this->menuBar()->addAction("Histogram");
+  
+    QMenu * convolutionMenu = this->menuBar()->addMenu("Convolution");
+    meanFilter = convolutionMenu->addAction("Mean Filter");
 
     connectActionsToControllers();
 
@@ -163,7 +171,22 @@ void MainWindow::equalizeImageHist() {
     }
 }
 
-void MainWindow::showHistogram(){
+void MainWindow::doMeanFilterImage() {
+    if (drawSurface->isImageLoaded()) {
+        bool padded = askForPadding();
+        spdlog::info("MainWindow::doMeanFilterImage: Convolving with mean filter...");
+        Image * newImage = Convolution::convolve(drawSurface->getActiveImage(), CommonConvolutions::Average, padded);
+        drawSurface->acquireLockImage();
+        drawSurface->purgeImage();
+        drawSurface->setActiveImage(newImage);
+        drawSurface->releaseLockImage();
+        drawSurface->update();
+    } else {
+        spdlog::warn("MainWindow::doMeanFilterImage: Please load an image first!");
+    }
+}
+
+void MainWindow::showHistogram() {
     if (drawSurface->isImageLoaded()) {
         spdlog::info("MainWindow::showHistogram: Showing histogram...");
         std::vector<std::vector<int>> hist = drawSurface->getActiveImage()->histogram();
@@ -192,6 +215,7 @@ void MainWindow::connectActionsToControllers() {
     connect(zoomAction, &QAction::triggered, this, &MainWindow::zoomImage);
     connect(equalizeAction, &QAction::triggered, this, &MainWindow::equalizeImageHist);
 
+    connect(meanFilter, &QAction::triggered, this, &MainWindow::doMeanFilterImage);
     connect(histogramAction, &QAction::triggered, this, &MainWindow::showHistogram);
 }
 
@@ -209,6 +233,15 @@ std::string MainWindow::getSaveFileUrl(std::string dialogTitle) {
     QUrl tempFileUrl = QFileDialog::getSaveFileUrl(this, dialogTitle.c_str(), *(new QUrl()), "Raw Image File (*.raw);; PBM Image File (*.pbm);; PGM Image File (*.pgm);; PPM Image File (*.ppm);; Bitmap File (*.bmp)");
     string fileUrl = tempFileUrl.toLocalFile().toUtf8().constData();
     return fileUrl;
+}
+
+bool MainWindow::askForPadding() {
+    QMessageBox::StandardButton response = QMessageBox::question(this, "Convolution Padding", "Do you want to pad the image before convolution?");
+    if (response == QMessageBox::Yes) {
+        return true;
+    } else {
+        return false;
+    }
 }
 
 void MainWindow::setActiveImage(Image * image) {
