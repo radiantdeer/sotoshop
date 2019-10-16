@@ -25,9 +25,7 @@ Image* Convolution::convolve(Image* image, const ConvolutionMatrix& opMatrix, bo
 
     Image * result = new Image(resultWidth, resultHeight);
     spdlog::debug("Convolution::convolve: Starting convolution...");
-    std::ostringstream stream;
     for (int j = 0; j < resultHeight; j++) {
-        stream.str(std::string());
         for (int i = 0; i < resultWidth; i++) {
             int redSum = 0;
             int greenSum = 0;
@@ -45,13 +43,10 @@ Image* Convolution::convolve(Image* image, const ConvolutionMatrix& opMatrix, bo
             greenSum /= opMatrix.getMatrixSum();
             blueSum /= opMatrix.getMatrixSum();
             Pixel thisPixel (Pixel::thresholding(redSum), Pixel::thresholding(greenSum), Pixel::thresholding(blueSum));
-            stream << thisPixel.toString() << " ";
             result->setPixelAt(i, j, thisPixel);
         }
-        spdlog::debug("{}",stream.str());
     }
     spdlog::debug("Convolution::convolve: Convolution done.");
-
     return result;
 }
 
@@ -68,6 +63,7 @@ Image* Convolution::padImage(Image* image, int padWidth, int padHeight) {
     int paddedWidth = originalWidth + (padWidth * 2);
     int paddedHeight = originalHeight + (padHeight * 2);
     Image * paddedImage = new Image(paddedWidth, paddedHeight);
+    paddedImage->setOriginalFormat(image->getOriginalFormat());
 
     spdlog::debug("Convolution::padImage: Padded image dimension : {}x{}", paddedImage->getWidth(), paddedImage->getHeight());
     for (int j = 0; j < padHeight; j++) {
