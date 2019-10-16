@@ -3,6 +3,7 @@
 #include <iostream>
 #include <cmath>
 #include <vector>
+#include "../spdlog/spdlog.h"
 
 Image::Image() {
     width = 0;
@@ -480,6 +481,7 @@ Image * Image::histogramEqualization() {
     std::vector<std::vector<int>> hist = this->histogram();
     int totalPixel = this->getHeight() * this->getWidth();
     if (this->getOriginalFormat() == "bmp" || this->getOriginalFormat() == "ppm" ) {
+        std::cout << hist.size() << std::endl;
         std::vector<int> redMap = hist.at(0);
         std::vector<int> greenMap = hist.at(1);
         std::vector<int> blueMap = hist.at(2);
@@ -488,13 +490,11 @@ Image * Image::histogramEqualization() {
             greenMap[i] += greenMap[i-1];
             blueMap[i] += blueMap[i-1];
         }
-
         for (int i = 0; i < COLOR_LEVEL; i++) {
             redMap[i] = redMap[i] * (COLOR_LEVEL-1) / totalPixel;
-            greenMap[i] = greenMap[i-1] * (COLOR_LEVEL-1) / totalPixel;
-            blueMap[i] = blueMap[i-1] * (COLOR_LEVEL-1) / totalPixel;
+            greenMap[i] = greenMap[i] * (COLOR_LEVEL-1) / totalPixel;
+            blueMap[i] = blueMap[i] * (COLOR_LEVEL-1) / totalPixel;
         }
-
         for (int i = 0; i < this->getWidth(); i++) {
             for (int j = 0; j < this->getHeight(); j++) {
                 Pixel a = this->getPixelAt(i,j);

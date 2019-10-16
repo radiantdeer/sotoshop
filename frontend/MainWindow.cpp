@@ -24,9 +24,10 @@ MainWindow::MainWindow() : QMainWindow() {
     flipAction = editMenu->addAction("Flip");
     zoomAction = editMenu->addAction("Zoom");
     editMenu->addSeparator();
-    equalizeAction = editMenu->addAction("Equalize Histogram");
 
-    histogramAction = this->menuBar()->addAction("Histogram");
+    QMenu * histogramMenu = this->menuBar()->addMenu("Histogram");
+    histogramAction = histogramMenu->addAction("Show");
+    equalizeAction = histogramMenu->addAction("Equalize");
 
     connectActionsToControllers();
 
@@ -153,7 +154,10 @@ void MainWindow::zoomImage() {
 void MainWindow::equalizeImageHist() {
     if (drawSurface->isImageLoaded()) {
         spdlog::info("MainWindow::equalizeImageHist: Equalizing image histogram...");
-        spdlog::info("MainWindow::equalizeImageHist: stub function");
+        drawSurface->acquireLockImage();
+        drawSurface->getActiveImage()->histogramEqualization();
+        drawSurface->releaseLockImage();
+        drawSurface->update();
     } else {
         spdlog::warn("MainWindow::equalizeImageHist: Please load an image first!");
     }
