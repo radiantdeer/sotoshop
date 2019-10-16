@@ -2,11 +2,16 @@
 
 #include <iostream>
 #include <QFileDialog>
+#include <QInputDialog>
 #include <QMenuBar>
+#include <QMessageBox>
 #include <QPaintEvent>
 #include <QRegion>
 #include <QUrl>
+#include <sstream>
 #include "../spdlog/spdlog.h"
+#include "../utilities/Convolution.hpp"
+#include "../utilities/CommonConvolutions.hpp"
 
 MainWindow::MainWindow() : QMainWindow() {
     this->setWindowTitle("SotoShop");
@@ -19,16 +24,33 @@ MainWindow::MainWindow() : QMainWindow() {
     negativeImageAction = editMenu->addAction("Negative Image");
     convertToGrayscaleAction = editMenu->addAction("Convert Image to Grayscale");
     editMenu->addSeparator();
+    brightenAction = editMenu->addAction("Brightening");
+    editMenu->addSeparator();
     moveAction = editMenu->addAction("Move image");
-    rotateAction = editMenu->addAction("Rotate");
-    flipAction = editMenu->addAction("Flip");
+    QMenu * rotateMenu = editMenu->addMenu("Rotate");
+    rotateCWAction = rotateMenu->addAction("90\370 CW (clock-wise)");
+    rotateCCWAction = rotateMenu->addAction("90\370 CCW (counterclock-wise)");
+    QMenu * flipMenu = editMenu->addMenu("Flip");
+    flipHAction = flipMenu->addAction("Horizontal");
+    flipVAction = flipMenu->addAction("Vertical");
     zoomAction = editMenu->addAction("Zoom");
     editMenu->addSeparator();
+    QMenu * arithmeticMenu = editMenu->addMenu("Arithmetic Operations");
+    additionAction = arithmeticMenu->addAction("Addition");
+    substractAction = arithmeticMenu->addAction("Substract");
+    multiplyAction = arithmeticMenu->addAction("Multiply");
+    QMenu * booleanMenu = editMenu->addMenu("Boolean Operations");
+    andAction = booleanMenu->addAction("AND");
+    orAction = booleanMenu->addAction("OR");
+    notAction = booleanMenu->addAction("NOT");
 
     QMenu * histogramMenu = this->menuBar()->addMenu("Histogram");
     histogramAction = histogramMenu->addAction("Show");
     equalizeAction = histogramMenu->addAction("Equalize");
     specifyHistAction = histogramMenu->addAction("Specify");
+
+    QMenu * convolutionMenu = this->menuBar()->addMenu("Convolution");
+    meanFilter = convolutionMenu->addAction("Mean Filter");
 
     connectActionsToControllers();
 
@@ -58,7 +80,9 @@ void MainWindow::loadFile() {
         }
         ImageLoader * imageLoader = ImageLoaderFactory::getImageLoader(url);
         Image * loadedImage = imageLoader->load(url);
+        drawSurface->acquireLockImage();
         drawSurface->setActiveImage(loadedImage);
+        drawSurface->releaseLockImage();
         delete imageLoader;
         spdlog::info("MainWindow::loadFile: Image {} loaded successfully.", url);
         drawSurface->update();
@@ -116,30 +140,93 @@ void MainWindow::convertToGrayscaleImage() {
     }
 }
 
+void MainWindow::brightenImage() {
+    if (drawSurface->isImageLoaded()) {
+        spdlog::debug("Prompting the user to input deltaX");
+        int delta = promptValue("Values needed", "Enter value : ");
+        spdlog::debug("User entered delta = {}", delta);
+        spdlog::info("MainWindow::convertToGrayscaleImage: Brightening image...");
+        drawSurface->acquireLockImage();
+        drawSurface->getActiveImage()->adjustBrightness(delta);
+        drawSurface->releaseLockImage();
+        drawSurface->update();
+    } else {
+        spdlog::warn("MainWindow::convertToGrayscaleImage: Please load an image first!");
+    }
+}
+
+
 void MainWindow::moveImage() {
     if (drawSurface->isImageLoaded()) {
-        spdlog::info("MainWindow::moveImage: Moving image...");
-        spdlog::info("MainWindow::moveImage: stub function");
+        spdlog::debug("Prompting the user to input deltaX");
+        int deltaX = promptValue("Values needed", "Enter delta X (how further the image is moved horizontally) : ");
+        spdlog::debug("User entered deltaX = {}", deltaX);
+
+        spdlog::debug("Prompting the user to input deltaY");
+        int deltaY = promptValue("Values needed", "Enter delta Y (how further the image is moved vertically) : ");
+        spdlog::debug("User entered deltaY = {}", deltaY);
+
+        spdlog::info("MainWindow::moveImage: Now moving the image...");
+        drawSurface->acquireLockImage();
+        drawSurface->getActiveImage()->translate(deltaX, deltaY);
+        drawSurface->releaseLockImage();
+        drawSurface->update();
     } else {
         spdlog::warn("MainWindow::moveImage: Please load an image first!");
     }
 }
 
-void MainWindow::rotateImage() {
+void MainWindow::rotateImageCW() {
     if (drawSurface->isImageLoaded()) {
-        spdlog::info("MainWindow::rotateImage: Rotating image...");
-        spdlog::info("MainWindow::rotateImage: stub function");
+        spdlog::info("MainWindow::rotateImageCW: Rotating image clockwise...");
+        drawSurface->acquireLockImage();
+        Image * oldImage = drawSurface->getActiveImage();
+        Image * newImage = oldImage->rotate90CW();
+        drawSurface->setActiveImage(newImage);
+        drawSurface->releaseLockImage();
+        drawSurface->update();
+        delete oldImage;
     } else {
-        spdlog::warn("MainWindow::rotateImage: Please load an image first!");
+        spdlog::warn("MainWindow::rotateImageCW: Please load an image first!");
     }
 }
 
-void MainWindow::flipImage() {
+void MainWindow::rotateImageCCW() {
     if (drawSurface->isImageLoaded()) {
-        spdlog::info("MainWindow::flipImage: Flipping image...");
-        spdlog::info("MainWindow::flipImage: stub function");
+        spdlog::info("MainWindow::rotateImageCCW: Rotating image counter-clockwise...");
+        drawSurface->acquireLockImage();
+        Image * oldImage = drawSurface->getActiveImage();
+        Image * newImage = oldImage->rotate90CCW();
+        drawSurface->setActiveImage(newImage);
+        drawSurface->releaseLockImage();
+        drawSurface->update();
+        delete oldImage;
     } else {
-        spdlog::warn("MainWindow::rotateImage: Please load an image first!");
+        spdlog::warn("MainWindow::rotateImageCCW: Please load an image first!");
+    }
+}
+
+void MainWindow::flipImageHorizontal() {
+    if (drawSurface->isImageLoaded()) {
+        spdlog::info("MainWindow::flipImageHorizontal: Flipping image horizontally...");
+        drawSurface->acquireLockImage();
+        drawSurface->getActiveImage()->flipH();
+        drawSurface->releaseLockImage();
+        drawSurface->update();
+    } else {
+        spdlog::warn("MainWindow::flipImageHorizontal: Please load an image first!");
+    }
+}
+
+void MainWindow::flipImageVertical() {
+    if (drawSurface->isImageLoaded()) {
+        spdlog::info("MainWindow::flipImageVertical: Flipping image vertically...");
+        drawSurface->acquireLockImage();
+        drawSurface->getActiveImage()->flipV();
+        drawSurface->releaseLockImage();
+        drawSurface->update();
+    } else {
+        spdlog::warn("MainWindow::flipImageVertical: Please load an image first!");
     }
 }
 
@@ -149,6 +236,123 @@ void MainWindow::zoomImage() {
         spdlog::info("MainWindow::zoomImage: stub function");
     } else {
         spdlog::warn("MainWindow::zoomImage: Please load an image first!");
+    }
+}
+
+void MainWindow::addImage() {
+    if (drawSurface->isImageLoaded()) {
+        spdlog::debug("MainWindow::addImage: Asking for other image...");
+        std::string url = getOpenFileUrl("Please load another image.");
+        if (url != "") {
+            spdlog::info("MainWindow::addImage: Adding newly loaded image to current image...");
+            ImageLoader * imageLoader = ImageLoaderFactory::getImageLoader(url);
+            Image * secondImage = imageLoader->load(url);
+            delete imageLoader;
+            drawSurface->acquireLockImage();
+            drawSurface->getActiveImage()->add(*secondImage);
+            drawSurface->releaseLockImage();
+            drawSurface->update();
+        } else {
+            spdlog::info("MainWindow::addImage: Operation cancelled");
+        }
+     } else {
+        spdlog::warn("MainWindow::addImage: Please load an image first!");
+    }
+}
+
+void MainWindow::substractImage() {
+    if (drawSurface->isImageLoaded()) {
+        spdlog::debug("MainWindow::substractImage: Asking for other image...");
+        std::string url = getOpenFileUrl("Please load another image");
+        if (url != "") {
+            spdlog::info("MainWindow::substractImage: Substracting newly loaded image to current image...");
+            ImageLoader * imageLoader = ImageLoaderFactory::getImageLoader(url);
+            Image * secondImage = imageLoader->load(url);
+            delete imageLoader;
+            drawSurface->acquireLockImage();
+            drawSurface->getActiveImage()->substract(*secondImage);
+            drawSurface->releaseLockImage();
+            drawSurface->update();
+        } else {
+            spdlog::info("MainWindow::substractImage: Operation cancelled");
+        }
+    } else {
+        spdlog::warn("MainWindow::substractImage: Please load an image first!");
+    }
+}
+
+void MainWindow::multiplyImage() {
+    if (drawSurface->isImageLoaded()) {
+        spdlog::debug("MainWindow::substractImage: Asking for other image...");
+        std::string url = getOpenFileUrl("Please load another image");
+        if (url != "") {
+            spdlog::info("MainWindow::multiplyImage: Multiplying current image with newly loaded image...");
+            ImageLoader * imageLoader = ImageLoaderFactory::getImageLoader(url);
+            Image * secondImage = imageLoader->load(url);
+            delete imageLoader;
+            drawSurface->acquireLockImage();
+            drawSurface->getActiveImage()->multiply(*secondImage);
+            drawSurface->releaseLockImage();
+            drawSurface->update();
+        } else {
+            spdlog::info("MainWindow::multiplyImage: Operation cancelled");
+        }
+    } else {
+        spdlog::warn("MainWindow::multiplyImage: Please load an image first!");
+    }
+}
+
+void MainWindow::operateAndImage() {
+    if (drawSurface->isImageLoaded()) {
+        spdlog::debug("MainWindow::operateAndImage: Asking for other image...");
+        std::string url = getOpenFileUrl("Please load another image");
+        if (url != "") {
+            spdlog::info("MainWindow::operateAndImage: Running AND operation...");
+            ImageLoader * imageLoader = ImageLoaderFactory::getImageLoader(url);
+            Image * secondImage = imageLoader->load(url);
+            delete imageLoader;
+            drawSurface->acquireLockImage();
+            drawSurface->getActiveImage()->and_op(*secondImage);
+            drawSurface->releaseLockImage();
+            drawSurface->update();
+        } else {
+            spdlog::info("MainWindow::operateAndImage: Operation cancelled");
+        }
+    } else {
+        spdlog::warn("MainWindow::operateAndImage: Please load an image first!");
+    }
+}
+
+void MainWindow::operateOrImage() {
+    if (drawSurface->isImageLoaded()) {
+        spdlog::debug("MainWindow::operateOrImage: Asking for other image...");
+        std::string url = getOpenFileUrl("Please load another image");
+        if (url != "") {
+            spdlog::info("MainWindow::operateOrImage: Running OR operation...");
+            ImageLoader * imageLoader = ImageLoaderFactory::getImageLoader(url);
+            Image * secondImage = imageLoader->load(url);
+            delete imageLoader;
+            drawSurface->acquireLockImage();
+            drawSurface->getActiveImage()->or_op(*secondImage);
+            drawSurface->releaseLockImage();
+            drawSurface->update();
+        } else {
+            spdlog::info("MainWindow::operateOrImage: Operation cancelled");
+        }
+    } else {
+        spdlog::warn("MainWindow::operateOrImage: Please load an image first!");
+    }
+}
+
+void MainWindow::operateNotImage() {
+    if (drawSurface->isImageLoaded()) {
+        spdlog::info("MainWindow::operateNotImage: Running NOT operation...");
+        drawSurface->acquireLockImage();
+        drawSurface->getActiveImage()->not_op();
+        drawSurface->releaseLockImage();
+        drawSurface->update();
+    } else {
+        spdlog::warn("MainWindow::operateNotImage: Please load an image first!");
     }
 }
 
@@ -185,7 +389,7 @@ void MainWindow::specifyHist() {
     }
 }
 
-void MainWindow::showHistogram(){
+void MainWindow::showHistogram() {
     if (drawSurface->isImageLoaded()) {
         spdlog::info("MainWindow::showHistogram: Showing histogram...");
         std::vector<std::vector<int>> hist = drawSurface->getActiveImage()->histogram();
@@ -202,19 +406,48 @@ void MainWindow::showHistogram(){
     }
 }
 
+void MainWindow::doMeanFilterImage() {
+    if (drawSurface->isImageLoaded()) {
+        bool padded = askForPadding();
+        spdlog::info("MainWindow::doMeanFilterImage: Convolving with mean filter...");
+        Image * newImage = Convolution::convolve(drawSurface->getActiveImage(), CommonConvolutions::Average, padded);
+        drawSurface->acquireLockImage();
+        drawSurface->purgeImage();
+        drawSurface->setActiveImage(newImage);
+        drawSurface->releaseLockImage();
+        drawSurface->update();
+    } else {
+        spdlog::warn("MainWindow::doMeanFilterImage: Please load an image first!");
+    }
+}
+
 void MainWindow::connectActionsToControllers() {
     connect(loadAction, &QAction::triggered, this, &MainWindow::loadFile);
     connect(saveAction, &QAction::triggered, this, &MainWindow::saveFile);
 
     connect(negativeImageAction, &QAction::triggered, this, &MainWindow::makeNegativeImage);
     connect(convertToGrayscaleAction, &QAction::triggered, this, &MainWindow::convertToGrayscaleImage);
+
+    connect(brightenAction, &QAction::triggered, this, &MainWindow::brightenImage);
+
     connect(moveAction, &QAction::triggered, this, &MainWindow::moveImage);
-    connect(rotateAction, &QAction::triggered, this, &MainWindow::rotateImage);
-    connect(flipAction, &QAction::triggered, this, &MainWindow::flipImage);
+    connect(rotateCWAction, &QAction::triggered, this, &MainWindow::rotateImageCW);
+    connect(rotateCCWAction, &QAction::triggered, this, &MainWindow::rotateImageCCW);
+    connect(flipHAction, &QAction::triggered, this, &MainWindow::flipImageHorizontal);
+    connect(flipVAction, &QAction::triggered, this, &MainWindow::flipImageVertical);
     connect(zoomAction, &QAction::triggered, this, &MainWindow::zoomImage);
+
+    connect(additionAction, &QAction::triggered, this, &MainWindow::addImage);
+    connect(substractAction, &QAction::triggered, this, &MainWindow::substractImage);
+    connect(multiplyAction, &QAction::triggered, this, &MainWindow::multiplyImage);
+    connect(andAction, &QAction::triggered, this, &MainWindow::operateAndImage);
+    connect(orAction, &QAction::triggered, this, &MainWindow::operateOrImage);
+    connect(notAction, &QAction::triggered, this, &MainWindow::operateNotImage);
+
     connect(equalizeAction, &QAction::triggered, this, &MainWindow::equalizeImageHist);
     connect(specifyHistAction, &QAction::triggered, this, &MainWindow::specifyHist);
 
+    connect(meanFilter, &QAction::triggered, this, &MainWindow::doMeanFilterImage);
     connect(histogramAction, &QAction::triggered, this, &MainWindow::showHistogram);
 }
 
@@ -232,6 +465,20 @@ std::string MainWindow::getSaveFileUrl(std::string dialogTitle) {
     QUrl tempFileUrl = QFileDialog::getSaveFileUrl(this, dialogTitle.c_str(), *(new QUrl()), "Raw Image File (*.raw);; PBM Image File (*.pbm);; PGM Image File (*.pgm);; PPM Image File (*.ppm);; Bitmap File (*.bmp)");
     string fileUrl = tempFileUrl.toLocalFile().toUtf8().constData();
     return fileUrl;
+}
+
+int MainWindow::promptValue(std::string promptTitle, std::string promptText) {
+    int value = QInputDialog::getInt(this, promptTitle.c_str(), promptText.c_str(), 0);
+    return value;
+}
+
+bool MainWindow::askForPadding() {
+    QMessageBox::StandardButton response = QMessageBox::question(this, "Convolution Padding", "Do you want to pad the image before convolution?");
+    if (response == QMessageBox::Yes) {
+        return true;
+    } else {
+        return false;
+    }
 }
 
 void MainWindow::setActiveImage(Image * image) {
