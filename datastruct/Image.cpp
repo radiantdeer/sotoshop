@@ -384,7 +384,7 @@ Image * Image::flipV() {
     return this;
 }
 
-Image * Image::operator+(Image B) {
+Image * Image::operator+(Image& B) {
     Image * C = new Image(*this);
     return C->add(B);
 }
@@ -394,7 +394,7 @@ Image * Image::operator+(unsigned char deltaBrightness) {
     return C->adjustBrightness(deltaBrightness);
 }
 
-Image * Image::operator-(Image B) {
+Image * Image::operator-(Image& B) {
     Image * C = new Image(*this);
     return C->substract(B);
 }
@@ -406,17 +406,17 @@ Image * Image::operator-(unsigned char deltaBrightness) {
 
 // TODO
 // TESTING AND DEBUG
-Image * Image::operator*(Image B) {
+Image * Image::operator*(Image& B) {
     Image * C = new Image(*this);
     return C->multiply(B);
 }
 
-Image * Image::operator&(Image B) {
+Image * Image::operator&(Image& B) {
     Image * C = new Image(*this);
     return C->and_op(B);
 }
 
-Image * Image::operator|(Image B) {
+Image * Image::operator|(Image& B) {
     Image * C = new Image(*this);
     return C->or_op(B);
 }
