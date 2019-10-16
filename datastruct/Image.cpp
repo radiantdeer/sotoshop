@@ -385,6 +385,25 @@ Image * Image::flipV() {
     return this;
 }
 
+Image * Image::zoomIn2() {
+    Image * result = new Image(this->getWidth() * 2, this->getHeight() * 2);
+    for (int j = 0; j < this->getHeight(); j++) {
+        for (int i = 0; i < this->getWidth(); i++) {
+            Pixel currentPixel = this->getPixelAt(i, j);
+            result->setPixelAt(i * 2, j * 2, currentPixel);
+            result->setPixelAt((i * 2) + 1, j * 2, currentPixel);
+            result->setPixelAt(i * 2, (j * 2) + 1, currentPixel);
+            result->setPixelAt((i * 2) + 1, (j * 2) + 1, currentPixel);
+        }
+    }
+    return result;
+}
+
+Image * Image::zoomOut2() {
+
+    return this;
+}
+
 Image * Image::operator+(Image& B) {
     Image * C = new Image(*this);
     return C->add(B);

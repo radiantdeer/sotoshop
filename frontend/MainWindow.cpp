@@ -232,7 +232,10 @@ void MainWindow::flipImageVertical() {
 void MainWindow::zoomImage() {
     if (drawSurface->isImageLoaded()) {
         spdlog::info("MainWindow::zoomImage: Zooming image...");
-        spdlog::info("MainWindow::zoomImage: stub function");
+        drawSurface->acquireLockImage();
+        drawSurface->setActiveImage(drawSurface->getActiveImage()->zoomIn2());
+        drawSurface->releaseLockImage();
+        drawSurface->update();
     } else {
         spdlog::warn("MainWindow::zoomImage: Please load an image first!");
     }
