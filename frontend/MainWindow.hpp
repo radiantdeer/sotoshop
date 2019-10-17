@@ -49,7 +49,8 @@ class MainWindow : public QMainWindow {
         void equalizeImageHist();
         void showHistogram();
         void specifyHist();
-  
+
+        void nthPower();
     private:
         QAction * loadAction;
         QAction * saveAction;
@@ -85,7 +86,9 @@ class MainWindow : public QMainWindow {
         QAction * equalizeAction;
         QAction * histogramAction;
         QAction * specifyHistAction;
-  
+
+        QAction * nthPowerAction;
+
         DrawSurface * drawSurface;
         HistogramDialog * histDialog;
 

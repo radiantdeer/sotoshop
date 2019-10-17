@@ -427,6 +427,22 @@ Image * Image::shrink2() {
     return result;
 }
 
+Image * Image::nthPower(double n, double c) {
+    for (int j = 0; j < this->getHeight(); j++) {
+        for (int i = 0; i < this->getWidth(); i++) {
+            // s = cr^n
+            Pixel a = this->getPixelAt(i,j);
+            int redVal   = 255*c*pow(double(a.getRed())  /(COLOR_LEVEL-1), n);
+            int greenVal = 255*c*pow(double(a.getGreen())/(COLOR_LEVEL-1), n);
+            int blueVal  = 255*c*pow(double(a.getBlue()) /(COLOR_LEVEL-1), n);
+            Pixel *p = new Pixel(redVal, greenVal, blueVal);
+            this->setPixelAt(i, j, *p);
+            delete p;
+        }
+    }
+    return this;
+}
+
 Image * Image::operator+(Image& B) {
     Image * C = new Image(*this);
     return C->add(B);

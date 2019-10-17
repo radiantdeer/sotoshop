@@ -45,6 +45,8 @@ MainWindow::MainWindow() : QMainWindow() {
     andAction = booleanMenu->addAction("AND");
     orAction = booleanMenu->addAction("OR");
     notAction = booleanMenu->addAction("NOT");
+    editMenu->addSeparator();
+    nthPowerAction = editMenu->addAction("N-Power");
 
     QMenu * histogramMenu = this->menuBar()->addMenu("Histogram");
     histogramAction = histogramMenu->addAction("Show");
@@ -326,6 +328,24 @@ void MainWindow::zoomOut() {
     }
 }
 
+void MainWindow::nthPower() {
+    if (drawSurface->isImageLoaded()) {
+        spdlog::debug("Prompting the user to input c");
+        double c = QInputDialog::getDouble(this, "Constant", "Enter value: ");
+        spdlog::debug("User entered delta = {}", c);
+        spdlog::debug("Prompting the user to input n");
+        double n = QInputDialog::getDouble(this, "N Power", "Enter value: ");
+        spdlog::debug("User entered delta = {}", n);
+        spdlog::info("MainWindow::nthPower: N Power");
+        drawSurface->acquireLockImage();
+        drawSurface->setActiveImage(drawSurface->getActiveImage()->nthPower(n, c));
+        drawSurface->releaseLockImage();
+        drawSurface->update();
+    } else {
+        spdlog::warn("MainWindow::nthPower: Please load an image first!");
+    }
+}
+
 void MainWindow::addImage() {
     if (drawSurface->isImageLoaded()) {
         spdlog::debug("MainWindow::addImage: Asking for other image...");
@@ -528,6 +548,7 @@ void MainWindow::connectActionsToControllers() {
     connect(highPassFilter4Action, &QAction::triggered, this, [this]{doHighPassFilter(4); });
 
     connect(histogramAction, &QAction::triggered, this, &MainWindow::showHistogram);
+    connect(nthPowerAction, &QAction::triggered, this, &MainWindow::nthPower);
 }
 
 std::string MainWindow::getOpenFileUrl(std::string dialogTitle) {
