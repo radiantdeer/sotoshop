@@ -48,6 +48,7 @@ class Image {
         Image * flipV();
         Image * magnify2();
         Image * shrink2();
+        Image * nthPower(double n, double c);
 
         Image * operator+(Image& B);
         Image * operator+(unsigned char deltaBrightness);

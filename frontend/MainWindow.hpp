@@ -42,6 +42,7 @@ class MainWindow : public QMainWindow {
         void operateAndImage();
         void operateOrImage();
         void operateNotImage();
+        void nthPower();
         void refresh();
         void doMeanFilter();
         void doMedianFilter();
@@ -91,6 +92,7 @@ class MainWindow : public QMainWindow {
         QAction * histogramAction;
         QAction * specifyHistAction;
 
+        QAction * nthPowerAction;
         QAction * bitPlaneAction;
 
         DrawSurface * drawSurface;
