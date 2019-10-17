@@ -46,18 +46,16 @@ int BMPImageSaver::save(const Image &image, std::string fileUrl) {
 
         int a = 0; int b = 0;
 
-        while (a < height && isGrayscale) {
-            while (b < width && isGrayscale) {
+        for (a = 0; a < height; a++) {
+            for (b = 0; b < width; b++) {
                 Pixel p = image.getPixelAt(b, a);
 
                 // CHECK IF THERE IS A NOT GRAYSCALE PIXEL
                 if (p.getRed() != p.getGreen() || p.getGreen() != p.getBlue() || p.getRed() != p.getBlue()) {
                     isGrayscale = false;
                 }
-
-                b++;
+                std::cout << (int) p.getRed() << " " << (int) p.getGreen() << " " << (int) p.getBlue() << std::endl;
             }
-            a++;
         }
 
         std::cout << "check grayscale end" << std::endl;
