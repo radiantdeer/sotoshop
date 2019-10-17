@@ -33,7 +33,7 @@ int BMPImageSaver::save(const Image &image, std::string fileUrl) {
         /* CHECK IF GRAYSCALE OR NOT */
         /**********************************************/
 
-        std::cout << "check grayscale" << std::endl;
+        spdlog::debug("BMPImageSaver::save: check grayscale");
 
         int byteperpixel = 1;           // BYTE PER PIXEL
         int bitperpixel = 1;            // BIT PER PIXEL
@@ -54,14 +54,13 @@ int BMPImageSaver::save(const Image &image, std::string fileUrl) {
                 if (p.getRed() != p.getGreen() || p.getGreen() != p.getBlue() || p.getRed() != p.getBlue()) {
                     isGrayscale = false;
                 }
-                std::cout << (int) p.getRed() << " " << (int) p.getGreen() << " " << (int) p.getBlue() << std::endl;
             }
         }
 
-        std::cout << "check grayscale end" << std::endl;
+        spdlog::debug("BMPImageSaver::save: check grayscale end");
 
         if (isGrayscale) {
-            std::cout << "is grayscale" << std::endl;
+            spdlog::debug("BMPImageSaver::save: is grayscale");
 
             // PICTURE IS IN GRAYSCALE
             // FILL COLOR TABLE WITH GRAYSCALE VALUE
@@ -75,7 +74,7 @@ int BMPImageSaver::save(const Image &image, std::string fileUrl) {
             bitmapcolortablesize = UCHAR_MAX + 1;
             byteperpixel = 1;           // GRAYSCALE
         } else {
-            std::cout << "not grayscale" << std::endl;
+            spdlog::debug("BMPImageSaver::save: not grayscale");
             // PICTURE IN COLOR
             // NO COLOR TABLE AND INDEX
             bitmapcolortablesize = 0;
@@ -92,7 +91,7 @@ int BMPImageSaver::save(const Image &image, std::string fileUrl) {
 
         int bmpfilesize = 14 + 40 + bitmapcolortablesize*4 + width*height*byteperpixel;
 
-        std::cout << "BMP size " << bmpfilesize << std::endl;
+        spdlog::debug("BMPImageSaver::save: BMP size : {}", bmpfilesize);
 
         /**********************************************/
         /* THIS SECTION WRITES */
@@ -272,7 +271,7 @@ int BMPImageSaver::save(const Image &image, std::string fileUrl) {
     }
 }
 
-unsigned char* ReverseByte(int value, int arraysize) {
+unsigned char * BMPImageSaver::ReverseByte(int value, int arraysize) {
     unsigned char *inversedbyte = (unsigned char *) malloc(sizeof (unsigned char) * arraysize);
     for (int i = 0; i < arraysize; i++) {
         inversedbyte[i] = (value >> (i * 8)) & 0xff;
