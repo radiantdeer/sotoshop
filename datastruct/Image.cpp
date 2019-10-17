@@ -640,8 +640,26 @@ Image * Image::grayLevelSlicing(int a, int b, int val) {
     }
 }
 
+// Currently only works for grayscale images, since it only adjusts red values
 Image * Image::contrastStretch() {
-
+    if ((this->getWidth() > 0) && (this->getHeight())) {
+        spdlog::debug("Image::contrastStretch: Determining rmin and rmax...");
+        int rmin = this->getPixelAt(0, 0).getRed();
+        int rmax = this->getPixelAt(0, 0).getRed();
+        for (int j = 0; j < this->getHeight(); j++) {
+            for (int i = 0; i < this->getWidth(); i++) {
+                if (rmin > this->getPixelAt(i, j).getRed()) {
+                    rmin = this->getPixelAt(i, j).getRed();
+                }
+                if (rmax < this->getPixelAt(i, j).getRed()) {
+                    rmax = this->getPixelAt(i, j).getRed();
+                }
+            }
+        }
+        spdlog::debug("Image::contrastStretch: Determined rmin to be {} and rmax to be {}.", rmin, rmax);
+        contrastStretch(rmin, rmax);
+    }
+    return this;
 }
 
 // Currently only works for grayscale images, since it only adjusts red values
