@@ -40,7 +40,7 @@ int BMPImageSaver::save(const Image &image, std::string fileUrl) {
         int bitmapcolortablesize = 1;   // BITMAP COLOR TABLE SIZE
 
         bool isGrayscale = true;
-        std::vector<Pixel> colortable;
+        std::vector<Pixel*> colortable;
         std::vector<Pixel>::iterator it;
         std::vector<int> colorindex;
 
@@ -68,7 +68,7 @@ int BMPImageSaver::save(const Image &image, std::string fileUrl) {
             // MAX GRAYSCALE VALUE IS 255
             unsigned char value = 0;
             do {
-                Pixel p = Pixel(value, value, value);
+                Pixel *p = new Pixel(value, value, value);
                 colortable.push_back(p);
             } while (++value);
 
@@ -202,10 +202,10 @@ int BMPImageSaver::save(const Image &image, std::string fileUrl) {
         /**********************************************/
         unsigned char val3[4];
         for(unsigned long i = 0; i < colortable.size(); i++) {
-            Pixel &p = colortable.at(i);
-            val3[0] = p.getBlue();
-            val3[1] = p.getGreen();
-            val3[2] = p.getRed();
+            Pixel *p = colortable.at(i);
+            val3[0] = p->getBlue();
+            val3[1] = p->getGreen();
+            val3[2] = p->getRed();
             val3[3] = 0x00;
             for (int j = 0; j < 4; j++) {
                 outfile << val3[j];
@@ -225,8 +225,17 @@ int BMPImageSaver::save(const Image &image, std::string fileUrl) {
             for (int i = height - 1; i >= 0; i--) {
                 for (int j = 0; j < width; j++) {
                     Pixel p = image.getPixelAt(j, i);
-                    it = std::find(colortable.begin(), colortable.end(), p);
-                    colorindex.push_back((int) std::distance(colortable.begin(), it));
+                    Pixel *q;
+
+                    unsigned long k = 0;
+                    while (k < colortable.size()) {
+                        q = colortable.at(k);
+                        if (p == *q) {
+                            break;
+                        }
+                        k++;
+                    }
+                    colorindex.push_back((int) k);
                 }
             }
 

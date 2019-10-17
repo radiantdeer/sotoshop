@@ -34,14 +34,12 @@ bool DrawSurface::isImageLoaded() {
 }
 
 void DrawSurface::setActiveImage(Image * newImage) {
-    acquireLockImage();
     activeImage = newImage;
     if (newImage != nullptr) {
         this->imageLoaded = true;
     } else {
         this->imageLoaded = false;
     }
-    releaseLockImage();
 }
 
 void DrawSurface::setImageLoaded(bool imageLoaded) {
@@ -60,12 +58,10 @@ void DrawSurface::releaseLockImage() {
 }
 
 void DrawSurface::purgeImage() {
-    acquireLockImage();
     if (activeImage != nullptr) {
         delete activeImage;
         imageLoaded = false;
     }
-    releaseLockImage();
 }
 
 // Implementing protected virtual method from QWidget

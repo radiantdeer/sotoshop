@@ -8,6 +8,9 @@ class BMPImageLoader : public ImageLoader {
     BMPImageLoader();
     Image * load(std::string fileUrl);
     Image * loadBM(std::string fileUrl);
+
+    static int buffertoInteger(char* buffer, int start, int size);
+
 };
 
 #endif
