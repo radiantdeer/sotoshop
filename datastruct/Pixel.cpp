@@ -69,7 +69,8 @@ void Pixel::setBlue(unsigned char blue) {
 }
 
 unsigned char Pixel::grayscaleValue() const {
-    return (0.299f * getRed()) + (0.587f * getGreen()) + (0.144f * getBlue());
+    int value = (int) (0.299f * getRed()) + (0.587f * getGreen()) + (0.144f * getBlue());
+    return thresholding(value);
 }
 
 unsigned char Pixel::meanGrayscaleValue() const {
