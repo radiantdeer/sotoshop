@@ -71,7 +71,7 @@ Image::Image(const Image& other) {
     for (int j = 0; j < height; j++) {
         std::vector<Pixel> tempData;
         for (int i = 0; i < width; i++) {
-            tempData.push_back(data[j][i]);
+            tempData.push_back(other.getPixelAt(i, j));
         }
         this->data.push_back(tempData);
     }
@@ -724,7 +724,7 @@ Image * Image::contrastStretch() {
         spdlog::debug("Image::contrastStretch: Determined these parameters : ");
         spdlog::debug("redmin : {} | redmax : {} | greenmin : {} | greenmax : {} | bluemin : {} | bluemax : {}", rrmin, rrmax, rgmin, rgmax, rbmin, rbmax);
         contrastStretch(rrmin, rrmax, rgmin, rgmax, rbmin, rbmax);
-    }    
+    }
     return this;
 }
 
