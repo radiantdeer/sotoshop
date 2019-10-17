@@ -7,13 +7,13 @@
 std::vector<std::vector<std::complex<double>> *> * Fourier::forward(Image * image) {
     Image * sourceImage;
     if ((image->getOriginalFormat() == "bmp") || (image->getOriginalFormat() == "ppm")) {
-        spdlog::info("Fourier::forward: Converting image to grayscale first...");
+        spdlog::debug("Fourier::forward: Converting image to grayscale first...");
         sourceImage = new Image(*image);
         sourceImage->grayscale();
     } else {
         sourceImage = image;
     }
-    spdlog::info("Fourier::forward: Allocating vector for result...");
+    spdlog::debug("Fourier::forward: Allocating vector for result...");
     std::vector<std::vector<std::complex<double>> *> * result = new std::vector<std::vector<std::complex<double>> *>(image->getHeight());
     for (int j = 0; j < image->getHeight(); j++) {
         result->at(j) = new std::vector<std::complex<double>>(image->getWidth());
@@ -61,7 +61,7 @@ Image * Fourier::visualizeFrequencies(std::vector<std::vector<std::complex<doubl
 }
 
 Image * Fourier::inverse(std::vector<std::vector<std::complex<double>> *> * frequencies) {
-    spdlog::info("Fourier::inverse: Allocating image result...");
+    spdlog::debug("Fourier::inverse: Allocating image result...");
     Image * result = new Image(frequencies->at(0)->size(), frequencies->size());
 
     spdlog::info("Fourier::inverse: Starting Inverse Fourier transform...");
@@ -74,11 +74,12 @@ Image * Fourier::inverse(std::vector<std::vector<std::complex<double>> *> * freq
             double thisValue = 0;
             for (int j = 0; j < frequencies->size(); j++) {
                 for (int i = 0; i < frequencies->at(j)->size(); i++) {
-                    std::complex<double> expValue = std::polar((double) 0, exp(2 * M_PI * (((double) u * i / result->getWidth()) + ((double) v * j / result->getHeight()))));
+                    std::complex<double> expValue = std::polar((double) 1, 2 * M_PI * (((double) u * i / result->getWidth()) + ((double) v * j / result->getHeight())));
                     std::complex<double> temp = frequencies->at(j)->at(i) * expValue;
-                    thisValue += std::norm(temp);
+                    thisValue += std::real(temp);
                 }
             }
+            spdlog::debug("{}", thisValue);
             result->setPixelAt(u, v, Pixel(thisValue, thisValue, thisValue));
             // Below is just for progress monitoring on logs
             done++;
