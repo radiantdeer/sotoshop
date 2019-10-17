@@ -47,6 +47,7 @@ class MainWindow : public QMainWindow {
         void doMedianFilter();
         void doHighPassFilter(int filterVariation);
         void grayLevelSlicing();
+        void contrastStretching(bool automatic);
 
         void equalizeImageHist();
         void showHistogram();
@@ -86,6 +87,8 @@ class MainWindow : public QMainWindow {
         QAction * andAction;
         QAction * orAction;
         QAction * notAction;
+        QAction * contrastStretchingAutoAction;
+        QAction * contrastStretchingManualAction;
 
         QAction * equalizeAction;
         QAction * histogramAction;

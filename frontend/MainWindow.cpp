@@ -47,6 +47,11 @@ MainWindow::MainWindow() : QMainWindow() {
     andAction = booleanMenu->addAction("AND");
     orAction = booleanMenu->addAction("OR");
     notAction = booleanMenu->addAction("NOT");
+    editMenu->addSeparator();
+    QMenu * contrastStretch = editMenu->addMenu("Stretch Contrast");
+    contrastStretchingAutoAction = contrastStretch->addAction("Auto");
+    contrastStretchingManualAction = contrastStretch->addAction("Manual");
+
     QMenu * histogramMenu = this->menuBar()->addMenu("Histogram");
     histogramAction = histogramMenu->addAction("Show");
     equalizeAction = histogramMenu->addAction("Equalize");
@@ -539,6 +544,23 @@ void MainWindow::showBitPlanes() {
     }
 }
 
+void MainWindow::contrastStretching(bool automatic) {
+    if (drawSurface->isImageLoaded()) {
+        Image * currentImage = drawSurface->getActiveImage();
+        if ((currentImage->getOriginalFormat() == "ppm") || (currentImage->getOriginalFormat() == "bmp")) {
+            spdlog::warn("MainWindow::contrastStretching: Contrast Stretching currently only available to grayscale images");
+        } else {
+            if (automatic) {
+                spdlog::info("MainWindow::contrastStretching: Automatically determine lower & upper bounds...");
+            } else {
+                spdlog::info("MainWindow::contrastStretching: Prompting lower & upper bound to user...");
+            }
+        }
+    } else {
+        spdlog::warn("MainWindow::contrastStretching: Please load an image first!");
+    }
+}
+
 void MainWindow::connectActionsToControllers() {
     connect(loadAction, &QAction::triggered, this, &MainWindow::loadFile);
     connect(saveAction, &QAction::triggered, this, &MainWindow::saveFile);
@@ -563,6 +585,9 @@ void MainWindow::connectActionsToControllers() {
     connect(andAction, &QAction::triggered, this, &MainWindow::operateAndImage);
     connect(orAction, &QAction::triggered, this, &MainWindow::operateOrImage);
     connect(notAction, &QAction::triggered, this, &MainWindow::operateNotImage);
+
+    connect(contrastStretchingAutoAction, &QAction::triggered, this, [this]{contrastStretching(true); });
+    connect(contrastStretchingManualAction, &QAction::triggered, this, [this]{contrastStretching(false); });
 
     connect(histogramAction, &QAction::triggered, this, &MainWindow::showHistogram);
     connect(equalizeAction, &QAction::triggered, this, &MainWindow::equalizeImageHist);

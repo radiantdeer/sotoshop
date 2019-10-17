@@ -64,6 +64,9 @@ class Image {
         Image * histogramSpecification(Image& B);
 
         Image * grayLevelSlicing(int a, int b, int val);
+        Image * contrastStretch();
+        Image * contrastStretch(int rmin, int rmax);
+
     private:
         int width;
         int height;

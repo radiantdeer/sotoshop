@@ -639,3 +639,11 @@ Image * Image::grayLevelSlicing(int a, int b, int val) {
         return this;
     }
 }
+
+Image * Image::contrastStretch() {
+
+}
+
+Image * Image::contrastStretch(int rmin, int rmax) {
+
+}
