@@ -65,7 +65,7 @@ class Image {
 
         Image * grayLevelSlicing(int a, int b, int val);
         Image * contrastStretch();
-        Image * contrastStretch(int rmin, int rmax);
+        Image * contrastStretch(int rrmin, int rrmax, int rgmin, int rgmax, int rbmin, int rbmax);
 
     private:
         int width;

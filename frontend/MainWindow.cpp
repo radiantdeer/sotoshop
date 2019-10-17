@@ -249,7 +249,7 @@ void MainWindow::flipImageVertical() {
 
 void MainWindow::doMeanFilter() {
     if (drawSurface->isImageLoaded()) {
-        bool padded = askForPadding();
+        bool padded = askYesNoQuestion("Convolution Padding", "Do you want to pad the image first?");
         spdlog::info("MainWindow::doMeanFilter: Convolving with mean filter...");
         Image * newImage = Convolution::convolve(drawSurface->getActiveImage(), CommonConvolutions::Average, padded);
         drawSurface->acquireLockImage();
@@ -264,7 +264,7 @@ void MainWindow::doMeanFilter() {
 
 void MainWindow::doMedianFilter() {
     if (drawSurface->isImageLoaded()) {
-        bool padded = askForPadding();
+        bool padded = askYesNoQuestion("Convolution Padding", "Do you want to pad the image first?");
         spdlog::info("MainWindow::doMedianFilter: Convolving with median filter...");
         Image * newImage = Convolution::medianConvolve(drawSurface->getActiveImage(), 3, 3, padded);
         drawSurface->acquireLockImage();
@@ -279,7 +279,7 @@ void MainWindow::doMedianFilter() {
 
 void MainWindow::doHighPassFilter(int filterVariation) {
     if (drawSurface->isImageLoaded()) {
-        bool padded = askForPadding();
+        bool padded = askYesNoQuestion("Convolution Padding", "Do you want to pad the image first?");
         spdlog::info("MainWindow::doHighPassFilter: Convolving with high-pass filter #{}...", filterVariation);
 
         const ConvolutionMatrix * opMatrix;
@@ -547,24 +547,24 @@ void MainWindow::showBitPlanes() {
 void MainWindow::contrastStretching(bool automatic) {
     if (drawSurface->isImageLoaded()) {
         Image * currentImage = drawSurface->getActiveImage();
-        if ((currentImage->getOriginalFormat() == "ppm") || (currentImage->getOriginalFormat() == "bmp")) {
-            spdlog::warn("MainWindow::contrastStretching: Contrast Stretching currently only available to grayscale images");
+        if (automatic) {
+            spdlog::info("MainWindow::contrastStretching: Automatically determine lower & upper bounds...");
+            drawSurface->acquireLockImage();
+            currentImage->contrastStretch();
+            drawSurface->releaseLockImage();
         } else {
-            if (automatic) {
-                spdlog::info("MainWindow::contrastStretching: Automatically determine lower & upper bounds...");
-                drawSurface->acquireLockImage();
-                currentImage->contrastStretch();
-                drawSurface->releaseLockImage();
-            } else {
-                spdlog::info("MainWindow::contrastStretching: Prompting lower & upper bound to user...");
-                int rmin = promptValue("Values needed.", "Enter lower bound of gray value. (0 - 255)");
-                int rmax = promptValue("Values needed", "Enter upper bound of gray level. (0 - 255)");
-                drawSurface->acquireLockImage();
-                currentImage->contrastStretch(rmin, rmax);
-                drawSurface->releaseLockImage();
-            }
-            drawSurface->update();
+            spdlog::info("MainWindow::contrastStretching: Prompting lower & upper bound to user...");
+            int rrmin = promptValue("Values needed.", "Enter lower bound of red color. (0 - 255)");
+            int rrmax = promptValue("Values needed", "Enter upper bound of red color. (0 - 255)");
+            int rgmin = promptValue("Values needed", "Minimum green color\n(just enter the same value as red if grayscale)");
+            int rgmax = promptValue("Values needed", "Maximum green color\n(just enter the same value as red if grayscale)");
+            int rbmin = promptValue("Values needed", "Minimum blue color\n(just enter the same value as red if grayscale)");
+            int rbmax = promptValue("Values needed", "Maximum blue color\n(just enter the same value as red if grayscale)");
+            drawSurface->acquireLockImage();
+            currentImage->contrastStretch(rrmin, rrmax, rgmin, rgmax, rbmin, rbmax);
+            drawSurface->releaseLockImage();
         }
+        drawSurface->update();
     } else {
         spdlog::warn("MainWindow::contrastStretching: Please load an image first!");
     }
@@ -634,8 +634,8 @@ int MainWindow::promptValue(std::string promptTitle, std::string promptText) {
     return value;
 }
 
-bool MainWindow::askForPadding() {
-    QMessageBox::StandardButton response = QMessageBox::question(this, "Convolution Padding", "Do you want to pad the image before convolution?");
+bool MainWindow::askYesNoQuestion(std::string promptTitle, std::string promptText) {
+    QMessageBox::StandardButton response = QMessageBox::question(this, promptTitle.c_str(), promptText.c_str());
     if (response == QMessageBox::Yes) {
         return true;
     } else {

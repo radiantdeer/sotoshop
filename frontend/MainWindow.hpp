@@ -103,7 +103,7 @@ class MainWindow : public QMainWindow {
         void connectActionsToControllers();
         std::string getOpenFileUrl(std::string dialogTitle);
         std::string getSaveFileUrl(std::string dialogTitle);
-        bool askForPadding();
+        bool askYesNoQuestion(std::string promptTitle, std::string promptText);
         static std::string getFileExtension(std::string fileUrl);
         int promptValue(std::string promptTitle, std::string promptText);
 
