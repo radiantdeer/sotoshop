@@ -131,8 +131,8 @@ void Image::setFileUrl(std::string fileUrl) {
 Image * Image::add(Image& B) {
     int opWidth = this->getWidth() > B.getWidth() ? B.getWidth() : this->getWidth();
     int opHeight = this->getHeight() > B.getHeight() ? B.getHeight() : this->getHeight();
-    for (int j = 0; j < opWidth; j++) {
-        for (int i = 0; i < opHeight; i++) {
+    for (int j = 0; j < opHeight; j++) {
+        for (int i = 0; i < opWidth; i++) {
             Pixel a = this->getPixelAt(i, j);
             Pixel b = B.getPixelAt(i, j);
             Pixel *pixel = a + b;

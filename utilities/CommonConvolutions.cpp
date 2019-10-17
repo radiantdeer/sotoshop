@@ -2,6 +2,8 @@
 
 int averageMatrix[] = {1, 1, 1, 1, 1, 1, 1, 1, 1};
 const ConvolutionMatrix CommonConvolutions::Average = ConvolutionMatrix(3, 3, averageMatrix);
+int averageMatrix5[] = {1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1};
+const ConvolutionMatrix CommonConvolutions::Average5 = ConvolutionMatrix(5, 5, averageMatrix5);
 int highFilter1[] = {-1, -1, -1, -1, 8, -1, -1, -1, -1};
 const ConvolutionMatrix CommonConvolutions::HighFilter1 = ConvolutionMatrix(3, 3, highFilter1);
 int highFilter2[] = {-1, -1, -1, -1, 9, -1, -1, -1, -1};

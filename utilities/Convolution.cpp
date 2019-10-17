@@ -3,6 +3,7 @@
 #include <sstream>
 #include <string>
 #include <vector>
+#include "CommonConvolutions.hpp"
 #include "../spdlog/spdlog.h"
 
 Image* Convolution::convolve(Image* image, const ConvolutionMatrix& opMatrix, bool padImage) {
@@ -101,6 +102,19 @@ Image* Convolution::medianConvolve(Image* image, int filterWidth, int filterHeig
     return result;
 }
 
+Image * Convolution::unsharpMasking(Image* image) {
+    spdlog::debug("Convolution::unsharpMasking: Calculating lowpass...");
+    Image * lowpass = convolve(image, CommonConvolutions::Average5, true);
+    spdlog::debug("Convolution::unsharpMasking: Calculating highpass...");
+    Image * highpass = new Image(*image);
+    highpass->substract(*lowpass);
+    delete lowpass;
+    spdlog::debug("Convolution::unsharpMasking: Finally calculate unsharp masking...");
+    Image * result = new Image(*image);
+    result->add(*highpass);
+    delete highpass;
+    return result;
+}
 
 Image* Convolution::padImage(Image* image, int padWidth, int padHeight) {
     int originalWidth = image->getWidth();

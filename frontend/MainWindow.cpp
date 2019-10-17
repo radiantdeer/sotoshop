@@ -51,7 +51,7 @@ MainWindow::MainWindow() : QMainWindow() {
     nthPowerAction = editMenu->addAction("N-Power");
     logAction = editMenu->addAction("Log");
     invLogAction = editMenu->addAction("Inverse Log");
-  
+
     editMenu->addSeparator();
     QMenu * contrastStretch = editMenu->addMenu("Stretch Contrast");
     contrastStretchingAutoAction = contrastStretch->addAction("Auto");
@@ -70,6 +70,7 @@ MainWindow::MainWindow() : QMainWindow() {
     highPassFilter2Action = highPass->addAction("Variation 2");
     highPassFilter3Action = highPass->addAction("Variation 3");
     highPassFilter4Action = highPass->addAction("Variation 4");
+    unsharpMaskingAction = convolutionMenu->addAction("Unsharp Masking");
 
     QMenu * other = this->menuBar()->addMenu("Other");
     bitPlaneAction = other->addAction("Bit Planes");
@@ -313,6 +314,20 @@ void MainWindow::doHighPassFilter(int filterVariation) {
         drawSurface->update();
     } else {
         spdlog::warn("MainWindow::doHighPassFilter: Please load an image first!");
+    }
+}
+
+void MainWindow::doUnsharpMasking() {
+    if (drawSurface->isImageLoaded()) {
+        spdlog::info("MainWindow::doUnsharpMasking: Filtering with unsharp masking...");
+        Image * result = Convolution::unsharpMasking(drawSurface->getActiveImage());
+        drawSurface->acquireLockImage();
+        drawSurface->purgeImage();
+        drawSurface->setActiveImage(result);
+        drawSurface->releaseLockImage();
+        drawSurface->update();
+    } else {
+        spdlog::warn("MainWindow::doUnsharpMasking: Please load an image first!");
     }
 }
 
@@ -656,9 +671,10 @@ void MainWindow::connectActionsToControllers() {
     connect(highPassFilter2Action, &QAction::triggered, this, [this]{doHighPassFilter(2); });
     connect(highPassFilter3Action, &QAction::triggered, this, [this]{doHighPassFilter(3); });
     connect(highPassFilter4Action, &QAction::triggered, this, [this]{doHighPassFilter(4); });
+    connect(unsharpMaskingAction, &QAction::triggered, this, &MainWindow::doUnsharpMasking);
 
     connect(histogramAction, &QAction::triggered, this, &MainWindow::showHistogram);
-  
+
     connect(bitPlaneAction, &QAction::triggered, this, &MainWindow::showBitPlanes);
 
 }
