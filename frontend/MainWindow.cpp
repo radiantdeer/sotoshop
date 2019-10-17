@@ -47,6 +47,8 @@ MainWindow::MainWindow() : QMainWindow() {
     andAction = booleanMenu->addAction("AND");
     orAction = booleanMenu->addAction("OR");
     notAction = booleanMenu->addAction("NOT");
+    logAction = editMenu->addAction("Log");
+    invLogAction = editMenu->addAction("Inverse Log");
     QMenu * histogramMenu = this->menuBar()->addMenu("Histogram");
     histogramAction = histogramMenu->addAction("Show");
     equalizeAction = histogramMenu->addAction("Equalize");
@@ -539,6 +541,26 @@ void MainWindow::showBitPlanes() {
     }
 }
 
+void MainWindow::logOperation() {
+    if (drawSurface->isImageLoaded()) {
+        double c = QInputDialog::getDouble(this, "Get Constanta", "Enter value:", 0, 0);
+        drawSurface->acquireLockImage();
+        drawSurface->getActiveImage()->logTrans(c);
+        drawSurface->releaseLockImage();
+        drawSurface->update();
+    } else {
+        spdlog::warn("MainWindow::logOperation: Please load an image first!");
+    }
+}
+
+void MainWindow::invLogOperation() {
+    if (drawSurface->isImageLoaded()) {
+
+    } else {
+        spdlog::warn("MainWindow::invLogOperation: Please load an image first!");
+    }
+}
+
 void MainWindow::connectActionsToControllers() {
     connect(loadAction, &QAction::triggered, this, &MainWindow::loadFile);
     connect(saveAction, &QAction::triggered, this, &MainWindow::saveFile);
@@ -556,6 +578,8 @@ void MainWindow::connectActionsToControllers() {
     connect(zoomInAction, &QAction::triggered, this, &MainWindow::zoomIn);
     connect(zoomOutAction, &QAction::triggered, this, &MainWindow::zoomOut);
     connect(grayLevelSlicingAction, &QAction::triggered, this, &MainWindow::grayLevelSlicing);
+    connect(logAction, &QAction::triggered, this, &MainWindow::logOperation);
+    connect(invLogAction, &QAction::triggered, this, &MainWindow::invLogOperation);
 
     connect(additionAction, &QAction::triggered, this, &MainWindow::addImage);
     connect(substractAction, &QAction::triggered, this, &MainWindow::substractImage);

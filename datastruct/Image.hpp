@@ -64,6 +64,9 @@ class Image {
         Image * histogramSpecification(Image& B);
 
         Image * grayLevelSlicing(int a, int b, int val);
+
+        Image * logTrans(double c);
+        Image * invLogTrans(double c);
     private:
         int width;
         int height;

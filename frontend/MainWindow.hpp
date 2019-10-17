@@ -52,6 +52,9 @@ class MainWindow : public QMainWindow {
         void showHistogram();
         void specifyHist();
 
+        void logOperation();
+        void invLogOperation();
+
         void showBitPlanes();
 
     private:
@@ -92,6 +95,9 @@ class MainWindow : public QMainWindow {
         QAction * specifyHistAction;
 
         QAction * bitPlaneAction;
+
+        QAction * logAction;
+        QAction * invLogAction;
 
         DrawSurface * drawSurface;
         HistogramDialog * histDialog;

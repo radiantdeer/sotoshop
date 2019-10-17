@@ -639,3 +639,22 @@ Image * Image::grayLevelSlicing(int a, int b, int val) {
         return this;
     }
 }
+
+Image * Image::logTrans(double c) {
+    for(int j = 0; j < this->getHeight(); j++) {
+        for(int i = 0; i < this->getWidth(); i++) {
+            // s = c * log(1 + r);
+            Pixel a = this->getPixelAt(i,j);
+            int redVal = c*log1p(a.getRed());
+            int greenVal = c*log1p(a.getGreen());
+            int blueVal = c*log1p(a.getBlue());
+            Pixel * p = new Pixel(redVal,greenVal,blueVal);
+            this->setPixelAt(i,j,*p);
+        }
+    }
+    return this;
+}
+
+Image * Image::invLogTrans(double c) {
+    return this;
+}
