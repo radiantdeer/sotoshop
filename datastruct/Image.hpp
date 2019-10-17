@@ -63,6 +63,8 @@ class Image {
         std::vector<std::vector<int>> equalizedHistogram();
         Image * histogramEqualization();
         Image * histogramSpecification(Image& B);
+
+        Image * grayLevelSlicing(int a, int b, int val);
     private:
         int width;
         int height;

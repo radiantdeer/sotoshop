@@ -11,6 +11,7 @@
 #include <QUrl>
 #include <sstream>
 #include "../spdlog/spdlog.h"
+#include "../utilities/BitPlaneSlicing.hpp"
 #include "../utilities/Convolution.hpp"
 #include "../utilities/CommonConvolutions.hpp"
 
@@ -36,6 +37,7 @@ MainWindow::MainWindow() : QMainWindow() {
     flipVAction = flipMenu->addAction("Vertical");
     zoomInAction = editMenu->addAction("Zoom In");
     zoomOutAction = editMenu->addAction("Zoom Out");
+    grayLevelSlicingAction = editMenu->addAction("Graylevel Slicing");
     editMenu->addSeparator();
     QMenu * arithmeticMenu = editMenu->addMenu("Arithmetic Operations");
     additionAction = arithmeticMenu->addAction("Addition");
@@ -62,11 +64,14 @@ MainWindow::MainWindow() : QMainWindow() {
     highPassFilter3Action = highPass->addAction("Variation 3");
     highPassFilter4Action = highPass->addAction("Variation 4");
 
+    QMenu * other = this->menuBar()->addMenu("Other");
+    bitPlaneAction = other->addAction("Bit Planes");
     connectActionsToControllers();
 
     drawSurface = new DrawSurface(this);
     this->setCentralWidget(drawSurface);
     histDialog = nullptr;
+    bitPlaneDialog = nullptr;
 }
 
 QAction * MainWindow::getLoadAction() {
@@ -346,6 +351,27 @@ void MainWindow::nthPower() {
     }
 }
 
+void MainWindow::grayLevelSlicing() {
+    if (drawSurface->isImageLoaded()) {
+        spdlog::debug("Prompting the user to input a");
+        int a = promptValue("Slicing Start Point", "Insert a value between 0 and 255");
+        spdlog::debug("User entered a = {}", a);
+        spdlog::debug("Prompting the user to input b");
+        int b = promptValue("Slicing End Point", "Insert a value between 0 and 255");
+        spdlog::debug("User entered b = {}", b);
+        spdlog::debug("Prompting the user to input val");
+        int val = promptValue("Slicing Value", "Insert a value between 0 and 255");
+        spdlog::debug("User entered val = {}", val);
+        spdlog::info("MainWindow::grayLevelSlicing: Slicing Gray Level...");
+        drawSurface->acquireLockImage();
+        drawSurface->setActiveImage(drawSurface->getActiveImage()->grayLevelSlicing(a,b,val));
+        drawSurface->releaseLockImage();
+        drawSurface->update();
+    } else {
+        spdlog::warn("MainWindow::grayLevelSlicing: Please load an image first!");
+    }
+}
+
 void MainWindow::addImage() {
     if (drawSurface->isImageLoaded()) {
         spdlog::debug("MainWindow::addImage: Asking for other image...");
@@ -513,6 +539,27 @@ void MainWindow::showHistogram() {
     }
 }
 
+void MainWindow::showBitPlanes() {
+    if (drawSurface->isImageLoaded()) {
+        Image * currentImage = drawSurface->getActiveImage();
+        if ((currentImage->getOriginalFormat() == "ppm") || (currentImage->getOriginalFormat() == "bmp")) {
+            spdlog::warn("MainWindow::showBitPlanes: Bit Plane slicing currently only available to grayscale images");
+        } else {
+            spdlog::debug("MainWindow::showBitPlanes: Generating bit planes...");
+            std::vector<Image> bitPlanes = BitPlaneSlicing::generate(currentImage);
+            spdlog::debug("MainWindow::showBitPlanes: Planes generated...");
+            if (bitPlaneDialog != nullptr) {
+                delete bitPlaneDialog;
+            }
+            spdlog::info("MainWindow::showBitPlanes: Showing bit planes...");
+            bitPlaneDialog = new BitPlaneDialog(bitPlanes);
+            bitPlaneDialog->show();
+        }
+    } else {
+        spdlog::warn("MainWindow::showBitPlanes: Please load an image first!");
+    }
+}
+
 void MainWindow::connectActionsToControllers() {
     connect(loadAction, &QAction::triggered, this, &MainWindow::loadFile);
     connect(saveAction, &QAction::triggered, this, &MainWindow::saveFile);
@@ -529,6 +576,7 @@ void MainWindow::connectActionsToControllers() {
     connect(flipVAction, &QAction::triggered, this, &MainWindow::flipImageVertical);
     connect(zoomInAction, &QAction::triggered, this, &MainWindow::zoomIn);
     connect(zoomOutAction, &QAction::triggered, this, &MainWindow::zoomOut);
+    connect(grayLevelSlicingAction, &QAction::triggered, this, &MainWindow::grayLevelSlicing);
 
     connect(additionAction, &QAction::triggered, this, &MainWindow::addImage);
     connect(substractAction, &QAction::triggered, this, &MainWindow::substractImage);
@@ -537,6 +585,9 @@ void MainWindow::connectActionsToControllers() {
     connect(orAction, &QAction::triggered, this, &MainWindow::operateOrImage);
     connect(notAction, &QAction::triggered, this, &MainWindow::operateNotImage);
 
+    connect(nthPowerAction, &QAction::triggered, this, &MainWindow::nthPower);
+  
+    connect(histogramAction, &QAction::triggered, this, &MainWindow::showHistogram);
     connect(equalizeAction, &QAction::triggered, this, &MainWindow::equalizeImageHist);
     connect(specifyHistAction, &QAction::triggered, this, &MainWindow::specifyHist);
 
@@ -548,7 +599,9 @@ void MainWindow::connectActionsToControllers() {
     connect(highPassFilter4Action, &QAction::triggered, this, [this]{doHighPassFilter(4); });
 
     connect(histogramAction, &QAction::triggered, this, &MainWindow::showHistogram);
-    connect(nthPowerAction, &QAction::triggered, this, &MainWindow::nthPower);
+  
+    connect(bitPlaneAction, &QAction::triggered, this, &MainWindow::showBitPlanes);
+
 }
 
 std::string MainWindow::getOpenFileUrl(std::string dialogTitle) {

@@ -7,6 +7,7 @@
 #include <QSignalMapper>
 #include <string>
 
+#include "BitPlaneDialog.hpp"
 #include "DrawSurface.hpp"
 #include "HistogramDialog.hpp"
 #include "../datastruct/Image.hpp"
@@ -41,20 +42,23 @@ class MainWindow : public QMainWindow {
         void operateAndImage();
         void operateOrImage();
         void operateNotImage();
+        void nthPower();
         void refresh();
         void doMeanFilter();
         void doMedianFilter();
         void doHighPassFilter(int filterVariation);
-  
+        void grayLevelSlicing();
+
         void equalizeImageHist();
         void showHistogram();
         void specifyHist();
 
-        void nthPower();
+        void showBitPlanes();
+
     private:
         QAction * loadAction;
         QAction * saveAction;
-  
+
         QAction * negativeImageAction;
         QAction * convertToGrayscaleAction;
         QAction * moveAction;
@@ -75,6 +79,7 @@ class MainWindow : public QMainWindow {
         QAction * flipVAction;
         QAction * zoomInAction;
         QAction * zoomOutAction;
+        QAction * grayLevelSlicingAction;
         QAction * brightenAction;
         QAction * additionAction;
         QAction * substractAction;
@@ -82,15 +87,17 @@ class MainWindow : public QMainWindow {
         QAction * andAction;
         QAction * orAction;
         QAction * notAction;
-  
+
         QAction * equalizeAction;
         QAction * histogramAction;
         QAction * specifyHistAction;
 
         QAction * nthPowerAction;
+        QAction * bitPlaneAction;
 
         DrawSurface * drawSurface;
         HistogramDialog * histDialog;
+        BitPlaneDialog * bitPlaneDialog;
 
         void connectActionsToControllers();
         std::string getOpenFileUrl(std::string dialogTitle);

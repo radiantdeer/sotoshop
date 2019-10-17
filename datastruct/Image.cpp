@@ -78,7 +78,6 @@ Image::Image(const Image& other) {
     this->originalFormat = originalFormat;
 }
 
-
 Pixel Image::getPixelAt(int x, int y) const {
     return data[y][x];
 }
@@ -129,8 +128,6 @@ void Image::setFileUrl(std::string fileUrl) {
     this->fileUrl = fileUrl;
 }
 
-// TODO
-// DEBUG METHOD
 Image * Image::add(Image& B) {
     int opWidth = this->getWidth() > B.getWidth() ? B.getWidth() : this->getWidth();
     int opHeight = this->getHeight() > B.getHeight() ? B.getHeight() : this->getHeight();
@@ -148,8 +145,6 @@ Image * Image::add(Image& B) {
     return this;
 }
 
-// TODO
-// DEBUG METHOD
 Image * Image::adjustBrightness(unsigned char delta) {
     for (int i = 0; i < this->getWidth(); i++) {
         for (int j = 0; j < this->getHeight(); j++) {
@@ -163,8 +158,6 @@ Image * Image::adjustBrightness(unsigned char delta) {
     return this;
 }
 
-// TODO
-// DEBUG METHOD
 Image * Image::substract(Image& B) {
     int opWidth = this->getWidth() > B.getWidth() ? B.getWidth() : this->getWidth();
     int opHeight = this->getHeight() > B.getHeight() ? B.getHeight() : this->getHeight();
@@ -182,8 +175,6 @@ Image * Image::substract(Image& B) {
     return this;
 }
 
-// TODO
-// TESTING AND DEBUG
 Image * Image::multiply(Image& B) {
     int opWidth, opHeight;
     if (B.getWidth() < this->getWidth()) {
@@ -225,8 +216,6 @@ Image * Image::invert() {
     return this;
 }
 
-// TODO
-// TESTING AND DEBUG
 Image * Image::grayscale() {
     for (int i = 0; i < this->getWidth(); i++) {
         for (int j = 0; j < this->getHeight(); j++) {
@@ -238,8 +227,6 @@ Image * Image::grayscale() {
     return this;
 }
 
-// TODO
-// TESTING AND DEBUG
 Image * Image::and_op(Image& B) {
     int opWidth = this->getWidth() > B.getWidth() ? B.getWidth() : this->getWidth();
     int opHeight = this->getHeight() > B.getHeight() ? B.getHeight() : this->getHeight();
@@ -255,8 +242,6 @@ Image * Image::and_op(Image& B) {
     return this;
 }
 
-// TODO
-// TESTING AND DEBUG
 Image * Image::or_op(Image& B) {
     int opWidth = this->getWidth() > B.getWidth() ? B.getWidth() : this->getWidth();
     int opHeight = this->getHeight() > B.getHeight() ? B.getHeight() : this->getHeight();
@@ -273,8 +258,6 @@ Image * Image::or_op(Image& B) {
     return this;
 }
 
-// TODO
-// TESTING AND DEBUG
 Image * Image::not_op() {
     for (int i = 0; i < this->getWidth(); i++) {
         for (int j = 0; j < this->getHeight(); j++) {
@@ -287,8 +270,6 @@ Image * Image::not_op() {
     return this;
 }
 
-// TODO
-// TESTING AND DEBUG
 Image * Image::translate(int dx, int dy) {
     for (int i = this->getWidth() - 1; i >= 0; i--) {
         for (int j = this->getHeight() - 1; j >= 0; j--) {
@@ -305,8 +286,6 @@ Image * Image::translate(int dx, int dy) {
     return this;
 }
 
-// TODO
-// TESTING AND DEBUG
 Image * Image::rotate90CW(){
     Image *newImage = new Image(this->getHeight(), this->getWidth());
     // Insert new Image
@@ -326,8 +305,6 @@ Image * Image::rotate90CW(){
     return newImage;
 }
 
-// TODO
-// TESTING AND DEBUG
 Image * Image::rotate90CCW(){
     Image *newImage = new Image(this->getHeight(), this->getWidth());
     int k = this->getWidth() - 1;
@@ -346,8 +323,6 @@ Image * Image::rotate90CCW(){
     return newImage;
 }
 
-// TODO
-// TESTING AND DEBUG
 Image * Image::flipH() {
     Image * tempImage = new Image(*this);
     for (int i = 0; i < tempImage->getWidth(); i++) {
@@ -362,8 +337,6 @@ Image * Image::flipH() {
     return this;
 }
 
-// TODO
-// TESTING AND DEBUG
 Image * Image::flipV() {
     Image * tempImage = new Image(*this);
     for (int i = 0; i < tempImage->getWidth(); i++) {
@@ -463,8 +436,6 @@ Image * Image::operator-(unsigned char deltaBrightness) {
     return C->adjustBrightness(0 - deltaBrightness);
 }
 
-// TODO
-// TESTING AND DEBUG
 Image * Image::operator*(Image& B) {
     Image * C = new Image(*this);
     return C->multiply(B);
@@ -660,4 +631,27 @@ Image * Image::histogramSpecification(Image& B) {
         }
     }
     return this;
+}
+
+Image * Image::grayLevelSlicing(int a, int b, int val) {
+    if (this->getOriginalFormat() == "bmp" || this->getOriginalFormat() == "ppm") {
+        return this;
+    } else {
+        if (val > COLOR_LEVEL) {
+            val = 255;
+        }
+        if (b < a) {
+            return this;
+        }
+        for (int i=0; i < this->getWidth(); i++) {
+            for (int j=0; j < this->getHeight(); j++) {
+                if (this->getPixelAt(i,j).getRed() >= a && this->getPixelAt(i,j).getRed() <= b) {
+                    Pixel *p = new Pixel(val, val, val);
+                    this->setPixelAt(i,j,*p);
+                    delete p;
+                }
+            }
+        }
+        return this;
+    }
 }
