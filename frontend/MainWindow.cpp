@@ -554,7 +554,13 @@ void MainWindow::contrastStretching(bool automatic) {
                 spdlog::info("MainWindow::contrastStretching: Automatically determine lower & upper bounds...");
             } else {
                 spdlog::info("MainWindow::contrastStretching: Prompting lower & upper bound to user...");
+                int rmin = promptValue("Values needed.", "Enter lower bound of gray value. (0 - 255)");
+                int rmax = promptValue("Values needed", "Enter upper bound of gray level. (0 - 255)");
+                drawSurface->acquireLockImage();
+                currentImage->contrastStretch(rmin, rmax);
+                drawSurface->releaseLockImage();
             }
+            drawSurface->update();
         }
     } else {
         spdlog::warn("MainWindow::contrastStretching: Please load an image first!");

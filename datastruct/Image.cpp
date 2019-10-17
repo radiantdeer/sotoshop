@@ -644,6 +644,16 @@ Image * Image::contrastStretch() {
 
 }
 
+// Currently only works for grayscale images, since it only adjusts red values
 Image * Image::contrastStretch(int rmin, int rmax) {
-
+    for (int j = 0; j < this->getHeight(); j++) {
+        for (int i = 0; i < this->getWidth(); i++) {
+            int currentVal = this->getPixelAt(i, j).getRed();
+            float adjustedVal = (float) (currentVal - rmin) / (float) (rmax - rmin);
+            adjustedVal *= MAX_GRAY;
+            currentVal = (int) adjustedVal;
+            this->setPixelAt(i, j, Pixel(adjustedVal, adjustedVal, adjustedVal));
+        }
+    }
+    return this;
 }
