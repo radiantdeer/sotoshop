@@ -48,6 +48,7 @@ class MainWindow : public QMainWindow {
         void doMedianFilter();
         void doHighPassFilter(int filterVariation);
         void doUnsharpMasking();
+        void doHighboost();
         void grayLevelSlicing();
         void contrastStretching(bool automatic);
 
@@ -78,6 +79,7 @@ class MainWindow : public QMainWindow {
         QAction * highPassFilter3Action;
         QAction * highPassFilter4Action;
         QAction * unsharpMaskingAction;
+        QAction * highboostAction;
 
         QAction * rotateCWAction;
         QAction * rotateCCWAction;

@@ -103,14 +103,22 @@ Image* Convolution::medianConvolve(Image* image, int filterWidth, int filterHeig
 }
 
 Image * Convolution::unsharpMasking(Image* image) {
-    spdlog::debug("Convolution::unsharpMasking: Calculating lowpass...");
-    Image * lowpass = convolve(image, CommonConvolutions::Average5, true);
-    spdlog::debug("Convolution::unsharpMasking: Calculating highpass...");
-    Image * highpass = new Image(*image);
-    highpass->substract(*lowpass);
-    delete lowpass;
-    spdlog::debug("Convolution::unsharpMasking: Finally calculate unsharp masking...");
+    Image * highpass = Convolution::highpass(image);
+    spdlog::debug("Convolution::unsharpMasking: Calculating unsharp masking...");
     Image * result = new Image(*image);
+    result->add(*highpass);
+    delete highpass;
+    return result;
+}
+
+Image* Convolution::highboost(Image* image, double alpha) {
+    Image * highpass = Convolution::highpass(image);
+    spdlog::debug("Convolution::highboost: Calculating highboost...");
+    Image * result = new Image(*image);
+    if (alpha < 1) {
+        alpha = 1;
+    }
+    result->multiply(alpha - 1);
     result->add(*highpass);
     delete highpass;
     return result;
@@ -148,4 +156,14 @@ Image* Convolution::padImage(Image* image, int padWidth, int padHeight) {
     }
 
     return paddedImage;
+}
+
+Image* Convolution::highpass(Image* image) {
+    spdlog::debug("Convolution::highpass: Calculating lowpass...");
+    Image * lowpass = convolve(image, CommonConvolutions::Average5, true);
+    spdlog::debug("Convolution::highpass: Calculating highpass...");
+    Image * highpass = new Image(*image);
+    highpass->substract(*lowpass);
+    delete lowpass;
+    return highpass;
 }

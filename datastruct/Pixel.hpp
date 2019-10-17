@@ -36,11 +36,12 @@ class Pixel {
         bool operator>=(Pixel& B);
         bool operator<(Pixel& B);
         bool operator<=(Pixel& B);
-  
+
         Pixel * operator+(Pixel& B);
         Pixel * operator+(unsigned char delta);
         Pixel * operator-(Pixel& B);
         Pixel * operator*(Pixel& B);
+        Pixel * operator*(double alpha);
         Pixel * operator&(Pixel& B);
         Pixel * operator|(Pixel& B);
         Pixel * operator~();
