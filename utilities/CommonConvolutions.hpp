@@ -7,6 +7,7 @@ class CommonConvolutions {
 
     public:
         static const ConvolutionMatrix Average;
+        static const ConvolutionMatrix Average5;
         static const ConvolutionMatrix HighFilter1;
         static const ConvolutionMatrix HighFilter2;
         static const ConvolutionMatrix HighFilter3;
