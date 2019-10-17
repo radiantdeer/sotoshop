@@ -48,6 +48,7 @@ class MainWindow : public QMainWindow {
         void doMedianFilter();
         void doHighPassFilter(int filterVariation);
         void grayLevelSlicing();
+        void contrastStretching(bool automatic);
 
         void equalizeImageHist();
         void showHistogram();
@@ -90,6 +91,8 @@ class MainWindow : public QMainWindow {
         QAction * andAction;
         QAction * orAction;
         QAction * notAction;
+        QAction * contrastStretchingAutoAction;
+        QAction * contrastStretchingManualAction;
 
         QAction * equalizeAction;
         QAction * histogramAction;
@@ -108,7 +111,7 @@ class MainWindow : public QMainWindow {
         void connectActionsToControllers();
         std::string getOpenFileUrl(std::string dialogTitle);
         std::string getSaveFileUrl(std::string dialogTitle);
-        bool askForPadding();
+        bool askYesNoQuestion(std::string promptTitle, std::string promptText);
         static std::string getFileExtension(std::string fileUrl);
         int promptValue(std::string promptTitle, std::string promptText);
 

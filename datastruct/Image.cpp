@@ -688,3 +688,63 @@ Image * Image::invLogTrans() {
     }
     return this;
 }
+
+Image * Image::contrastStretch() {
+    if ((this->getWidth() > 0) && (this->getHeight())) {
+        spdlog::debug("Image::contrastStretch: Determining rmin and rmax...");
+        int rrmin = this->getPixelAt(0, 0).getRed();
+        int rrmax = this->getPixelAt(0, 0).getRed();
+        int rgmin = this->getPixelAt(0, 0).getGreen();
+        int rgmax = this->getPixelAt(0, 0).getGreen();
+        int rbmin = this->getPixelAt(0, 0).getBlue();
+        int rbmax = this->getPixelAt(0, 0).getBlue();
+
+        for (int j = 0; j < this->getHeight(); j++) {
+            for (int i = 0; i < this->getWidth(); i++) {
+                if (rrmin > this->getPixelAt(i, j).getRed()) {
+                    rrmin = this->getPixelAt(i, j).getRed();
+                }
+                if (rrmax < this->getPixelAt(i, j).getRed()) {
+                    rrmax = this->getPixelAt(i, j).getRed();
+                }
+                if (rgmin > this->getPixelAt(i, j).getGreen()) {
+                    rgmin = this->getPixelAt(i, j).getGreen();
+                }
+                if (rgmax < this->getPixelAt(i, j).getGreen()) {
+                    rgmax = this->getPixelAt(i, j).getGreen();
+                }
+                if (rbmin > this->getPixelAt(i, j).getBlue()) {
+                    rbmin = this->getPixelAt(i, j).getBlue();
+                }
+                if (rbmax < this->getPixelAt(i, j).getBlue()) {
+                    rbmax = this->getPixelAt(i, j).getBlue();
+                }
+            }
+        }
+        spdlog::debug("Image::contrastStretch: Determined these parameters : ");
+        spdlog::debug("redmin : {} | redmax : {} | greenmin : {} | greenmax : {} | bluemin : {} | bluemax : {}", rrmin, rrmax, rgmin, rgmax, rbmin, rbmax);
+        contrastStretch(rrmin, rrmax, rgmin, rgmax, rbmin, rbmax);
+    }    
+    return this;
+}
+
+Image * Image::contrastStretch(int rrmin, int rrmax, int rgmin, int rgmax, int rbmin, int rbmax) {
+    for (int j = 0; j < this->getHeight(); j++) {
+        for (int i = 0; i < this->getWidth(); i++) {
+            int redVal = this->getPixelAt(i, j).getRed();
+            int greenVal = this->getPixelAt(i, j).getGreen();
+            int blueVal = this->getPixelAt(i, j).getBlue();
+            float adjustedRedVal = (float) (redVal - rrmin) / (float) (rrmax - rrmin);
+            float adjustedGreenVal = (float) (greenVal - rgmin) / (float) (rgmax - rgmin);
+            float adjustedBlueVal = (float) (blueVal - rbmin) / (float) (rbmax - rbmin);
+            adjustedRedVal *= MAX_GRAY;
+            adjustedGreenVal *= MAX_GRAY;
+            adjustedBlueVal *= MAX_GRAY;
+            redVal = Pixel::thresholding((int) adjustedRedVal);
+            greenVal = Pixel::thresholding((int) adjustedGreenVal);
+            blueVal = Pixel::thresholding((int) adjustedBlueVal);
+            this->setPixelAt(i, j, Pixel(redVal, greenVal, blueVal));
+        }
+    }
+    return this;
+}

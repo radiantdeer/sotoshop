@@ -51,6 +51,11 @@ MainWindow::MainWindow() : QMainWindow() {
     nthPowerAction = editMenu->addAction("N-Power");
     logAction = editMenu->addAction("Log");
     invLogAction = editMenu->addAction("Inverse Log");
+  
+    editMenu->addSeparator();
+    QMenu * contrastStretch = editMenu->addMenu("Stretch Contrast");
+    contrastStretchingAutoAction = contrastStretch->addAction("Auto");
+    contrastStretchingManualAction = contrastStretch->addAction("Manual");
 
     QMenu * histogramMenu = this->menuBar()->addMenu("Histogram");
     histogramAction = histogramMenu->addAction("Show");
@@ -249,7 +254,7 @@ void MainWindow::flipImageVertical() {
 
 void MainWindow::doMeanFilter() {
     if (drawSurface->isImageLoaded()) {
-        bool padded = askForPadding();
+        bool padded = askYesNoQuestion("Convolution Padding", "Do you want to pad the image first?");
         spdlog::info("MainWindow::doMeanFilter: Convolving with mean filter...");
         Image * newImage = Convolution::convolve(drawSurface->getActiveImage(), CommonConvolutions::Average, padded);
         drawSurface->acquireLockImage();
@@ -264,7 +269,7 @@ void MainWindow::doMeanFilter() {
 
 void MainWindow::doMedianFilter() {
     if (drawSurface->isImageLoaded()) {
-        bool padded = askForPadding();
+        bool padded = askYesNoQuestion("Convolution Padding", "Do you want to pad the image first?");
         spdlog::info("MainWindow::doMedianFilter: Convolving with median filter...");
         Image * newImage = Convolution::medianConvolve(drawSurface->getActiveImage(), 3, 3, padded);
         drawSurface->acquireLockImage();
@@ -279,7 +284,7 @@ void MainWindow::doMedianFilter() {
 
 void MainWindow::doHighPassFilter(int filterVariation) {
     if (drawSurface->isImageLoaded()) {
-        bool padded = askForPadding();
+        bool padded = askYesNoQuestion("Convolution Padding", "Do you want to pad the image first?");
         spdlog::info("MainWindow::doHighPassFilter: Convolving with high-pass filter #{}...", filterVariation);
 
         const ConvolutionMatrix * opMatrix;
@@ -562,6 +567,32 @@ void MainWindow::showBitPlanes() {
     }
 }
 
+void MainWindow::contrastStretching(bool automatic) {
+    if (drawSurface->isImageLoaded()) {
+        Image * currentImage = drawSurface->getActiveImage();
+        if (automatic) {
+            spdlog::info("MainWindow::contrastStretching: Automatically determine lower & upper bounds...");
+            drawSurface->acquireLockImage();
+            currentImage->contrastStretch();
+            drawSurface->releaseLockImage();
+        } else {
+            spdlog::info("MainWindow::contrastStretching: Prompting lower & upper bound to user...");
+            int rrmin = promptValue("Values needed.", "Enter lower bound of red color. (0 - 255)");
+            int rrmax = promptValue("Values needed", "Enter upper bound of red color. (0 - 255)");
+            int rgmin = promptValue("Values needed", "Minimum green color\n(just enter the same value as red if grayscale)");
+            int rgmax = promptValue("Values needed", "Maximum green color\n(just enter the same value as red if grayscale)");
+            int rbmin = promptValue("Values needed", "Minimum blue color\n(just enter the same value as red if grayscale)");
+            int rbmax = promptValue("Values needed", "Maximum blue color\n(just enter the same value as red if grayscale)");
+            drawSurface->acquireLockImage();
+            currentImage->contrastStretch(rrmin, rrmax, rgmin, rgmax, rbmin, rbmax);
+            drawSurface->releaseLockImage();
+        }
+        drawSurface->update();
+    } else {
+        spdlog::warn("MainWindow::contrastStretching: Please load an image first!");
+    }
+}
+
 void MainWindow::logOperation() {
     if (drawSurface->isImageLoaded()) {
         drawSurface->acquireLockImage();
@@ -601,6 +632,7 @@ void MainWindow::connectActionsToControllers() {
     connect(zoomInAction, &QAction::triggered, this, &MainWindow::zoomIn);
     connect(zoomOutAction, &QAction::triggered, this, &MainWindow::zoomOut);
     connect(grayLevelSlicingAction, &QAction::triggered, this, &MainWindow::grayLevelSlicing);
+    connect(nthPowerAction, &QAction::triggered, this, &MainWindow::nthPower);
     connect(logAction, &QAction::triggered, this, &MainWindow::logOperation);
     connect(invLogAction, &QAction::triggered, this, &MainWindow::invLogOperation);
 
@@ -611,8 +643,9 @@ void MainWindow::connectActionsToControllers() {
     connect(orAction, &QAction::triggered, this, &MainWindow::operateOrImage);
     connect(notAction, &QAction::triggered, this, &MainWindow::operateNotImage);
 
-    connect(nthPowerAction, &QAction::triggered, this, &MainWindow::nthPower);
-  
+    connect(contrastStretchingAutoAction, &QAction::triggered, this, [this]{contrastStretching(true); });
+    connect(contrastStretchingManualAction, &QAction::triggered, this, [this]{contrastStretching(false); });
+
     connect(histogramAction, &QAction::triggered, this, &MainWindow::showHistogram);
     connect(equalizeAction, &QAction::triggered, this, &MainWindow::equalizeImageHist);
     connect(specifyHistAction, &QAction::triggered, this, &MainWindow::specifyHist);
@@ -651,8 +684,8 @@ int MainWindow::promptValue(std::string promptTitle, std::string promptText) {
     return value;
 }
 
-bool MainWindow::askForPadding() {
-    QMessageBox::StandardButton response = QMessageBox::question(this, "Convolution Padding", "Do you want to pad the image before convolution?");
+bool MainWindow::askYesNoQuestion(std::string promptTitle, std::string promptText) {
+    QMessageBox::StandardButton response = QMessageBox::question(this, promptTitle.c_str(), promptText.c_str());
     if (response == QMessageBox::Yes) {
         return true;
     } else {

@@ -58,6 +58,9 @@ class Image {
         Image * operator&(Image& B);
         Image * operator|(Image& B);
         Image * operator~();
+  
+        Image * logTrans();
+        Image * invLogTrans();
 
         std::vector<std::vector<int>> histogram();
         std::vector<std::vector<int>> equalizedHistogram();
@@ -65,10 +68,10 @@ class Image {
         Image * histogramSpecification(Image& B);
 
         Image * grayLevelSlicing(int a, int b, int val);
+        Image * contrastStretch();
+        Image * contrastStretch(int rrmin, int rrmax, int rgmin, int rgmax, int rbmin, int rbmax);
 
-        Image * logTrans();
-        Image * invLogTrans();
-    private:
+  private:
         int width;
         int height;
         std::vector<std::vector<Pixel>> data;
