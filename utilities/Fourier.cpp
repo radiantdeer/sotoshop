@@ -61,8 +61,35 @@ Image * Fourier::visualizeFrequencies(std::vector<std::vector<std::complex<doubl
 }
 
 Image * Fourier::inverse(std::vector<std::vector<std::complex<double>> *> * frequencies) {
-    Image * result = nullptr;
+    spdlog::info("Fourier::inverse: Allocating image result...");
+    Image * result = new Image(frequencies->at(0)->size(), frequencies->size());
 
+    spdlog::info("Fourier::inverse: Starting Inverse Fourier transform...");
+    int numOfFrequencies = result->getHeight() * result->getWidth();
+    int done = 0;
+    double prevPercentage = 0;
+    double percentage = 0;
+    for (int v = 0; v < result->getHeight(); v++) {
+        for (int u = 0; u < result->getWidth(); u++) {
+            double thisValue = 0;
+            for (int j = 0; j < frequencies->size(); j++) {
+                for (int i = 0; i < frequencies->at(j)->size(); i++) {
+                    std::complex<double> expValue = std::polar((double) 0, exp(2 * M_PI * (((double) u * i / result->getWidth()) + ((double) v * j / result->getHeight()))));
+                    std::complex<double> temp = frequencies->at(j)->at(i) * expValue;
+                    thisValue += std::norm(temp);
+                }
+            }
+            result->setPixelAt(u, v, Pixel(thisValue, thisValue, thisValue));
+            // Below is just for progress monitoring on logs
+            done++;
+            percentage = (double) done * 100 / (double) numOfFrequencies;
+            if ((percentage - prevPercentage) > 1) {
+                spdlog::info("Fourier::inverse: {}%", percentage);
+                prevPercentage = percentage;
+            }
+        }
+    }
+    spdlog::info("Fourier::inverse: Done.");
     return result;
 }
 

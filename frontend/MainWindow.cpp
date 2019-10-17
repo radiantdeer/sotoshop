@@ -640,7 +640,15 @@ void MainWindow::viewFourierSpectrum() {
 
 void MainWindow::doInverseFourier() {
     if (fourierFrequencies != nullptr) {
-        spdlog::info("MainWindow::doInverseFourier: stub function");
+        if (fourierVisual != nullptr) {
+            delete fourierVisual;
+        }
+        if (fourierDialog != nullptr) {
+            delete fourierDialog;
+        }
+        Image * fourierVisual = Fourier::inverse(fourierFrequencies);
+        fourierDialog = new DrawSurface(nullptr, fourierVisual);
+        fourierDialog->show();
     } else {
         spdlog::warn("MainWindow::doInverseFourier: Please do a Fourier Transform first!");
     }
