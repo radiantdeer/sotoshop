@@ -2,8 +2,8 @@
 #include "PBMImageSaver.hpp"
 #include "PGMImageSaver.hpp"
 #include "PPMImageSaver.hpp"
-#include "RawImageSaver.hpp"
 #include "BMPImageSaver.hpp"
+#include "RawImageSaver.hpp"
 #include <iostream>
 #include "../../spdlog/spdlog.h"
 #include "../../utilities/Utilities.hpp"
