@@ -400,6 +400,22 @@ Image * Image::shrink2() {
     return result;
 }
 
+Image * Image::nthPower(double n, double c) {
+    for (int j = 0; j < this->getHeight(); j++) {
+        for (int i = 0; i < this->getWidth(); i++) {
+            // s = cr^n
+            Pixel a = this->getPixelAt(i,j);
+            int redVal   = 255*c*pow(double(a.getRed())  /(COLOR_LEVEL-1), n);
+            int greenVal = 255*c*pow(double(a.getGreen())/(COLOR_LEVEL-1), n);
+            int blueVal  = 255*c*pow(double(a.getBlue()) /(COLOR_LEVEL-1), n);
+            Pixel *p = new Pixel(redVal, greenVal, blueVal);
+            this->setPixelAt(i, j, *p);
+            delete p;
+        }
+    }
+    return this;
+}
+
 Image * Image::operator+(Image& B) {
     Image * C = new Image(*this);
     return C->add(B);
@@ -640,6 +656,39 @@ Image * Image::grayLevelSlicing(int a, int b, int val) {
     }
 }
 
+Image * Image::logTrans() {
+    const double c = double(COLOR_LEVEL - 1) / log10(COLOR_LEVEL);
+    for(int j = 0; j < this->getHeight(); j++) {
+        for(int i = 0; i < this->getWidth(); i++) {
+            // s = c * log(1 + r);
+            Pixel a = this->getPixelAt(i,j);
+            int redVal = c*log10(a.getRed() + 1);
+            int greenVal = c*log10(a.getGreen() + 1);
+            int blueVal = c*log10(a.getBlue() + 1);
+            Pixel * p = new Pixel(redVal,greenVal,blueVal);
+            this->setPixelAt(i,j,*p);
+        }
+    }
+    return this;
+}
+
+Image * Image::invLogTrans() {
+    const double BASE = 1.02;
+    const double c = double(COLOR_LEVEL - 1) / (pow(BASE, COLOR_LEVEL) - 1);
+    for(int j = 0; j < this->getHeight(); j++) {
+        for(int i = 0; i < this->getWidth(); i++) {
+            // s = c * (e^r -1)
+            Pixel a = this->getPixelAt(i,j);
+            int redVal = c*(pow(BASE, a.getRed()) - 1);
+            int greenVal = c*(pow(BASE, a.getGreen()) - 1);
+            int blueVal = c*(pow(BASE, a.getBlue()) - 1);
+            Pixel * p = new Pixel(redVal,greenVal,blueVal);
+            this->setPixelAt(i,j,*p);
+        }
+    }
+    return this;
+}
+
 Image * Image::contrastStretch() {
     if ((this->getWidth() > 0) && (this->getHeight())) {
         spdlog::debug("Image::contrastStretch: Determining rmin and rmax...");
@@ -675,7 +724,7 @@ Image * Image::contrastStretch() {
         spdlog::debug("Image::contrastStretch: Determined these parameters : ");
         spdlog::debug("redmin : {} | redmax : {} | greenmin : {} | greenmax : {} | bluemin : {} | bluemax : {}", rrmin, rrmax, rgmin, rgmax, rbmin, rbmax);
         contrastStretch(rrmin, rrmax, rgmin, rgmax, rbmin, rbmax);
-    }
+    }    
     return this;
 }
 

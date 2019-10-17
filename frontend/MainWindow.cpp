@@ -48,6 +48,11 @@ MainWindow::MainWindow() : QMainWindow() {
     orAction = booleanMenu->addAction("OR");
     notAction = booleanMenu->addAction("NOT");
     editMenu->addSeparator();
+    nthPowerAction = editMenu->addAction("N-Power");
+    logAction = editMenu->addAction("Log");
+    invLogAction = editMenu->addAction("Inverse Log");
+  
+    editMenu->addSeparator();
     QMenu * contrastStretch = editMenu->addMenu("Stretch Contrast");
     contrastStretchingAutoAction = contrastStretch->addAction("Auto");
     contrastStretchingManualAction = contrastStretch->addAction("Manual");
@@ -335,6 +340,24 @@ void MainWindow::zoomOut() {
     }
 }
 
+void MainWindow::nthPower() {
+    if (drawSurface->isImageLoaded()) {
+        spdlog::debug("Prompting the user to input c");
+        double c = QInputDialog::getDouble(this, "Constant", "Enter value: ");
+        spdlog::debug("User entered delta = {}", c);
+        spdlog::debug("Prompting the user to input n");
+        double n = QInputDialog::getDouble(this, "N Power", "Enter value: ");
+        spdlog::debug("User entered delta = {}", n);
+        spdlog::info("MainWindow::nthPower: N Power");
+        drawSurface->acquireLockImage();
+        drawSurface->setActiveImage(drawSurface->getActiveImage()->nthPower(n, c));
+        drawSurface->releaseLockImage();
+        drawSurface->update();
+    } else {
+        spdlog::warn("MainWindow::nthPower: Please load an image first!");
+    }
+}
+
 void MainWindow::grayLevelSlicing() {
     if (drawSurface->isImageLoaded()) {
         spdlog::debug("Prompting the user to input a");
@@ -570,6 +593,28 @@ void MainWindow::contrastStretching(bool automatic) {
     }
 }
 
+void MainWindow::logOperation() {
+    if (drawSurface->isImageLoaded()) {
+        drawSurface->acquireLockImage();
+        drawSurface->getActiveImage()->logTrans();
+        drawSurface->releaseLockImage();
+        drawSurface->update();
+    } else {
+        spdlog::warn("MainWindow::logOperation: Please load an image first!");
+    }
+}
+
+void MainWindow::invLogOperation() {
+    if (drawSurface->isImageLoaded()) {
+        drawSurface->acquireLockImage();
+        drawSurface->getActiveImage()->invLogTrans();
+        drawSurface->releaseLockImage();
+        drawSurface->update();
+    } else {
+        spdlog::warn("MainWindow::invLogOperation: Please load an image first!");
+    }
+}
+
 void MainWindow::connectActionsToControllers() {
     connect(loadAction, &QAction::triggered, this, &MainWindow::loadFile);
     connect(saveAction, &QAction::triggered, this, &MainWindow::saveFile);
@@ -587,6 +632,9 @@ void MainWindow::connectActionsToControllers() {
     connect(zoomInAction, &QAction::triggered, this, &MainWindow::zoomIn);
     connect(zoomOutAction, &QAction::triggered, this, &MainWindow::zoomOut);
     connect(grayLevelSlicingAction, &QAction::triggered, this, &MainWindow::grayLevelSlicing);
+    connect(nthPowerAction, &QAction::triggered, this, &MainWindow::nthPower);
+    connect(logAction, &QAction::triggered, this, &MainWindow::logOperation);
+    connect(invLogAction, &QAction::triggered, this, &MainWindow::invLogOperation);
 
     connect(additionAction, &QAction::triggered, this, &MainWindow::addImage);
     connect(substractAction, &QAction::triggered, this, &MainWindow::substractImage);
@@ -609,6 +657,8 @@ void MainWindow::connectActionsToControllers() {
     connect(highPassFilter3Action, &QAction::triggered, this, [this]{doHighPassFilter(3); });
     connect(highPassFilter4Action, &QAction::triggered, this, [this]{doHighPassFilter(4); });
 
+    connect(histogramAction, &QAction::triggered, this, &MainWindow::showHistogram);
+  
     connect(bitPlaneAction, &QAction::triggered, this, &MainWindow::showBitPlanes);
 
 }

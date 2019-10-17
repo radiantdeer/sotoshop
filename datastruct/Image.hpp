@@ -48,6 +48,7 @@ class Image {
         Image * flipV();
         Image * magnify2();
         Image * shrink2();
+        Image * nthPower(double n, double c);
 
         Image * operator+(Image& B);
         Image * operator+(unsigned char deltaBrightness);
@@ -57,6 +58,9 @@ class Image {
         Image * operator&(Image& B);
         Image * operator|(Image& B);
         Image * operator~();
+  
+        Image * logTrans();
+        Image * invLogTrans();
 
         std::vector<std::vector<int>> histogram();
         std::vector<std::vector<int>> equalizedHistogram();
@@ -67,7 +71,7 @@ class Image {
         Image * contrastStretch();
         Image * contrastStretch(int rrmin, int rrmax, int rgmin, int rgmax, int rbmin, int rbmax);
 
-    private:
+  private:
         int width;
         int height;
         std::vector<std::vector<Pixel>> data;

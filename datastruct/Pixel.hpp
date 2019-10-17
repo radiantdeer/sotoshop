@@ -44,7 +44,6 @@ class Pixel {
         Pixel * operator&(Pixel& B);
         Pixel * operator|(Pixel& B);
         Pixel * operator~();
-
 };
 
 #endif
