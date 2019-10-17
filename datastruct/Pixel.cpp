@@ -128,7 +128,7 @@ Pixel * Pixel::operator*(Pixel& B) {
     return C;
 }
 
-Pixel * Pixel::operator*(unsigned char alpha) {
+Pixel * Pixel::operator*(double alpha) {
     int valueRed = thresholding(this->getRed() * alpha);
     int valueGreen = thresholding(this->getGreen() * alpha);
     int valueBlue = thresholding(this->getBlue() * alpha);

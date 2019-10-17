@@ -41,7 +41,7 @@ class Pixel {
         Pixel * operator+(unsigned char delta);
         Pixel * operator-(Pixel& B);
         Pixel * operator*(Pixel& B);
-        Pixel * operator*(unsigned char alpha);
+        Pixel * operator*(double alpha);
         Pixel * operator&(Pixel& B);
         Pixel * operator|(Pixel& B);
         Pixel * operator~();

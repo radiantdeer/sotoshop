@@ -71,6 +71,7 @@ MainWindow::MainWindow() : QMainWindow() {
     highPassFilter3Action = highPass->addAction("Variation 3");
     highPassFilter4Action = highPass->addAction("Variation 4");
     unsharpMaskingAction = convolutionMenu->addAction("Unsharp Masking");
+    highboostAction = convolutionMenu->addAction("Highboost");
 
     QMenu * other = this->menuBar()->addMenu("Other");
     bitPlaneAction = other->addAction("Bit Planes");
@@ -321,6 +322,21 @@ void MainWindow::doUnsharpMasking() {
     if (drawSurface->isImageLoaded()) {
         spdlog::info("MainWindow::doUnsharpMasking: Filtering with unsharp masking...");
         Image * result = Convolution::unsharpMasking(drawSurface->getActiveImage());
+        drawSurface->acquireLockImage();
+        drawSurface->purgeImage();
+        drawSurface->setActiveImage(result);
+        drawSurface->releaseLockImage();
+        drawSurface->update();
+    } else {
+        spdlog::warn("MainWindow::doUnsharpMasking: Please load an image first!");
+    }
+}
+
+void MainWindow::doHighboost() {
+    if (drawSurface->isImageLoaded()) {
+        spdlog::info("MainWindow::doUnsharpMasking: Filtering with highboost...");
+        double alpha = QInputDialog::getDouble(this, "Value needed", "Enter alpha");
+        Image * result = Convolution::highboost(drawSurface->getActiveImage(), alpha);
         drawSurface->acquireLockImage();
         drawSurface->purgeImage();
         drawSurface->setActiveImage(result);
@@ -672,6 +688,7 @@ void MainWindow::connectActionsToControllers() {
     connect(highPassFilter3Action, &QAction::triggered, this, [this]{doHighPassFilter(3); });
     connect(highPassFilter4Action, &QAction::triggered, this, [this]{doHighPassFilter(4); });
     connect(unsharpMaskingAction, &QAction::triggered, this, &MainWindow::doUnsharpMasking);
+    connect(highboostAction, &QAction::triggered, this, &MainWindow::doHighboost);
 
     connect(histogramAction, &QAction::triggered, this, &MainWindow::showHistogram);
 

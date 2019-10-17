@@ -199,7 +199,7 @@ Image * Image::multiply(Image& B) {
     return this;
 }
 
-Image * Image::multiply(unsigned char alpha) {
+Image * Image::multiply(double alpha) {
     for (int j = 0; j < this->getHeight(); j++) {
         for (int i = 0; i < this->getWidth(); i++) {
             Pixel a = this->getPixelAt(i, j);
@@ -453,7 +453,7 @@ Image * Image::operator*(Image& B) {
     return C->multiply(B);
 }
 
-Image * Image::operator*(unsigned char alpha) {
+Image * Image::operator*(double alpha) {
     Image * C = new Image(*this);
     return C->multiply(alpha);
 }
