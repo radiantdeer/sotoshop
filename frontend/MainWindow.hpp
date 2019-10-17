@@ -5,7 +5,9 @@
 #include <QMainWindow>
 #include <QObject>
 #include <QSignalMapper>
+#include <complex>
 #include <string>
+#include <vector>
 
 #include "BitPlaneDialog.hpp"
 #include "DrawSurface.hpp"
@@ -60,6 +62,9 @@ class MainWindow : public QMainWindow {
         void invLogOperation();
 
         void showBitPlanes();
+        void doFourierTransform();
+        void viewFourierSpectrum();
+        void doInverseFourier();
 
     private:
         QAction * loadAction;
@@ -71,6 +76,10 @@ class MainWindow : public QMainWindow {
         QAction * rotateAction;
         QAction * flipAction;
         QAction * zoomAction;
+
+        QAction * nthPowerAction;
+        QAction * logAction;
+        QAction * invLogAction;
 
         QAction * meanFilterAction;
         QAction * medianFilterAction;
@@ -102,15 +111,17 @@ class MainWindow : public QMainWindow {
         QAction * histogramAction;
         QAction * specifyHistAction;
 
-        QAction * nthPowerAction;
         QAction * bitPlaneAction;
-
-        QAction * logAction;
-        QAction * invLogAction;
+        QAction * fourierAction;
+        QAction * viewFourierSpectrumAction;
+        QAction * inverseFourierAction;
 
         DrawSurface * drawSurface;
         HistogramDialog * histDialog;
         BitPlaneDialog * bitPlaneDialog;
+        std::vector<std::vector<std::complex<double>> *> * fourierFrequencies;
+        DrawSurface * fourierDialog;
+        Image * fourierVisual;
 
         void connectActionsToControllers();
         std::string getOpenFileUrl(std::string dialogTitle);
