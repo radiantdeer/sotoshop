@@ -75,12 +75,17 @@ MainWindow::MainWindow() : QMainWindow() {
 
     QMenu * other = this->menuBar()->addMenu("Other");
     bitPlaneAction = other->addAction("Bit Planes");
+    fourierAction = other->addAction("Fourier Transform");
+    viewFourierSpectrumAction = other->addAction("View Fourier Spectrum");
+    inverseFourierAction = other->addAction("Inverse Fourier Transform");
+
     connectActionsToControllers();
 
     drawSurface = new DrawSurface(this);
     this->setCentralWidget(drawSurface);
     histDialog = nullptr;
     bitPlaneDialog = nullptr;
+    fourierFrequencies = nullptr;
 }
 
 QAction * MainWindow::getLoadAction() {
@@ -598,6 +603,31 @@ void MainWindow::showBitPlanes() {
     }
 }
 
+void MainWindow::doFourierTransform() {
+    if (drawSurface->isImageLoaded()) {
+        spdlog::info("MainWindow::doFourierTransform: stub function");
+    } else {
+        spdlog::warn("MainWindow::doFourierTransform: Please load an image first!");
+    }
+}
+
+void MainWindow::viewFourierSpectrum() {
+    if (fourierFrequencies != nullptr) {
+        spdlog::info("MainWindow::viewFourierSpectrum: stub function");
+    } else {
+        spdlog::warn("MainWindow::viewFourierSpectrum: Please do a Fourier Transform first!");
+    }
+}
+
+void MainWindow::doInverseFourier() {
+    if (fourierFrequencies != nullptr) {
+        spdlog::info("MainWindow::doInverseFourier: stub function");
+    } else {
+        spdlog::warn("MainWindow::doInverseFourier: Please do a Fourier Transform first!");
+    }
+}
+
+
 void MainWindow::contrastStretching(bool automatic) {
     if (drawSurface->isImageLoaded()) {
         Image * currentImage = drawSurface->getActiveImage();
@@ -690,9 +720,10 @@ void MainWindow::connectActionsToControllers() {
     connect(unsharpMaskingAction, &QAction::triggered, this, &MainWindow::doUnsharpMasking);
     connect(highboostAction, &QAction::triggered, this, &MainWindow::doHighboost);
 
-    connect(histogramAction, &QAction::triggered, this, &MainWindow::showHistogram);
-
     connect(bitPlaneAction, &QAction::triggered, this, &MainWindow::showBitPlanes);
+    connect(fourierAction, &QAction::triggered, this, &MainWindow::);
+    connect(viewFourierSpectrumAction, &QAction::triggered, this, &MainWindow::);
+    connect(inverseFourierAction, &QAction::triggered, this, &MainWindow::);
 
 }
 
