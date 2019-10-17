@@ -655,3 +655,36 @@ Image * Image::grayLevelSlicing(int a, int b, int val) {
         return this;
     }
 }
+
+Image * Image::logTrans() {
+    const double c = double(COLOR_LEVEL - 1) / log10(COLOR_LEVEL);
+    for(int j = 0; j < this->getHeight(); j++) {
+        for(int i = 0; i < this->getWidth(); i++) {
+            // s = c * log(1 + r);
+            Pixel a = this->getPixelAt(i,j);
+            int redVal = c*log10(a.getRed() + 1);
+            int greenVal = c*log10(a.getGreen() + 1);
+            int blueVal = c*log10(a.getBlue() + 1);
+            Pixel * p = new Pixel(redVal,greenVal,blueVal);
+            this->setPixelAt(i,j,*p);
+        }
+    }
+    return this;
+}
+
+Image * Image::invLogTrans() {
+    const double BASE = 1.02;
+    const double c = double(COLOR_LEVEL - 1) / (pow(BASE, COLOR_LEVEL) - 1);
+    for(int j = 0; j < this->getHeight(); j++) {
+        for(int i = 0; i < this->getWidth(); i++) {
+            // s = c * (e^r -1)
+            Pixel a = this->getPixelAt(i,j);
+            int redVal = c*(pow(BASE, a.getRed()) - 1);
+            int greenVal = c*(pow(BASE, a.getGreen()) - 1);
+            int blueVal = c*(pow(BASE, a.getBlue()) - 1);
+            Pixel * p = new Pixel(redVal,greenVal,blueVal);
+            this->setPixelAt(i,j,*p);
+        }
+    }
+    return this;
+}

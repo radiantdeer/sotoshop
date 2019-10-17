@@ -49,6 +49,8 @@ MainWindow::MainWindow() : QMainWindow() {
     notAction = booleanMenu->addAction("NOT");
     editMenu->addSeparator();
     nthPowerAction = editMenu->addAction("N-Power");
+    logAction = editMenu->addAction("Log");
+    invLogAction = editMenu->addAction("Inverse Log");
 
     QMenu * histogramMenu = this->menuBar()->addMenu("Histogram");
     histogramAction = histogramMenu->addAction("Show");
@@ -560,6 +562,28 @@ void MainWindow::showBitPlanes() {
     }
 }
 
+void MainWindow::logOperation() {
+    if (drawSurface->isImageLoaded()) {
+        drawSurface->acquireLockImage();
+        drawSurface->getActiveImage()->logTrans();
+        drawSurface->releaseLockImage();
+        drawSurface->update();
+    } else {
+        spdlog::warn("MainWindow::logOperation: Please load an image first!");
+    }
+}
+
+void MainWindow::invLogOperation() {
+    if (drawSurface->isImageLoaded()) {
+        drawSurface->acquireLockImage();
+        drawSurface->getActiveImage()->invLogTrans();
+        drawSurface->releaseLockImage();
+        drawSurface->update();
+    } else {
+        spdlog::warn("MainWindow::invLogOperation: Please load an image first!");
+    }
+}
+
 void MainWindow::connectActionsToControllers() {
     connect(loadAction, &QAction::triggered, this, &MainWindow::loadFile);
     connect(saveAction, &QAction::triggered, this, &MainWindow::saveFile);
@@ -577,6 +601,8 @@ void MainWindow::connectActionsToControllers() {
     connect(zoomInAction, &QAction::triggered, this, &MainWindow::zoomIn);
     connect(zoomOutAction, &QAction::triggered, this, &MainWindow::zoomOut);
     connect(grayLevelSlicingAction, &QAction::triggered, this, &MainWindow::grayLevelSlicing);
+    connect(logAction, &QAction::triggered, this, &MainWindow::logOperation);
+    connect(invLogAction, &QAction::triggered, this, &MainWindow::invLogOperation);
 
     connect(additionAction, &QAction::triggered, this, &MainWindow::addImage);
     connect(substractAction, &QAction::triggered, this, &MainWindow::substractImage);
