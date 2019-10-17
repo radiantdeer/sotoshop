@@ -128,6 +128,16 @@ Pixel * Pixel::operator*(Pixel& B) {
     return C;
 }
 
+int thresholding(int value) {
+    if (value > 255) {
+        return 255;
+    } else if (value < 0) {
+        return 0;
+    } else {
+        return value;
+    }
+}
+
 bool Pixel::operator==(Pixel& B) {
     return (this->getRed() == B.getRed()) && (this->getGreen() == B.getGreen()) && (this->getBlue() == B.getBlue());
 }
