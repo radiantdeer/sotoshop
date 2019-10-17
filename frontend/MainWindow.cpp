@@ -47,8 +47,11 @@ MainWindow::MainWindow() : QMainWindow() {
     andAction = booleanMenu->addAction("AND");
     orAction = booleanMenu->addAction("OR");
     notAction = booleanMenu->addAction("NOT");
+    editMenu->addSeparator();
+    nthPowerAction = editMenu->addAction("N-Power");
     logAction = editMenu->addAction("Log");
     invLogAction = editMenu->addAction("Inverse Log");
+
     QMenu * histogramMenu = this->menuBar()->addMenu("Histogram");
     histogramAction = histogramMenu->addAction("Show");
     equalizeAction = histogramMenu->addAction("Equalize");
@@ -332,6 +335,24 @@ void MainWindow::zoomOut() {
     }
 }
 
+void MainWindow::nthPower() {
+    if (drawSurface->isImageLoaded()) {
+        spdlog::debug("Prompting the user to input c");
+        double c = QInputDialog::getDouble(this, "Constant", "Enter value: ");
+        spdlog::debug("User entered delta = {}", c);
+        spdlog::debug("Prompting the user to input n");
+        double n = QInputDialog::getDouble(this, "N Power", "Enter value: ");
+        spdlog::debug("User entered delta = {}", n);
+        spdlog::info("MainWindow::nthPower: N Power");
+        drawSurface->acquireLockImage();
+        drawSurface->setActiveImage(drawSurface->getActiveImage()->nthPower(n, c));
+        drawSurface->releaseLockImage();
+        drawSurface->update();
+    } else {
+        spdlog::warn("MainWindow::nthPower: Please load an image first!");
+    }
+}
+
 void MainWindow::grayLevelSlicing() {
     if (drawSurface->isImageLoaded()) {
         spdlog::debug("Prompting the user to input a");
@@ -590,6 +611,8 @@ void MainWindow::connectActionsToControllers() {
     connect(orAction, &QAction::triggered, this, &MainWindow::operateOrImage);
     connect(notAction, &QAction::triggered, this, &MainWindow::operateNotImage);
 
+    connect(nthPowerAction, &QAction::triggered, this, &MainWindow::nthPower);
+  
     connect(histogramAction, &QAction::triggered, this, &MainWindow::showHistogram);
     connect(equalizeAction, &QAction::triggered, this, &MainWindow::equalizeImageHist);
     connect(specifyHistAction, &QAction::triggered, this, &MainWindow::specifyHist);
@@ -601,6 +624,8 @@ void MainWindow::connectActionsToControllers() {
     connect(highPassFilter3Action, &QAction::triggered, this, [this]{doHighPassFilter(3); });
     connect(highPassFilter4Action, &QAction::triggered, this, [this]{doHighPassFilter(4); });
 
+    connect(histogramAction, &QAction::triggered, this, &MainWindow::showHistogram);
+  
     connect(bitPlaneAction, &QAction::triggered, this, &MainWindow::showBitPlanes);
 
 }
