@@ -555,7 +555,11 @@ void MainWindow::logOperation() {
 
 void MainWindow::invLogOperation() {
     if (drawSurface->isImageLoaded()) {
-
+        double c = QInputDialog::getDouble(this, "Get Constanta", "Enter value:", 0, 0);
+        drawSurface->acquireLockImage();
+        drawSurface->getActiveImage()->invLogTrans(c);
+        drawSurface->releaseLockImage();
+        drawSurface->update();
     } else {
         spdlog::warn("MainWindow::invLogOperation: Please load an image first!");
     }

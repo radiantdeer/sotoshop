@@ -656,5 +656,16 @@ Image * Image::logTrans(double c) {
 }
 
 Image * Image::invLogTrans(double c) {
+    for(int j = 0; j < this->getHeight(); j++) {
+        for(int i = 0; i < this->getWidth(); i++) {
+            // s = c * (e^r -1)
+            Pixel a = this->getPixelAt(i,j);
+            int redVal = c*expm1(a.getRed());
+            int greenVal = c*expm1(a.getGreen());
+            int blueVal = c*expm1(a.getBlue());
+            Pixel * p = new Pixel(redVal,greenVal,blueVal);
+            this->setPixelAt(i,j,*p);
+        }
+    }
     return this;
 }
