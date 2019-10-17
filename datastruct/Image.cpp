@@ -691,9 +691,9 @@ Image * Image::contrastStretch(int rrmin, int rrmax, int rgmin, int rgmax, int r
             adjustedRedVal *= MAX_GRAY;
             adjustedGreenVal *= MAX_GRAY;
             adjustedBlueVal *= MAX_GRAY;
-            redVal = (int) adjustedRedVal;
-            greenVal = (int) adjustedGreenVal;
-            blueVal = (int) adjustedBlueVal;
+            redVal = Pixel::thresholding((int) adjustedRedVal);
+            greenVal = Pixel::thresholding((int) adjustedGreenVal);
+            blueVal = Pixel::thresholding((int) adjustedBlueVal);
             this->setPixelAt(i, j, Pixel(redVal, greenVal, blueVal));
         }
     }
