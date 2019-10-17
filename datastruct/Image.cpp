@@ -199,6 +199,18 @@ Image * Image::multiply(Image& B) {
     return this;
 }
 
+Image * Image::multiply(unsigned char alpha) {
+    for (int j = 0; j < this->getHeight(); j++) {
+        for (int i = 0; i < this->getWidth(); i++) {
+            Pixel a = this->getPixelAt(i, j);
+            Pixel * c = a * alpha;
+            this->setPixelAt(i, j, *c);
+            delete c;
+        }
+    }
+    return this;
+}
+
 Image * Image::invert() {
     for (int i = 0; i < this->getWidth(); i++) {
         for (int j = 0; j < this->getHeight(); j++) {
@@ -440,6 +452,12 @@ Image * Image::operator*(Image& B) {
     Image * C = new Image(*this);
     return C->multiply(B);
 }
+
+Image * Image::operator*(unsigned char alpha) {
+    Image * C = new Image(*this);
+    return C->multiply(alpha);
+}
+
 
 Image * Image::operator&(Image& B) {
     Image * C = new Image(*this);

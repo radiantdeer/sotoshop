@@ -36,6 +36,7 @@ class Image {
         Image * adjustBrightness(unsigned char delta);
         Image * substract(Image& B);
         Image * multiply(Image& b);
+        Image * multiply(unsigned char alpha);
         Image * invert();
         Image * grayscale();
         Image * and_op(Image& B);
@@ -55,10 +56,11 @@ class Image {
         Image * operator-(Image& B);
         Image * operator-(unsigned char deltaBrightness);
         Image * operator*(Image& B);
+        Image * operator*(unsigned char alpha);
         Image * operator&(Image& B);
         Image * operator|(Image& B);
         Image * operator~();
-  
+
         Image * logTrans();
         Image * invLogTrans();
 

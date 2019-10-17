@@ -128,6 +128,15 @@ Pixel * Pixel::operator*(Pixel& B) {
     return C;
 }
 
+Pixel * Pixel::operator*(unsigned char alpha) {
+    int valueRed = thresholding(this->getRed() * alpha);
+    int valueGreen = thresholding(this->getGreen() * alpha);
+    int valueBlue = thresholding(this->getBlue() * alpha);
+    Pixel * C = new Pixel(valueRed, valueGreen, valueBlue);
+    return C;
+}
+
+
 int thresholding(int value) {
     if (value > 255) {
         return 255;
