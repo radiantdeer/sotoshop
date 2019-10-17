@@ -6,7 +6,7 @@
 // Any non-grayscale images will be converted to grayscale
 std::vector<std::vector<std::complex<double>> *> * Fourier::forward(Image * image) {
     Image * sourceImage;
-    if ((image->getOriginalFormat() == "bmp") || (image->getOriginalFormat() == "pgm")) {
+    if ((image->getOriginalFormat() == "bmp") || (image->getOriginalFormat() == "ppm")) {
         spdlog::info("Fourier::forward: Converting image to grayscale first...");
         sourceImage = new Image(*image);
         sourceImage->grayscale();
@@ -34,10 +34,11 @@ std::vector<std::vector<std::complex<double>> *> * Fourier::forward(Image * imag
                 }
             }
             result->at(v)->at(u) /= (sourceImage->getHeight() * sourceImage->getWidth());
+            // Below is just for progress monitoring on logs
             done++;
             percentage = (double) done * 100 / (double) numOfFrequencies;
             if ((percentage - prevPercentage) > 1) {
-                spdlog::info("{}%", percentage);
+                spdlog::info("Fourier::forward: {}%", percentage);
                 prevPercentage = percentage;
             }
         }
@@ -46,8 +47,57 @@ std::vector<std::vector<std::complex<double>> *> * Fourier::forward(Image * imag
     return result;
 }
 
+Image * Fourier::visualizeFrequencies(std::vector<std::vector<std::complex<double>> *> * frequencies) {
+    Image * result = new Image(frequencies->at(0)->size(), frequencies->size());
+    for (int j = 0; j < result->getHeight(); j++) {
+        for (int i = 0; i < result->getWidth(); i++) {
+            double thisValue = std::norm(frequencies->at(j)->at(i));
+            thisValue = 128 * log10(thisValue + 1);
+            Pixel thisPixel ((unsigned char) thisValue, (unsigned char) thisValue, (unsigned char) thisValue);
+            result->setPixelAt(i, j, thisPixel);
+        }
+    }
+    return result;
+}
+
 Image * Fourier::inverse(std::vector<std::vector<std::complex<double>> *> * frequencies) {
     Image * result = nullptr;
 
     return result;
+}
+
+void Fourier::shift(std::vector<std::vector<std::complex<double>> *> * frequencies) {
+    // Shift rows
+    int centerPoint = frequencies->size() / 2;
+    std::vector<std::complex<double>> * centerElement = nullptr;
+    if ((frequencies->size() % 2) == 1) {
+        centerElement = frequencies->at(centerPoint);
+        frequencies->erase(frequencies->begin() + centerPoint);
+    }
+    for (int i = 0; i < centerPoint; i++) {
+        std::vector<std::complex<double>> * temp = frequencies->at(i);
+        frequencies->at(i) = frequencies->at(centerPoint + i);
+        frequencies->at(centerPoint + i) = temp;
+    }
+    if (centerElement != nullptr) {
+        frequencies->push_back(centerElement);
+    }
+
+    // Shift columns
+    for (int j = 0; j < frequencies->size(); j++) {
+        int centerPoint = frequencies->at(j)->size() / 2;
+        std::complex<double> centerElement;
+        if ((frequencies->size() % 2) == 1) {
+            centerElement = frequencies->at(j)->at(centerPoint);
+            frequencies->erase(frequencies->begin() + centerPoint);
+        }
+        for (int i = 0; i < centerPoint; i++) {
+            std::complex<double> temp = frequencies->at(j)->at(i);
+            frequencies->at(j)->at(i) = frequencies->at(j)->at(centerPoint + i);
+            frequencies->at(j)->at(centerPoint + i) = temp;
+        }
+        if ((frequencies->size() % 2) == 1) {
+            frequencies->at(j)->push_back(centerElement);
+        }
+    }
 }

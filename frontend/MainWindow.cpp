@@ -87,6 +87,8 @@ MainWindow::MainWindow() : QMainWindow() {
     histDialog = nullptr;
     bitPlaneDialog = nullptr;
     fourierFrequencies = nullptr;
+    fourierVisual = nullptr;
+    fourierDialog = nullptr;
 }
 
 QAction * MainWindow::getLoadAction() {
@@ -617,7 +619,20 @@ void MainWindow::doFourierTransform() {
 
 void MainWindow::viewFourierSpectrum() {
     if (fourierFrequencies != nullptr) {
-        spdlog::info("MainWindow::viewFourierSpectrum: stub function");
+        spdlog::info("MainWindow::viewFourierSpectrum: Visualizing Fourier frequencies...");
+        if (fourierVisual != nullptr) {
+            delete fourierVisual;
+        }
+        if (fourierDialog != nullptr) {
+            delete fourierDialog;
+        }
+        spdlog::info("MainWindow::viewFourierSpectrum: Shift frequencies first...");
+        Fourier::shift(fourierFrequencies);
+        Image * fourierVisual = Fourier::visualizeFrequencies(fourierFrequencies);
+        fourierDialog = new DrawSurface(nullptr, fourierVisual);
+        fourierDialog->show();
+        spdlog::info("MainWindow::viewFourierSpectrum: De-shift frequencies...");
+        Fourier::shift(fourierFrequencies);
     } else {
         spdlog::warn("MainWindow::viewFourierSpectrum: Please do a Fourier Transform first!");
     }

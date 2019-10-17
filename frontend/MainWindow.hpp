@@ -120,6 +120,8 @@ class MainWindow : public QMainWindow {
         HistogramDialog * histDialog;
         BitPlaneDialog * bitPlaneDialog;
         std::vector<std::vector<std::complex<double>> *> * fourierFrequencies;
+        DrawSurface * fourierDialog;
+        Image * fourierVisual;
 
         void connectActionsToControllers();
         std::string getOpenFileUrl(std::string dialogTitle);
