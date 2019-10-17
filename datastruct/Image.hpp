@@ -65,8 +65,8 @@ class Image {
 
         Image * grayLevelSlicing(int a, int b, int val);
 
-        Image * logTrans(double c);
-        Image * invLogTrans(double c);
+        Image * logTrans();
+        Image * invLogTrans();
     private:
         int width;
         int height;
