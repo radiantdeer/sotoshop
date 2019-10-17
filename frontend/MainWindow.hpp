@@ -46,6 +46,7 @@ class MainWindow : public QMainWindow {
         void doMeanFilter();
         void doMedianFilter();
         void doHighPassFilter(int filterVariation);
+        void grayLevelSlicing();
 
         void equalizeImageHist();
         void showHistogram();
@@ -77,6 +78,7 @@ class MainWindow : public QMainWindow {
         QAction * flipVAction;
         QAction * zoomInAction;
         QAction * zoomOutAction;
+        QAction * grayLevelSlicingAction;
         QAction * brightenAction;
         QAction * additionAction;
         QAction * substractAction;
