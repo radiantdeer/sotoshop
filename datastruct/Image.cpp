@@ -78,7 +78,6 @@ Image::Image(const Image& other) {
     this->originalFormat = originalFormat;
 }
 
-
 Pixel Image::getPixelAt(int x, int y) const {
     return data[y][x];
 }
