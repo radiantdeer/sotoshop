@@ -721,9 +721,9 @@ void MainWindow::connectActionsToControllers() {
     connect(highboostAction, &QAction::triggered, this, &MainWindow::doHighboost);
 
     connect(bitPlaneAction, &QAction::triggered, this, &MainWindow::showBitPlanes);
-    connect(fourierAction, &QAction::triggered, this, &MainWindow::);
-    connect(viewFourierSpectrumAction, &QAction::triggered, this, &MainWindow::);
-    connect(inverseFourierAction, &QAction::triggered, this, &MainWindow::);
+    connect(fourierAction, &QAction::triggered, this, &MainWindow::doFourierTransform);
+    connect(viewFourierSpectrumAction, &QAction::triggered, this, &MainWindow::viewFourierSpectrum);
+    connect(inverseFourierAction, &QAction::triggered, this, &MainWindow::doInverseFourier);
 
 }
 
