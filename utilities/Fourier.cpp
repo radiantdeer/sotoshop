@@ -79,7 +79,6 @@ Image * Fourier::inverse(std::vector<std::vector<std::complex<double>> *> * freq
                     thisValue += std::real(temp);
                 }
             }
-            spdlog::debug("{}", thisValue);
             result->setPixelAt(u, v, Pixel(thisValue, thisValue, thisValue));
             // Below is just for progress monitoring on logs
             done++;
