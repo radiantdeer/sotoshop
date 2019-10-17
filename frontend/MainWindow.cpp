@@ -14,6 +14,7 @@
 #include "../utilities/BitPlaneSlicing.hpp"
 #include "../utilities/Convolution.hpp"
 #include "../utilities/CommonConvolutions.hpp"
+#include "../utilities/Fourier.hpp"
 
 MainWindow::MainWindow() : QMainWindow() {
     this->setWindowTitle("SotoShop");
@@ -605,7 +606,10 @@ void MainWindow::showBitPlanes() {
 
 void MainWindow::doFourierTransform() {
     if (drawSurface->isImageLoaded()) {
-        spdlog::info("MainWindow::doFourierTransform: stub function");
+        if (fourierFrequencies != nullptr) {
+            delete fourierFrequencies;
+        }
+        fourierFrequencies = Fourier::forward(drawSurface->getActiveImage());
     } else {
         spdlog::warn("MainWindow::doFourierTransform: Please load an image first!");
     }
