@@ -8,10 +8,10 @@
 class Fourier {
 
     public:
-        static std::vector<std::vector<std::complex<double>> *> * forward(Image * image);
-        static Image * visualizeFrequencies(std::vector<std::vector<std::complex<double>> *> * frequencies);
-        static Image * inverse(std::vector<std::vector<std::complex<double>> *> * frequencies);
-        static void shift(std::vector<std::vector<std::complex<double>> *> * frequencies);
+        static std::vector<std::vector<std::vector<std::complex<double>>>> * forward(Image * image);
+        static Image * visualizeFrequencies(std::vector<std::vector<std::vector<std::complex<double>>>> * frequencies);
+        static Image * inverse(std::vector<std::vector<std::vector<std::complex<double>>>> * frequencies);
+        static void shift(std::vector<std::vector<std::vector<std::complex<double>>>> * frequencies);
 
 };
 
