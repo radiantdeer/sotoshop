@@ -119,7 +119,7 @@ class MainWindow : public QMainWindow {
         DrawSurface * drawSurface;
         HistogramDialog * histDialog;
         BitPlaneDialog * bitPlaneDialog;
-        std::vector<std::vector<std::complex<double>> *> * fourierFrequencies;
+        std::vector<std::vector<std::vector<std::complex<double>>>> * fourierFrequencies;
         DrawSurface * fourierDialog;
         Image * fourierVisual;
 
