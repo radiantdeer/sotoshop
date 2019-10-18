@@ -1,6 +1,14 @@
 #include "Fourier.hpp"
+#include <atomic>
 #include <cmath>
 #include "../spdlog/spdlog.h"
+#include <thread>
+
+const int MAX_THREAD = 4;
+std::atomic<int> fourierMaxThread (MAX_THREAD);
+std::atomic<int> done(0);
+std::atomic<double> prevPercentage;
+std::atomic<double> percentage;
 
 // This Fourier transform will only support grayscale images
 // Any non-grayscale images will be converted to grayscale
@@ -20,30 +28,20 @@ std::vector<std::vector<std::vector<std::complex<double>>>> * Fourier::forward(I
     }
     spdlog::info("Fourier::forward: Starting Fourier transform...");
     int numOfFrequencies = sourceImage->getHeight() * sourceImage->getWidth();
-    int done = 0;
-    double prevPercentage = 0;
-    double percentage = 0;
-    for (int v = 0; v < result->size(); v++) {
-        for (int u = 0; u < result->at(v).size(); u++) {
-            for (int j = 0; j < sourceImage->getHeight(); j++) {
-                for (int i = 0; i < sourceImage->getWidth(); i++) {
-                    result->at(v).at(u).at(0) += std::polar((double) sourceImage->getPixelAt(i, j).getRed(), (double) -2 * M_PI * (((double) u * i / sourceImage->getWidth()) + ((double) v * j / sourceImage->getHeight())));
-                    result->at(v).at(u).at(1) += std::polar((double) sourceImage->getPixelAt(i, j).getGreen(), (double) -2 * M_PI * (((double) u * i / sourceImage->getWidth()) + ((double) v * j / sourceImage->getHeight())));
-                    result->at(v).at(u).at(2) += std::polar((double) sourceImage->getPixelAt(i, j).getBlue(), (double) -2 * M_PI * (((double) u * i / sourceImage->getWidth()) + ((double) v * j / sourceImage->getHeight())));
-                }
-            }
-            result->at(v).at(u).at(0) /= (sourceImage->getHeight() * sourceImage->getWidth());
-            result->at(v).at(u).at(1) /= (sourceImage->getHeight() * sourceImage->getWidth());
-            result->at(v).at(u).at(2) /= (sourceImage->getHeight() * sourceImage->getWidth());
-            // Below is just for progress monitoring on logs
-            done++;
-            percentage = (double) done * 100 / (double) numOfFrequencies;
-            if ((percentage - prevPercentage) > 1) {
-                spdlog::info("Fourier::forward: {}%", percentage);
-                prevPercentage = percentage;
-            }
-        }
+    int v = 0;
+    done.store(0);
+    percentage.store(0);
+    prevPercentage.store(0);
+    while (v < result->size()) {
+        fourierMaxThread -= 1;
+        std::thread newThread (singleRowForward, image, result, v);
+        newThread.detach();
+        v++;
+        while (fourierMaxThread <= 0) {}
     }
+
+    while (fourierMaxThread < MAX_THREAD) {}
+
     spdlog::info("Fourier::forward: Done.");
     return result;
 }
@@ -71,37 +69,21 @@ Image * Fourier::inverse(std::vector<std::vector<std::vector<std::complex<double
 
     spdlog::info("Fourier::inverse: Starting Inverse Fourier transform...");
     int numOfFrequencies = result->getHeight() * result->getWidth();
-    int done = 0;
-    double prevPercentage = 0;
-    double percentage = 0;
-    for (int v = 0; v < result->getHeight(); v++) {
-        for (int u = 0; u < result->getWidth(); u++) {
-            double redValue = 0;
-            double greenValue = 0;
-            double blueValue = 0;
-            for (int j = 0; j < frequencies->size(); j++) {
-                for (int i = 0; i < frequencies->at(j).size(); i++) {
-                    std::complex<double> expRedValue = std::polar((double) 1, 2 * M_PI * (((double) u * i / result->getWidth()) + ((double) v * j / result->getHeight())));
-                    std::complex<double> tempRed = frequencies->at(j).at(i).at(0) * expRedValue;
-                    redValue += std::real(tempRed);
-                    std::complex<double> expGreenValue = std::polar((double) 1, 2 * M_PI * (((double) u * i / result->getWidth()) + ((double) v * j / result->getHeight())));
-                    std::complex<double> tempGreen = frequencies->at(j).at(i).at(1) * expGreenValue;
-                    greenValue += std::real(tempGreen);
-                    std::complex<double> expBlueValue = std::polar((double) 1, 2 * M_PI * (((double) u * i / result->getWidth()) + ((double) v * j / result->getHeight())));
-                    std::complex<double> tempBlue = frequencies->at(j).at(i).at(2) * expBlueValue;
-                    blueValue += std::real(tempBlue);
-                }
-            }
-            result->setPixelAt(u, v, Pixel(redValue, greenValue, blueValue));
-            // Below is just for progress monitoring on logs
-            done++;
-            percentage = (double) done * 100 / (double) numOfFrequencies;
-            if ((percentage - prevPercentage) > 1) {
-                spdlog::info("Fourier::inverse: {}%", percentage);
-                prevPercentage = percentage;
-            }
-        }
+    int v = 0;
+    done.store(0);
+    prevPercentage.store(0);
+    percentage.store(0);
+
+    while (v < result->getHeight()) {
+        fourierMaxThread -= 1;
+        std::thread newThread (singleRowInverse, result, frequencies, v);
+        newThread.detach();
+        v++;
+        while (fourierMaxThread <= 0) {}
     }
+
+    while (fourierMaxThread < MAX_THREAD) {}
+
     spdlog::info("Fourier::inverse: Done.");
     return result;
 }
@@ -139,5 +121,56 @@ void Fourier::shift(std::vector<std::vector<std::vector<std::complex<double>>>> 
         if ((frequencies->size() % 2) == 1) {
             frequencies->at(j).push_back(centerElement);
         }
+    }
+}
+
+void Fourier::singleRowForward(Image * image, std::vector<std::vector<std::vector<std::complex<double>>>> * resultArray, int row) {
+    for (int u = 0; u < resultArray->at(row).size(); u++) {
+        for (int j = 0; j < image->getHeight(); j++) {
+            for (int i = 0; i < image->getWidth(); i++) {
+                resultArray->at(row).at(u).at(0) += std::polar((double) image->getPixelAt(i, j).getRed(), (double) -2 * M_PI * (((double) u * i / image->getWidth()) + ((double) row * j / image->getHeight())));
+                resultArray->at(row).at(u).at(1) += std::polar((double) image->getPixelAt(i, j).getGreen(), (double) -2 * M_PI * (((double) u * i / image->getWidth()) + ((double) row * j / image->getHeight())));
+                resultArray->at(row).at(u).at(2) += std::polar((double) image->getPixelAt(i, j).getBlue(), (double) -2 * M_PI * (((double) u * i / image->getWidth()) + ((double) row * j / image->getHeight())));
+            }
+        }
+        resultArray->at(row).at(u).at(0) /= (image->getHeight() * image->getWidth());
+        resultArray->at(row).at(u).at(1) /= (image->getHeight() * image->getWidth());
+        resultArray->at(row).at(u).at(2) /= (image->getHeight() * image->getWidth());
+    }
+    fourierMaxThread += 1;
+    done += 1;
+    percentage = ((double) done * 100 / image->getHeight());
+    if ((percentage - prevPercentage) > 1) {
+        spdlog::info("Fourier::forward: {}%", percentage);
+        prevPercentage.store(percentage);
+    }
+}
+
+void Fourier::singleRowInverse(Image * image, std::vector<std::vector<std::vector<std::complex<double>>>> * array, int row) {
+    for (int u = 0; u < image->getWidth(); u++) {
+        double redValue = 0;
+        double greenValue = 0;
+        double blueValue = 0;
+        for (int j = 0; j < array->size(); j++) {
+            for (int i = 0; i < array->at(j).size(); i++) {
+                std::complex<double> expRedValue = std::polar((double) 1, 2 * M_PI * (((double) u * i / image->getWidth()) + ((double) row * j / image->getHeight())));
+                std::complex<double> tempRed = array->at(j).at(i).at(0) * expRedValue;
+                redValue += std::real(tempRed);
+                std::complex<double> expGreenValue = std::polar((double) 1, 2 * M_PI * (((double) u * i / image->getWidth()) + ((double) row * j / image->getHeight())));
+                std::complex<double> tempGreen = array->at(j).at(i).at(1) * expGreenValue;
+                greenValue += std::real(tempGreen);
+                std::complex<double> expBlueValue = std::polar((double) 1, 2 * M_PI * (((double) u * i / image->getWidth()) + ((double) row * j / image->getHeight())));
+                std::complex<double> tempBlue = array->at(j).at(i).at(2) * expBlueValue;
+                blueValue += std::real(tempBlue);
+            }
+        }
+        image->setPixelAt(u, row, Pixel(redValue, greenValue, blueValue));
+    }
+    fourierMaxThread++;
+    done++;
+    percentage = (double) done * 100 / (double) image->getHeight();
+    if ((percentage - prevPercentage) > 1) {
+        spdlog::info("Fourier::inverse: {}%", percentage);
+        prevPercentage.store(percentage);
     }
 }
