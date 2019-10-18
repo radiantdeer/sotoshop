@@ -14,6 +14,7 @@
 #include "../utilities/BitPlaneSlicing.hpp"
 #include "../utilities/Convolution.hpp"
 #include "../utilities/CommonConvolutions.hpp"
+#include "../utilities/Fourier.hpp"
 
 MainWindow::MainWindow() : QMainWindow() {
     this->setWindowTitle("SotoShop");
@@ -75,12 +76,19 @@ MainWindow::MainWindow() : QMainWindow() {
 
     QMenu * other = this->menuBar()->addMenu("Other");
     bitPlaneAction = other->addAction("Bit Planes");
+    fourierAction = other->addAction("Fourier Transform");
+    viewFourierSpectrumAction = other->addAction("View Fourier Spectrum");
+    inverseFourierAction = other->addAction("Inverse Fourier Transform");
+
     connectActionsToControllers();
 
     drawSurface = new DrawSurface(this);
     this->setCentralWidget(drawSurface);
     histDialog = nullptr;
     bitPlaneDialog = nullptr;
+    fourierFrequencies = nullptr;
+    fourierVisual = nullptr;
+    fourierDialog = nullptr;
 }
 
 QAction * MainWindow::getLoadAction() {
@@ -598,6 +606,55 @@ void MainWindow::showBitPlanes() {
     }
 }
 
+void MainWindow::doFourierTransform() {
+    if (drawSurface->isImageLoaded()) {
+        if (fourierFrequencies != nullptr) {
+            delete fourierFrequencies;
+        }
+        fourierFrequencies = Fourier::forward(drawSurface->getActiveImage());
+    } else {
+        spdlog::warn("MainWindow::doFourierTransform: Please load an image first!");
+    }
+}
+
+void MainWindow::viewFourierSpectrum() {
+    if (fourierFrequencies != nullptr) {
+        spdlog::info("MainWindow::viewFourierSpectrum: Visualizing Fourier frequencies...");
+        if (fourierVisual != nullptr) {
+            delete fourierVisual;
+        }
+        if (fourierDialog != nullptr) {
+            delete fourierDialog;
+        }
+        spdlog::info("MainWindow::viewFourierSpectrum: Shift frequencies first...");
+        Fourier::shift(fourierFrequencies);
+        Image * fourierVisual = Fourier::visualizeFrequencies(fourierFrequencies);
+        fourierDialog = new DrawSurface(nullptr, fourierVisual);
+        fourierDialog->show();
+        spdlog::info("MainWindow::viewFourierSpectrum: De-shift frequencies...");
+        Fourier::shift(fourierFrequencies);
+    } else {
+        spdlog::warn("MainWindow::viewFourierSpectrum: Please do a Fourier Transform first!");
+    }
+}
+
+void MainWindow::doInverseFourier() {
+    if (fourierFrequencies != nullptr) {
+        if (fourierVisual != nullptr) {
+            delete fourierVisual;
+        }
+        if (fourierDialog != nullptr) {
+            delete fourierDialog;
+        }
+        Image * fourierVisual = Fourier::inverse(fourierFrequencies);
+        fourierDialog = new DrawSurface(nullptr, fourierVisual);
+        fourierDialog->show();
+    } else {
+        spdlog::warn("MainWindow::doInverseFourier: Please do a Fourier Transform first!");
+    }
+}
+
+
 void MainWindow::contrastStretching(bool automatic) {
     if (drawSurface->isImageLoaded()) {
         Image * currentImage = drawSurface->getActiveImage();
@@ -690,9 +747,10 @@ void MainWindow::connectActionsToControllers() {
     connect(unsharpMaskingAction, &QAction::triggered, this, &MainWindow::doUnsharpMasking);
     connect(highboostAction, &QAction::triggered, this, &MainWindow::doHighboost);
 
-    connect(histogramAction, &QAction::triggered, this, &MainWindow::showHistogram);
-
     connect(bitPlaneAction, &QAction::triggered, this, &MainWindow::showBitPlanes);
+    connect(fourierAction, &QAction::triggered, this, &MainWindow::doFourierTransform);
+    connect(viewFourierSpectrumAction, &QAction::triggered, this, &MainWindow::viewFourierSpectrum);
+    connect(inverseFourierAction, &QAction::triggered, this, &MainWindow::doInverseFourier);
 
 }
 
