@@ -3,7 +3,10 @@
 #include <iostream>
 #include <cmath>
 #include <vector>
+#include <complex>
 #include "../spdlog/spdlog.h"
+
+#define PI 3.14159265358979323846
 
 Image::Image() {
     width = 0;
@@ -765,4 +768,58 @@ Image * Image::contrastStretch(int rrmin, int rrmax, int rgmin, int rgmax, int r
         }
     }
     return this;
+}
+
+Image * Image::FFT() {
+    // convert image data to std::vector<std::vector<std::complex<double>>>
+    // iterate every column with FFTPixel1D with isInverse = false(rotate image first, use CW)
+    // iterate every row with FFTPixel1D with isInverse = false (rotate image again to normal, use CCW)
+    // find the Fourier Spectrum (use norm())
+}
+
+Image * Image::invFFT() {
+    // convert image data to std::vector<std::vector<std::complex<double>>>
+    // iterate every column with FFTPixel1D with isInverse = true(rotate image first, use CW)
+    // iterate every row with FFTPixel1D with isInverse = true (rotate image again to normal, use CCW)
+    // find the Fourier Spectrum (use norm())
+}
+
+std::vector<std::vector<std::complex<double>>> FFTPixel1D(std::vector<std::vector<std::complex<double>>> x, bool isInverse) {
+    const size_t N = x.size();
+    if (N <= 1) return x;
+
+    // divide
+    std::vector<std::vector<std::complex<double>>> even;
+    std::vector<std::vector<std::complex<double>>> odd;
+    for (int i = 0; i < N/2; i+=2) {
+        std::vector<std::complex<double>> tempEven;
+        std::vector<std::complex<double>> tempOdd;
+        for(int channelIterator = 0; channelIterator < 3; channelIterator++)
+        {
+            tempEven.push_back(x[i][channelIterator]);
+            tempOdd.push_back(x[i + 1][channelIterator]);
+        }
+
+        even.push_back(tempEven);
+        odd.push_back(tempOdd);
+    }
+
+    //conquer
+    FFTPixel1D(even, isInverse);
+    FFTPixel1D(odd, isInverse);
+
+    //combine
+    for (size_t k = 0; k < N/2; ++k) {
+        for (int channelIterator = 0; channelIterator < 3; channelIterator++) {
+            std::complex<double> t;
+            if (isInverse) {
+                t = std::polar(1.0, -2.0 * PI * k / N) * odd[k][channelIterator];
+            } else {
+                t = std::polar(1.0, 2.0 * PI * k / N) * odd[k][channelIterator];
+            }
+            x[k    ][channelIterator] = even[k][channelIterator] + t;
+            x[k+N/2][channelIterator] = even[k][channelIterator] - t;
+        }
+    }
+    return x;
 }
