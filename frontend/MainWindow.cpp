@@ -17,6 +17,7 @@
 #include "../utilities/CommonConvolutions.hpp"
 #include "../utilities/Fourier.hpp"
 #include "../utilities/EdgeDetection.hpp"
+#include "../utilities/HoughTransformation.hpp"
 
 MainWindow::MainWindow() : QMainWindow() {
     this->setWindowTitle("SotoShop");
@@ -84,6 +85,12 @@ MainWindow::MainWindow() : QMainWindow() {
     fourierAction = other->addAction("Fourier Transform");
     viewFourierSpectrumAction = other->addAction("View Fourier Spectrum");
     inverseFourierAction = other->addAction("Inverse Fourier Transform");
+    QMenu * houghMenu = other->addMenu("Hough Transform");
+    lineHoughAction = houghMenu->addAction("Line");
+
+    QMenu * edge = this->menuBar()->addMenu("Edge Detect");
+    sobelOperationAction = edge->addAction("Sobel Operation");
+    prewittOperationAction = edge->addAction("Prewitt Operation");
 
     connectActionsToControllers();
 
@@ -721,6 +728,48 @@ void MainWindow::invLogOperation() {
     }
 }
 
+void MainWindow::sobelOperation() {
+    if (drawSurface->isImageLoaded()) {
+        spdlog::info("MainWindow::sobelOperation: Edge detection with Sobel operator...");
+        Image * result = Convolution::sobelOperation(drawSurface->getActiveImage(), CommonConvolutions::SobelX, CommonConvolutions::SobelY);
+        drawSurface->acquireLockImage();
+        drawSurface->purgeImage();
+        drawSurface->setActiveImage(result);
+        drawSurface->releaseLockImage();
+        drawSurface->update();
+    } else {
+        spdlog::warn("MainWindow::sobelOperation: Please load an image first!");
+    }
+}
+
+void MainWindow::prewittOperation() {
+    if (drawSurface->isImageLoaded()) {
+        spdlog::info("MainWindow::sobelOperation: Edge detection with Sobel operator...");
+        Image * result = Convolution::sobelOperation(drawSurface->getActiveImage(), CommonConvolutions::PrewittX, CommonConvolutions::PrewittY);
+        drawSurface->acquireLockImage();
+        drawSurface->purgeImage();
+        drawSurface->setActiveImage(result);
+        drawSurface->releaseLockImage();
+        drawSurface->update();
+    } else {
+        spdlog::warn("MainWindow::sobelOperation: Please load an image first!");
+    }
+}
+
+void MainWindow::doLineHough() {
+    if (drawSurface->isImageLoaded()) {
+        spdlog::info("MainWindow::doLineHough: Edge detection with Line Hough Transform...");
+        Image* result = HoughTransformation::HoughLine(drawSurface->getActiveImage());
+        drawSurface->acquireLockImage();
+        drawSurface->purgeImage();
+        drawSurface->setActiveImage(result);
+        drawSurface->releaseLockImage();
+        drawSurface->update();
+    } else {
+        spdlog::warn("MainWindow::doLineHough: Please load an image first!");
+    }
+}
+
 void MainWindow::connectActionsToControllers() {
     connect(loadAction, &QAction::triggered, this, &MainWindow::loadFile);
     connect(saveAction, &QAction::triggered, this, &MainWindow::saveFile);
@@ -772,6 +821,10 @@ void MainWindow::connectActionsToControllers() {
     connect(viewFourierSpectrumAction, &QAction::triggered, this, &MainWindow::viewFourierSpectrum);
     connect(inverseFourierAction, &QAction::triggered, this, &MainWindow::doInverseFourier);
 
+    connect(sobelOperationAction, &QAction::triggered, this, &MainWindow::sobelOperation);
+    connect(prewittOperationAction, &QAction::triggered, this, &MainWindow::prewittOperation);
+
+    connect(lineHoughAction, &QAction::triggered, this, &MainWindow::doLineHough);
 }
 
 std::string MainWindow::getOpenFileUrl(std::string dialogTitle) {
