@@ -13,6 +13,8 @@ class Convolution {
         static Image* unsharpMasking(Image* image);
         static Image* highboost(Image* image, double alpha);
 
+        static Image* sobelOperation(Image* image, const ConvolutionMatrix& opMatrixX, const ConvolutionMatrix& opMatrixY);
+
     private:
         // padWidth & padHeight is the length of padding on just one side, not the sum of both side
         static Image* highpass(Image *image);

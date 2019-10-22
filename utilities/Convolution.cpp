@@ -124,6 +124,94 @@ Image* Convolution::highboost(Image* image, double alpha) {
     return result;
 }
 
+Image* Convolution::sobelOperation(Image* image, const ConvolutionMatrix& opMatrixX, const ConvolutionMatrix& opMatrixY) {
+    int resultWidth, resultHeight;
+    Image *sourceImage;
+
+    // IMAGE CONVERTED TO GRAYSCALE FIRST
+    Image * grayImage = image->grayscale();
+
+    spdlog::debug("Convolution::sobelOperation: Preparing...");
+    sourceImage = grayImage;
+
+    // OPERATE WITH UNPADDED IMAGE
+    resultWidth = image->getWidth() - ((opMatrixX.getWidth() / 2) * 2);
+    resultHeight = image->getHeight() - ((opMatrixX.getHeight() / 2) * 2);
+
+    // ADD FORMAT TO RESULT
+    Image * result = new Image(resultWidth, resultHeight);
+    result->setOriginalFormat(sourceImage->getOriginalFormat());
+
+    // SOBEL OPERATION
+    spdlog::debug("Convolution::sobelOperation: Starting Sobel Operation...");
+    for (int j = 0; j < resultHeight; j++) {
+        for (int i = 0; i < resultWidth; i++) {
+//            int redSumX = 0;
+//            int greenSumX = 0;
+//            int blueSumX = 0;
+
+//            int redSumY = 0;
+//            int greenSumY = 0;
+//            int blueSumY = 0;
+
+//            int magnitudeRed = 0;
+//            int magnitudeGreen = 0;
+//            int magnitudeBlue = 0;
+
+            // SOBEL VARIABLE
+            int xSum = 0;
+            int ySum = 0;
+            int magnitude = 0;
+
+            // COUNT X SUM
+            for (int y = 0; y < opMatrixX.getHeight(); y++) {
+                for (int x = 0; x < opMatrixX.getWidth(); x++) {
+                    int opConstant = opMatrixX.getElementAt(x, y);
+                    Pixel currentPixel = sourceImage->getPixelAt(i + x, j + y);
+                    xSum += (opConstant * (int) currentPixel.getRed());
+//                    redSumX = (opConstant * (int) currentPixel.getRed());
+//                    greenSumX = (opConstant * (int) currentPixel.getGreen());
+//                    blueSumX = (opConstant * (int) currentPixel.getBlue());
+                }
+            }
+
+            // COUNT Y SUM
+            for (int y = 0; y < opMatrixY.getHeight(); y++) {
+                for (int x = 0; x < opMatrixY.getWidth(); x++) {
+                    int opConstant = opMatrixY.getElementAt(x, y);
+                    Pixel currentPixel = sourceImage->getPixelAt(i + x, j + y);
+                    ySum += (opConstant * (int) currentPixel.getRed());
+//                    redSumY = (opConstant * (int) currentPixel.getRed());
+//                    greenSumY = (opConstant * (int) currentPixel.getGreen());
+//                    blueSumY = (opConstant * (int) currentPixel.getBlue());
+                }
+            }
+
+            // SET MAGNITUDE
+//            magnitude = sqrt(xSum*xSum + ySum*ySum);
+            magnitude = abs(xSum) + abs(ySum);
+//            magnitudeRed = abs(redSumX) + abs(redSumY);
+//            magnitudeGreen = abs(greenSumX) + abs(greenSumY);
+//            magnitudeBlue = abs(blueSumX) + abs(blueSumY);
+
+            // SET NEW PIXEL VALUE
+            Pixel thisPixel (Pixel::thresholding(magnitude), Pixel::thresholding(magnitude), Pixel::thresholding(magnitude));
+//            Pixel thisPixel (Pixel::thresholding(magnitudeRed), Pixel::thresholding(magnitudeGreen), Pixel::thresholding(magnitudeBlue));
+            result->setPixelAt(i, j, thisPixel);
+        }
+    }
+
+    Image * paddedResult;
+
+    // PADD IMAGE
+    spdlog::debug("Convolution::sobelOperation: Adding padding to result image...");
+    int padWidth = opMatrixX.getWidth() / 2;
+    int padHeight = opMatrixX.getHeight() / 2;
+    paddedResult = Convolution::padImage(result, padWidth, padHeight);
+
+    return paddedResult;
+}
+
 Image* Convolution::padImage(Image* image, int padWidth, int padHeight) {
     int originalWidth = image->getWidth();
     int originalHeight = image->getHeight();
