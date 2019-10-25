@@ -83,6 +83,7 @@ MainWindow::MainWindow() : QMainWindow() {
     QMenu * edge = this->menuBar()->addMenu("Edge Detect");
     sobelOperationAction = edge->addAction("Sobel Operation");
     prewittOperationAction = edge->addAction("Prewitt Operation");
+    robertOperationAction = edge->addAction("Robert Operation");
 
     connectActionsToControllers();
 
@@ -735,6 +736,20 @@ void MainWindow::prewittOperation() {
     }
 }
 
+void MainWindow::robertOperation() {
+    if (drawSurface->isImageLoaded()) {
+        spdlog::info("MainWindow::sobelOperation: Edge detection with Sobel operator...");
+        Image * result = Convolution::sobelOperation(drawSurface->getActiveImage(), CommonConvolutions::RobertX, CommonConvolutions::RobertY);
+        drawSurface->acquireLockImage();
+        drawSurface->purgeImage();
+        drawSurface->setActiveImage(result);
+        drawSurface->releaseLockImage();
+        drawSurface->update();
+    } else {
+        spdlog::warn("MainWindow::sobelOperation: Please load an image first!");
+    }
+}
+
 void MainWindow::connectActionsToControllers() {
     connect(loadAction, &QAction::triggered, this, &MainWindow::loadFile);
     connect(saveAction, &QAction::triggered, this, &MainWindow::saveFile);
@@ -786,6 +801,7 @@ void MainWindow::connectActionsToControllers() {
 
     connect(sobelOperationAction, &QAction::triggered, this, &MainWindow::sobelOperation);
     connect(prewittOperationAction, &QAction::triggered, this, &MainWindow::prewittOperation);
+    connect(robertOperationAction, &QAction::triggered, this, &MainWindow::robertOperation);
 
 }
 

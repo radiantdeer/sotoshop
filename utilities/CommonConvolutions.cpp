@@ -20,3 +20,7 @@ int prewittXMatrix[] = {-1, 0, 1, -1, 0, 1, -1, 0, 1};
 const ConvolutionMatrix CommonConvolutions::PrewittX = ConvolutionMatrix(3, 3, prewittXMatrix);
 int prewittYMatrix[] = {1, 1, 1, 0, 0, 0, -1, -1, -1};
 const ConvolutionMatrix CommonConvolutions::PrewittY = ConvolutionMatrix(3, 3, prewittYMatrix);
+int robertXMatrix[] = {1, 0, 0, -1};
+const ConvolutionMatrix CommonConvolutions::RobertX = ConvolutionMatrix(2, 2, robertXMatrix);
+int robertYMatrix[] = {0, 1, -1, 0};
+const ConvolutionMatrix CommonConvolutions::RobertY = ConvolutionMatrix(2, 2, robertYMatrix);

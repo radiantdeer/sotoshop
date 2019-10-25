@@ -16,7 +16,8 @@ class CommonConvolutions {
         static const ConvolutionMatrix SobelY;
         static const ConvolutionMatrix PrewittX;
         static const ConvolutionMatrix PrewittY;
-
+        static const ConvolutionMatrix RobertX;
+        static const ConvolutionMatrix RobertY;
 };
 
 #endif
