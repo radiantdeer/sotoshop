@@ -759,7 +759,7 @@ void MainWindow::connectActionsToControllers() {
 std::string MainWindow::getOpenFileUrl(std::string dialogTitle) {
     using namespace std;
     spdlog::debug("Showing up the open file dialog...");
-    QUrl tempFileUrl = QFileDialog::getOpenFileUrl(this, dialogTitle.c_str(), *(new QUrl()), "Image Files (*.raw , *.pbm , *.pgm , *.ppm , *.bmp);; All Files (*)");
+    QUrl tempFileUrl = QFileDialog::getOpenFileUrl(this, dialogTitle.c_str(), *(new QUrl()), "Image Files (*.raw , *.pbm , *.pgm , *.ppm , *.bmp);; All Files (*)", 0, QFileDialog::DontUseNativeDialog);
     string fileUrl = tempFileUrl.toLocalFile().toUtf8().constData();
     return fileUrl;
 }
@@ -767,7 +767,7 @@ std::string MainWindow::getOpenFileUrl(std::string dialogTitle) {
 std::string MainWindow::getSaveFileUrl(std::string dialogTitle) {
     using namespace std;
     spdlog::debug("Showing up the save file dialog...");
-    QUrl tempFileUrl = QFileDialog::getSaveFileUrl(this, dialogTitle.c_str(), *(new QUrl()), "Raw Image File (*.raw);; PBM Image File (*.pbm);; PGM Image File (*.pgm);; PPM Image File (*.ppm);; Bitmap File (*.bmp)");
+    QUrl tempFileUrl = QFileDialog::getSaveFileUrl(this, dialogTitle.c_str(), *(new QUrl()), "Raw Image File (*.raw);; PBM Image File (*.pbm);; PGM Image File (*.pgm);; PPM Image File (*.ppm);; Bitmap File (*.bmp)", 0, QFileDialog::DontUseNativeDialog);
     string fileUrl = tempFileUrl.toLocalFile().toUtf8().constData();
     return fileUrl;
 }
