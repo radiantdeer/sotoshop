@@ -283,19 +283,17 @@ Image * Image::not_op() {
 }
 
 Image * Image::translate(int dx, int dy) {
-    for (int i = this->getWidth() - 1; i >= 0; i--) {
-        for (int j = this->getHeight() - 1; j >= 0; j--) {
-            if (((i - dx) >= 0) && ((j - dy) >= 0)) {
-                Pixel a = this->getPixelAt(i - dx, j - dy);
-                Pixel *b = new Pixel(a);
-                this->setPixelAt(i, j, *b);
-                delete b;
-            } else {
-                this->setPixelAt(i, j, Pixel(0, 0, 0));
+    Image *newImage = new Image(this->getWidth(), this->getHeight());
+    for (int i = 0; i < this->getWidth(); i++) {
+        for (int j = 0; j < this->getHeight(); j++) {
+            if (((i + dx) >= 0) && ((i + dx) < this->getWidth()) && ((j + dy) >= 0) && ((j + dy) < this->getHeight())) {
+                Pixel *a = new Pixel(this->getPixelAt(i, j));
+                newImage->setPixelAt(i + dx, j + dy, *a);
+                delete a;
             }
         }
     }
-    return this;
+    return newImage;
 }
 
 Image * Image::rotate90CW(){
