@@ -200,7 +200,9 @@ void MainWindow::moveImage() {
 
         spdlog::info("MainWindow::moveImage: Now moving the image...");
         drawSurface->acquireLockImage();
-        drawSurface->getActiveImage()->translate(deltaX, deltaY);
+        Image * newImage = drawSurface->getActiveImage()->translate(deltaX, deltaY);
+        drawSurface->purgeImage();
+        drawSurface->setActiveImage(newImage);
         drawSurface->releaseLockImage();
         drawSurface->update();
     } else {
