@@ -167,3 +167,9 @@ Image* Convolution::highpass(Image* image) {
     delete lowpass;
     return highpass;
 }
+
+Image* Convolution::laplaceOp(Image *image) {
+    spdlog::debug("Convolution::laplaceOp: Calculating laplace...");
+    Image * laplace = convolve(image, CommonConvolutions::Laplace, true);
+    return laplace;
+}

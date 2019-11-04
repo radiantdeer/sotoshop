@@ -12,6 +12,7 @@ class Convolution {
         static Image* medianConvolve(Image* image, int filterWidth, int filterHeight, bool padImage);
         static Image* unsharpMasking(Image* image);
         static Image* highboost(Image* image, double alpha);
+        static Image* laplaceOp(Image* image);
 
     private:
         // padWidth & padHeight is the length of padding on just one side, not the sum of both side

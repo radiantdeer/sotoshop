@@ -12,3 +12,5 @@ int highFilter3[] = {0, 1, 0, 1, -4, 1, 0, 1, 0};
 const ConvolutionMatrix CommonConvolutions::HighFilter3 = ConvolutionMatrix(3, 3, highFilter3);
 int highFilter4[] = {0, -1, 0, -1, 5, -1, 0, -1, 0};
 const ConvolutionMatrix CommonConvolutions::HighFilter4 = ConvolutionMatrix(3, 3, highFilter4);
+int laplace[] = {0, 1, 0, 1, -4, 1, 0, 1, 0};
+const ConvolutionMatrix CommonConvolutions::Laplace = ConvolutionMatrix(3, 3, laplace);
