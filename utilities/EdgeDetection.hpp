@@ -1,7 +1,7 @@
 #ifndef __EDGE_DETECTION_HPP
 #define __EDGE_DETECTION_HPP
 
-#include "..\datastruct\Image.hpp"
+#include "../datastruct/Image.hpp"
 #include "Convolution.hpp"
 
 class EdgeDetection {

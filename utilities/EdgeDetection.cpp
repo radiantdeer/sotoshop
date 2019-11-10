@@ -1,4 +1,5 @@
 #include "EdgeDetection.hpp"
+#include <cmath>
 
 Image* EdgeDetection::gradient(Image *image) {
     Image *result = new Image(image->getWidth(), image->getHeight());
@@ -6,14 +7,20 @@ Image* EdgeDetection::gradient(Image *image) {
         for (int j=0; j < image->getHeight(); j++) {
             Pixel *gx, *gy;
             if (i + 1 < image->getWidth()) {
-                gx = image->getPixelAt(i + 1 ,j) - image->getPixelAt(i, j);
+                Pixel p1 = image->getPixelAt(i + 1 ,j);
+                Pixel p2 = image->getPixelAt(i, j);
+                gx = p1 - p2;
             } else {
-                gx = Pixel() -image->getPixelAt(i,j);
+                Pixel p2 = image->getPixelAt(i,j);
+                gx = Pixel() - p2;
             }
             if (j + 1 < image->getHeight()) {
-                gy = image->getPixelAt(i ,j + 1) - image->getPixelAt(i, j);
+                Pixel p1 = image->getPixelAt(i ,j + 1);
+                Pixel p2 = image->getPixelAt(i, j);
+                gy = p1 - p2;
             } else {
-                gy = Pixel() - image->getPixelAt(i,j);
+                Pixel p2 = image->getPixelAt(i,j);
+                gy = Pixel() - p2;
             }
             gx = gx->operator*(*gx);
             gy = gy->operator*(*gy);
