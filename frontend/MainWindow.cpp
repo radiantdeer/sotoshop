@@ -15,6 +15,7 @@
 #include "../utilities/Convolution.hpp"
 #include "../utilities/CommonConvolutions.hpp"
 #include "../utilities/Fourier.hpp"
+#include "../utilities/EdgeDetection.hpp"
 
 MainWindow::MainWindow() : QMainWindow() {
     this->setWindowTitle("SotoShop");
@@ -73,6 +74,9 @@ MainWindow::MainWindow() : QMainWindow() {
     highPassFilter4Action = highPass->addAction("Variation 4");
     unsharpMaskingAction = convolutionMenu->addAction("Unsharp Masking");
     highboostAction = convolutionMenu->addAction("Highboost");
+
+    QMenu * edgeDetectionMenu = this->menuBar()->addMenu("Edge Detection");
+    gradientAction = edgeDetectionMenu->addAction("Gradient");
 
     QMenu * other = this->menuBar()->addMenu("Other");
     bitPlaneAction = other->addAction("Bit Planes");
@@ -354,6 +358,20 @@ void MainWindow::doHighboost() {
         drawSurface->update();
     } else {
         spdlog::warn("MainWindow::doUnsharpMasking: Please load an image first!");
+    }
+}
+
+void MainWindow::doGradient() {
+    if (drawSurface->isImageLoaded()) {
+        spdlog::info("MainWindow::doGradient: Edge Detection with Gradient...");
+        Image * result = EdgeDetection::gradient(drawSurface->getActiveImage());
+        drawSurface->acquireLockImage();
+        drawSurface->purgeImage();
+        drawSurface->setActiveImage(result);
+        drawSurface->releaseLockImage();
+        drawSurface->update();
+    } else {
+        spdlog::warn("MainWindow::doGradient: Please load an image first!");
     }
 }
 
@@ -748,6 +766,8 @@ void MainWindow::connectActionsToControllers() {
     connect(highPassFilter4Action, &QAction::triggered, this, [this]{doHighPassFilter(4); });
     connect(unsharpMaskingAction, &QAction::triggered, this, &MainWindow::doUnsharpMasking);
     connect(highboostAction, &QAction::triggered, this, &MainWindow::doHighboost);
+
+    connect(gradientAction, &QAction::triggered, this, &MainWindow::doGradient);
 
     connect(bitPlaneAction, &QAction::triggered, this, &MainWindow::showBitPlanes);
     connect(fourierAction, &QAction::triggered, this, &MainWindow::doFourierTransform);
