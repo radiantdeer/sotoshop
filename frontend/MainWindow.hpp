@@ -69,6 +69,7 @@ class MainWindow : public QMainWindow {
         void sobelOperation();
         void prewittOperation();
         void robertOperation();
+        void cannyOperation();
 
     private:
         QAction * loadAction;
@@ -123,6 +124,7 @@ class MainWindow : public QMainWindow {
         QAction * sobelOperationAction;
         QAction * prewittOperationAction;
         QAction * robertOperationAction;
+        QAction * cannyOperationAction;
 
         DrawSurface * drawSurface;
         HistogramDialog * histDialog;

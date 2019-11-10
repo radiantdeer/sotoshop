@@ -84,6 +84,7 @@ MainWindow::MainWindow() : QMainWindow() {
     sobelOperationAction = edge->addAction("Sobel Operation");
     prewittOperationAction = edge->addAction("Prewitt Operation");
     robertOperationAction = edge->addAction("Robert Operation");
+    cannyOperationAction = edge->addAction("Canny Operation");
 
     connectActionsToControllers();
 
@@ -724,7 +725,7 @@ void MainWindow::sobelOperation() {
 
 void MainWindow::prewittOperation() {
     if (drawSurface->isImageLoaded()) {
-        spdlog::info("MainWindow::sobelOperation: Edge detection with Sobel operator...");
+        spdlog::info("MainWindow::prewittOperation: Edge detection with Prewitt operator...");
         Image * result = Convolution::sobelOperation(drawSurface->getActiveImage(), CommonConvolutions::PrewittX, CommonConvolutions::PrewittY);
         drawSurface->acquireLockImage();
         drawSurface->purgeImage();
@@ -732,13 +733,13 @@ void MainWindow::prewittOperation() {
         drawSurface->releaseLockImage();
         drawSurface->update();
     } else {
-        spdlog::warn("MainWindow::sobelOperation: Please load an image first!");
+        spdlog::warn("MainWindow::prewwittOperation: Please load an image first!");
     }
 }
 
 void MainWindow::robertOperation() {
     if (drawSurface->isImageLoaded()) {
-        spdlog::info("MainWindow::sobelOperation: Edge detection with Sobel operator...");
+        spdlog::info("MainWindow::robertOperation: Edge detection with Robert operator...");
         Image * result = Convolution::sobelOperation(drawSurface->getActiveImage(), CommonConvolutions::RobertX, CommonConvolutions::RobertY);
         drawSurface->acquireLockImage();
         drawSurface->purgeImage();
@@ -746,7 +747,22 @@ void MainWindow::robertOperation() {
         drawSurface->releaseLockImage();
         drawSurface->update();
     } else {
-        spdlog::warn("MainWindow::sobelOperation: Please load an image first!");
+        spdlog::warn("MainWindow::robertOperation: Please load an image first!");
+    }
+}
+
+void MainWindow::cannyOperation() {
+    if (drawSurface->isImageLoaded()) {
+        spdlog::info("MainWindow::cannyOperation: Edge detection with Canny operator...");
+        int threshold = QInputDialog::getInt(this, "Threshold", "Value");
+        Image * result = Convolution::cannyOperation(drawSurface->getActiveImage(), CommonConvolutions::Gaussian, CommonConvolutions::SobelX, CommonConvolutions::SobelY, threshold);
+        drawSurface->acquireLockImage();
+        drawSurface->purgeImage();
+        drawSurface->setActiveImage(result);
+        drawSurface->releaseLockImage();
+        drawSurface->update();
+    } else {
+        spdlog::warn("MainWindow::cannyOperation: Please load an image first!");
     }
 }
 
@@ -802,6 +818,7 @@ void MainWindow::connectActionsToControllers() {
     connect(sobelOperationAction, &QAction::triggered, this, &MainWindow::sobelOperation);
     connect(prewittOperationAction, &QAction::triggered, this, &MainWindow::prewittOperation);
     connect(robertOperationAction, &QAction::triggered, this, &MainWindow::robertOperation);
+    connect(cannyOperationAction, &QAction::triggered, this, &MainWindow::cannyOperation);
 
 }
 

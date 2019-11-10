@@ -14,6 +14,7 @@ class Convolution {
         static Image* highboost(Image* image, double alpha);
 
         static Image* sobelOperation(Image* image, const ConvolutionMatrix& opMatrixX, const ConvolutionMatrix& opMatrixY);
+        static Image* cannyOperation(Image* image, const ConvolutionMatrix& gaussianMatrix, const ConvolutionMatrix& opMatrixX, const ConvolutionMatrix& opMatrixY, int threshold);
 
     private:
         // padWidth & padHeight is the length of padding on just one side, not the sum of both side

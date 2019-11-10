@@ -142,22 +142,8 @@ Image* Convolution::sobelOperation(Image* image, const ConvolutionMatrix& opMatr
     Image * result = new Image(resultWidth, resultHeight);
     result->setOriginalFormat(sourceImage->getOriginalFormat());
 
-    // SOBEL OPERATION
-    spdlog::debug("Convolution::sobelOperation: Starting Sobel Operation...");
     for (int j = 0; j < resultHeight; j++) {
         for (int i = 0; i < resultWidth; i++) {
-//            int redSumX = 0;
-//            int greenSumX = 0;
-//            int blueSumX = 0;
-
-//            int redSumY = 0;
-//            int greenSumY = 0;
-//            int blueSumY = 0;
-
-//            int magnitudeRed = 0;
-//            int magnitudeGreen = 0;
-//            int magnitudeBlue = 0;
-
             // SOBEL VARIABLE
             int xSum = 0;
             int ySum = 0;
@@ -169,9 +155,6 @@ Image* Convolution::sobelOperation(Image* image, const ConvolutionMatrix& opMatr
                     int opConstant = opMatrixX.getElementAt(x, y);
                     Pixel currentPixel = sourceImage->getPixelAt(i + x, j + y);
                     xSum += (opConstant * (int) currentPixel.getRed());
-//                    redSumX = (opConstant * (int) currentPixel.getRed());
-//                    greenSumX = (opConstant * (int) currentPixel.getGreen());
-//                    blueSumX = (opConstant * (int) currentPixel.getBlue());
                 }
             }
 
@@ -181,22 +164,14 @@ Image* Convolution::sobelOperation(Image* image, const ConvolutionMatrix& opMatr
                     int opConstant = opMatrixY.getElementAt(x, y);
                     Pixel currentPixel = sourceImage->getPixelAt(i + x, j + y);
                     ySum += (opConstant * (int) currentPixel.getRed());
-//                    redSumY = (opConstant * (int) currentPixel.getRed());
-//                    greenSumY = (opConstant * (int) currentPixel.getGreen());
-//                    blueSumY = (opConstant * (int) currentPixel.getBlue());
                 }
             }
 
             // SET MAGNITUDE
-//            magnitude = sqrt(xSum*xSum + ySum*ySum);
             magnitude = abs(xSum) + abs(ySum);
-//            magnitudeRed = abs(redSumX) + abs(redSumY);
-//            magnitudeGreen = abs(greenSumX) + abs(greenSumY);
-//            magnitudeBlue = abs(blueSumX) + abs(blueSumY);
 
             // SET NEW PIXEL VALUE
             Pixel thisPixel (Pixel::thresholding(magnitude), Pixel::thresholding(magnitude), Pixel::thresholding(magnitude));
-//            Pixel thisPixel (Pixel::thresholding(magnitudeRed), Pixel::thresholding(magnitudeGreen), Pixel::thresholding(magnitudeBlue));
             result->setPixelAt(i, j, thisPixel);
         }
     }
@@ -210,6 +185,82 @@ Image* Convolution::sobelOperation(Image* image, const ConvolutionMatrix& opMatr
     paddedResult = Convolution::padImage(result, padWidth, padHeight);
 
     return paddedResult;
+}
+
+Image* Convolution::cannyOperation(Image* image, const ConvolutionMatrix& gaussianMatrix, const ConvolutionMatrix& opMatrixX, const ConvolutionMatrix& opMatrixY, int threshold) {
+
+    /*********************************************************/
+    /* GAUSSIAN BLURRING IMAGE                               */
+    /*********************************************************/
+    Image* gaussianImage = convolve(image, gaussianMatrix, true);
+
+    /*********************************************************/
+    /* MAKE GRADIENT X AND Y FROM IMAGE                      */
+    /*********************************************************/
+    // IMAGE CONVERTED TO GRAYSCALE FIRST
+    Image * grayImage = gaussianImage->grayscale();
+    Image * sourceImage;
+    int resultWidth, resultHeight;
+    std::vector<std::vector<int>> magnitudeX;
+    std::vector<std::vector<int>> magnitudeY;
+
+    int padWidth = opMatrixX.getWidth() / 2;
+    int padHeight = opMatrixX.getHeight() / 2;
+
+    spdlog::debug("Convolution::cannyOperation: Preparing Sobel Operation...");
+    sourceImage = Convolution::padImage(grayImage, padWidth, padHeight);
+
+    // OPERATE WITH PADDED IMAGE
+    resultWidth = image->getWidth();
+    resultHeight = image->getHeight();
+
+    // SOBEL OPERATION
+    spdlog::debug("Convolution::cannyOperation: Starting Sobel Operation...");
+    Image * result = new Image(resultWidth, resultHeight);
+    result->setOriginalFormat(sourceImage->getOriginalFormat());
+
+    for (int j = 0; j < resultHeight; j++) {
+        std::vector<int> magnitudeMinorX;
+        std::vector<int> magnitudeMinorY;
+        for (int i = 0; i < resultWidth; i++) {
+            // SOBEL VARIABLE
+            int xSum = 0;
+            int ySum = 0;
+            int magnitude = 0;
+
+            // COUNT X SUM
+            for (int y = 0; y < opMatrixX.getHeight(); y++) {
+                for (int x = 0; x < opMatrixX.getWidth(); x++) {
+                    int opConstant = opMatrixX.getElementAt(x, y);
+                    Pixel currentPixel = sourceImage->getPixelAt(i + x, j + y);
+                    xSum += (opConstant * (int) currentPixel.getRed());
+                }
+            }
+
+            magnitudeMinorX.push_back(xSum);
+
+            // COUNT Y SUM
+            for (int y = 0; y < opMatrixY.getHeight(); y++) {
+                for (int x = 0; x < opMatrixY.getWidth(); x++) {
+                    int opConstant = opMatrixY.getElementAt(x, y);
+                    Pixel currentPixel = sourceImage->getPixelAt(i + x, j + y);
+                    ySum += (opConstant * (int) currentPixel.getRed());
+                }
+            }
+
+            magnitudeMinorY.push_back(ySum);
+        }
+        magnitudeX.push_back(magnitudeMinorX);
+        magnitudeY.push_back(magnitudeMinorY);
+    }
+
+    /*********************************************************/
+    /* THRESHOLDING                                          */
+    /*********************************************************/
+
+
+
+    return image;
 }
 
 Image* Convolution::padImage(Image* image, int padWidth, int padHeight) {
