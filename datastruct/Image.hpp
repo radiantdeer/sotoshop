@@ -3,6 +3,7 @@
 
 #include <string>
 #include <vector>
+#include "ImageHistogram.hpp"
 #include "Pixel.hpp"
 
 #define COLOR_LEVEL 256
@@ -64,7 +65,7 @@ class Image {
         Image * logTrans();
         Image * invLogTrans();
 
-        std::vector<std::vector<int>> histogram();
+        ImageHistogram histogram();
         std::vector<std::vector<int>> equalizedHistogram();
         Image * histogramEqualization();
         Image * histogramSpecification(Image& B);

@@ -11,6 +11,7 @@
 #include <QUrl>
 #include <sstream>
 #include "../spdlog/spdlog.h"
+#include "../datastruct/ImageHistogram.hpp"
 #include "../utilities/BitPlaneSlicing.hpp"
 #include "../utilities/Convolution.hpp"
 #include "../utilities/CommonConvolutions.hpp"
@@ -591,10 +592,7 @@ void MainWindow::specifyHist() {
 void MainWindow::showHistogram() {
     if (drawSurface->isImageLoaded()) {
         spdlog::info("MainWindow::showHistogram: Showing histogram...");
-        std::vector<std::vector<int>> hist = drawSurface->getActiveImage()->histogram();
-        for (int i = 0; i < 256; i+=255) {
-            spdlog::info(hist.at(0).at(i));
-        }
+        ImageHistogram hist = drawSurface->getActiveImage()->histogram();
         if (histDialog != nullptr) {
             delete histDialog;
         }
