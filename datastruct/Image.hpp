@@ -6,12 +6,12 @@
 #include "ImageHistogram.hpp"
 #include "Pixel.hpp"
 
-#define COLOR_LEVEL 256
-
 class Image {
 
     public:
         static const int MAX_GRAY = 255;
+        static const int COLOR_LEVEL = 256;
+
         Image();
         Image(int, int);
         Image(int, int, std::string);
@@ -66,7 +66,7 @@ class Image {
         Image * invLogTrans();
 
         ImageHistogram histogram();
-        std::vector<std::vector<int>> equalizedHistogram();
+        ImageHistogram equalizedHistogram();
         Image * histogramEqualization();
         Image * histogramSpecification(Image& B);
 

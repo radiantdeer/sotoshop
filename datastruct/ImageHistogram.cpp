@@ -2,7 +2,9 @@
 #include "Image.hpp"
 
 ImageHistogram::ImageHistogram() {
-    redData.resize(Image::MAX_GRAY + 1);
+    redData.resize(Image::MAX_GRAY + 1, 0);
+    greenData.resize(Image::MAX_GRAY + 1, 0);
+    blueData.resize(Image::MAX_GRAY + 1, 0);
     grayscale = true;
 }
 
@@ -49,19 +51,6 @@ std::vector<int> ImageHistogram::getGray() const {
 }
 
 
-// Returns three values if not grayscale (R, G, B), returns only one value if grayscale
-std::vector<int> ImageHistogram::getValueAt(int graylevel) const {
-    std::vector<int> out;
-    if (grayscale) {
-        out.push_back(redData[graylevel]);
-    } else {
-        out.push_back(redData[graylevel]);
-        out.push_back(greenData[graylevel]);
-        out.push_back(blueData[graylevel]);
-    }
-    return out;
-}
-
 int ImageHistogram::getValueAt(int graylevel, char channel) const {
     if (grayscale) {
         return redData[graylevel];
@@ -78,8 +67,6 @@ int ImageHistogram::getValueAt(int graylevel, char channel) const {
     }
 }
 
-// channel = 'R', 'G', 'B', or 'Y' ('Y' for grayscale, you don't need to set this if image is grayscale)
-// If the image/histogram is in RGB and channel is set to 'Y', it will update all channels
 void ImageHistogram::setValueAt(int graylevel, int value, char channel) {
     if (grayscale) {
         redData[graylevel] = value;
