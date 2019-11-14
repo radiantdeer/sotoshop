@@ -17,13 +17,13 @@ ImageSaver * ImageSaverFactory::getImageSaver(std::string fileUrl) {
         imageSaver = new RawImageSaver();
     } else if ((format == "pgm") || (format == "PGM")) {
         spdlog::debug("ImageSaverFactory detects PGM image");
-        imageSaver = new RawImageSaver();
+        imageSaver = new PGMImageSaver();
     } else if ((format == "ppm") || (format == "PPM")) {
         spdlog::debug("ImageSaverFactory detects PPM image");
-        imageSaver = new RawImageSaver();
+        imageSaver = new PPMImageSaver();
     } else if ((format == "pbm") || (format == "PBM")) {
         spdlog::debug("ImageSaverFactory detects PBM image");
-        imageSaver = new RawImageSaver();
+        imageSaver = new PBMImageSaver();
     } else if ((format == "bmp") || (format == "BMP")) {
         spdlog::debug("ImageSaverFactory detects BMP image");
         imageSaver = new BMPImageSaver();

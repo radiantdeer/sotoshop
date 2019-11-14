@@ -74,7 +74,7 @@ class Image {
         Image * contrastStretch();
         Image * contrastStretch(int rrmin, int rrmax, int rgmin, int rgmax, int rbmin, int rbmax);
 
-  private:
+    private:
         int width;
         int height;
         std::vector<std::vector<Pixel>> data;

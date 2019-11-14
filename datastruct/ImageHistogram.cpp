@@ -6,6 +6,9 @@ ImageHistogram::ImageHistogram() {
     greenData.resize(Image::MAX_GRAY + 1, 0);
     blueData.resize(Image::MAX_GRAY + 1, 0);
     grayscale = true;
+    recalculateMean = true;
+    recalculateMedian = true;
+    recalculateMode = true;
 }
 
 ImageHistogram::ImageHistogram(std::vector<std::vector<int>> data, bool grayscale) {
@@ -24,6 +27,9 @@ ImageHistogram::ImageHistogram(std::vector<std::vector<int>> data, bool grayscal
             blueData[i] = data[2][i];
         }
     }
+    recalculateMean = true;
+    recalculateMedian = true;
+    recalculateMode = true;
 }
 
 std::vector<int> ImageHistogram::getRed() const {
@@ -83,6 +89,9 @@ void ImageHistogram::setValueAt(int graylevel, int value, char channel) {
             blueData[graylevel] = value;
         }
     }
+    recalculateMean = true;
+    recalculateMedian = true;
+    recalculateMode = true;
 }
 
 void ImageHistogram::incrementValueAt(int graylevel, int incrementBy, char channel) {
@@ -101,6 +110,9 @@ void ImageHistogram::incrementValueAt(int graylevel, int incrementBy, char chann
             blueData[graylevel] += incrementBy;
         }
     }
+    recalculateMean = true;
+    recalculateMedian = true;
+    recalculateMode = true;
 }
 
 bool ImageHistogram::isGrayscale() const {
@@ -114,3 +126,85 @@ void ImageHistogram::setGrayscale(bool grayscale) {
         blueData.resize(Image::MAX_GRAY + 1);
     }
 }
+
+double ImageHistogram::mean(char channel) {
+    if (recalculateMean) {
+        calculateMean();
+    }
+
+    if (grayscale) {
+        return meanRed;
+    } else {
+        if  (channel == 'G') {
+            return meanGreen;
+        } else if (channel == 'B') {
+            return meanBlue;
+        } else {
+            return meanRed;
+        }
+    }
+}
+
+double ImageHistogram::median(char channel) {
+    if (recalculateMedian) {
+        calculateMedian();
+    }
+
+    if (grayscale) {
+        return medianRed;
+    } else {
+        if (channel == 'G') {
+            return medianGreen;
+        } else if (channel == 'B') {
+            return medianBlue;
+        } else {
+            return medianRed;
+        }
+    }
+}
+
+int ImageHistogram::mode(char channel) {
+    if (recalculateMode) {
+        calculateMode();
+    }
+
+    if (grayscale) {
+        return modeRed;
+    } else {
+        if (channel == 'G') {
+            return modeGreen;
+        } else if (channel == 'B') {
+            return modeBlue;
+        } else {
+            return modeRed;
+        }
+    }
+}
+
+void ImageHistogram::calculateMean() {
+    meanRed = 0;
+    meanGreen = 0;
+    meanBlue = 0;
+    for (int i = 0; i < redData.size(); i++) {
+        meanRed += redData[i];
+        if (!grayscale) {
+            meanGreen += greenData[i];
+            meanBlue += blueData[i];
+        }
+    }
+    meanRed = meanRed / redData.size();
+    meanGreen = meanGreen / redData.size();
+    meanBlue = meanBlue / redData.size();
+    recalculateMean = false;
+}
+
+void ImageHistogram::calculateMedian() {
+    
+    recalculateMedian = false;
+}
+
+void ImageHistogram::calculateMode() {
+
+    recalculateMode = false;
+}
+

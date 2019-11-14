@@ -22,11 +22,30 @@ class ImageHistogram {
         bool isGrayscale() const;
         void setGrayscale(bool grayscale);
 
+        double mean(char channel = 'R');
+        double median(char channel = 'R');
+        int mode(char channel = 'R');
+
     private:
         std::vector<int> redData;
         std::vector<int> greenData;
         std::vector<int> blueData;
+        double meanRed;
+        double medianRed;
+        int modeRed;
+        double meanGreen;
+        double medianGreen;
+        int modeGreen;
+        double meanBlue;
+        double medianBlue;
+        int modeBlue;
         bool grayscale;
+        bool recalculateMean;
+        bool recalculateMedian;
+        bool recalculateMode;
+        void calculateMean();
+        void calculateMedian();
+        void calculateMode();
 
 };
 

@@ -487,6 +487,10 @@ ImageHistogram Image::histogram() {
                 hist.incrementValueAt(this->getPixelAt(i,j).getBlue(), 1, 'B');
             }
         }
+        spdlog::debug("Means : ");
+        spdlog::debug("  Red : {}", hist.mean('R'));
+        spdlog::debug("  Green : {}", hist.mean('G'));
+        spdlog::debug("  Blue : {}", hist.mean('B'));
     } else {
         // grayscale
         hist.setGrayscale(true);
@@ -495,6 +499,7 @@ ImageHistogram Image::histogram() {
                 hist.incrementValueAt(this->getPixelAt(i, j).getRed());
             }
         }
+        spdlog::debug("Mean (Gray) : {}", hist.mean('R'));
     }
     return hist;
 }
