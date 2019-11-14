@@ -70,7 +70,7 @@ MainWindow::MainWindow() : QMainWindow() {
     QMenu * highPass = convolutionMenu->addMenu("High-pass Filter");
     highPassFilter1Action = highPass->addAction("Variation 1");
     highPassFilter2Action = highPass->addAction("Variation 2");
-    highPassFilter3Action = highPass->addAction("Variation 3");
+    highPassFilter3Action = highPass->addAction("Variation 3 (Laplace)");
     highPassFilter4Action = highPass->addAction("Variation 4");
     unsharpMaskingAction = convolutionMenu->addAction("Unsharp Masking");
     highboostAction = convolutionMenu->addAction("Highboost");

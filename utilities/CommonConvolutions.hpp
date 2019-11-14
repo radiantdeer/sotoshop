@@ -12,7 +12,7 @@ class CommonConvolutions {
         static const ConvolutionMatrix HighFilter2;
         static const ConvolutionMatrix HighFilter3;
         static const ConvolutionMatrix HighFilter4;
-
+        static const ConvolutionMatrix Laplace;
 };
 
 #endif
