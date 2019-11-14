@@ -3,14 +3,15 @@
 
 #include <string>
 #include <vector>
+#include "ImageHistogram.hpp"
 #include "Pixel.hpp"
-
-#define COLOR_LEVEL 256
 
 class Image {
 
     public:
         static const int MAX_GRAY = 255;
+        static const int COLOR_LEVEL = 256;
+
         Image();
         Image(int, int);
         Image(int, int, std::string);
@@ -64,8 +65,8 @@ class Image {
         Image * logTrans();
         Image * invLogTrans();
 
-        std::vector<std::vector<int>> histogram();
-        std::vector<std::vector<int>> equalizedHistogram();
+        ImageHistogram histogram();
+        ImageHistogram equalizedHistogram();
         Image * histogramEqualization();
         Image * histogramSpecification(Image& B);
 
@@ -73,7 +74,7 @@ class Image {
         Image * contrastStretch();
         Image * contrastStretch(int rrmin, int rrmax, int rgmin, int rgmax, int rbmin, int rbmax);
 
-  private:
+    private:
         int width;
         int height;
         std::vector<std::vector<Pixel>> data;

@@ -475,78 +475,77 @@ Image * Image::operator~() {
 // Returns array of color histogram
 // Returns a matrix of 3 x 256 for colored images (PPM, BMP)
 // Returns a matrix of 1 x 256 for grayscaled images (PBM, PGM, RAW)
-std::vector<std::vector<int>> Image::histogram() {
-    std::vector<std::vector<int>> hist;
+ImageHistogram Image::histogram() {
+    ImageHistogram hist;
     if (this->getOriginalFormat() == "bmp" || this->getOriginalFormat() == "ppm") {
         // color
-        std::vector<int> red (256, 0);
-        std::vector<int> green (256, 0);
-        std::vector<int> blue (256, 0);
+        hist.setGrayscale(false);
         for (int i = 0; i < this->getWidth(); i++) {
             for (int j = 0; j < this->getHeight(); j++) {
-                red[this->getPixelAt(i,j).getRed()]++;
-                green[this->getPixelAt(i,j).getGreen()]++;
-                blue[this->getPixelAt(i,j).getBlue()]++;
+                hist.incrementValueAt(this->getPixelAt(i,j).getRed(), 1, 'R');
+                hist.incrementValueAt(this->getPixelAt(i,j).getGreen(), 1, 'G');
+                hist.incrementValueAt(this->getPixelAt(i,j).getBlue(), 1, 'B');
             }
         }
-        hist.push_back(red);
-        hist.push_back(green);
-        hist.push_back(blue);
+        spdlog::debug("Means : ");
+        spdlog::debug("  Red : {}", hist.mean('R'));
+        spdlog::debug("  Green : {}", hist.mean('G'));
+        spdlog::debug("  Blue : {}", hist.mean('B'));
     } else {
         // grayscale
-        std::vector<int> gray (256, 0);
+        hist.setGrayscale(true);
         for (int i = 0; i < this->getWidth(); i++) {
             for (int j = 0; j < this->getHeight(); j++) {
-                gray[this->getPixelAt(i, j).getRed()]++;
+                hist.incrementValueAt(this->getPixelAt(i, j).getRed());
             }
         }
-        hist.push_back(gray);
+        spdlog::debug("Mean (Gray) : {}", hist.mean('R'));
     }
     return hist;
 }
 
-std::vector<std::vector<int>> Image::equalizedHistogram() {
-    std::vector<std::vector<int>> hist = this->histogram();
-    std::vector<std::vector<int>> histEq;
+ImageHistogram Image::equalizedHistogram() {
+    ImageHistogram hist = this->histogram();
+    std::vector<std::vector<int>> temp;
+    ImageHistogram *histEq;
     int totalPixel = this->getHeight() * this->getWidth();
-    if (this->getOriginalFormat() == "bmp" || this->getOriginalFormat() == "ppm" ) {
-        std::vector<int> redMap = hist.at(0);
-        std::vector<int> greenMap = hist.at(1);
-        std::vector<int> blueMap = hist.at(2);
+    if (this->getOriginalFormat() == "bmp" || this->getOriginalFormat() == "ppm") {
+        temp.push_back(hist.getRed());
+        temp.push_back(hist.getGreen());
+        temp.push_back(hist.getBlue());
+        histEq = new ImageHistogram(temp, false);
         for (int i = 1; i < COLOR_LEVEL; i++) {
-            redMap[i] += redMap[i-1];
-            greenMap[i] += greenMap[i-1];
-            blueMap[i] += blueMap[i-1];
+            histEq->incrementValueAt(i, histEq->getValueAt(i-1, 'R'), 'R');
+            histEq->incrementValueAt(i, histEq->getValueAt(i-1, 'G'), 'G');
+            histEq->incrementValueAt(i, histEq->getValueAt(i-1, 'B'), 'B');
         }
         for (int i = 0; i < COLOR_LEVEL; i++) {
-            redMap[i] = redMap[i] * (COLOR_LEVEL-1) / totalPixel;
-            greenMap[i] = greenMap[i] * (COLOR_LEVEL-1) / totalPixel;
-            blueMap[i] = blueMap[i] * (COLOR_LEVEL-1) / totalPixel;
+            histEq->setValueAt(i, histEq->getValueAt(i, 'R') * (COLOR_LEVEL-1) / totalPixel, 'R');
+            histEq->setValueAt(i, histEq->getValueAt(i, 'G') * (COLOR_LEVEL-1) / totalPixel, 'G');
+            histEq->setValueAt(i, histEq->getValueAt(i, 'R') * (COLOR_LEVEL-1) / totalPixel, 'B');
         }
-        histEq.push_back(redMap);
-        histEq.push_back(greenMap);
-        histEq.push_back(blueMap);
     } else {
-        std::vector<int> grayMap = hist.at(0);
+        temp.push_back(hist.getRed());
+        histEq = new ImageHistogram(temp, true);
         for (int i = 1; i < COLOR_LEVEL; i++) {
-            grayMap[i] += grayMap[i-1];
+            histEq->incrementValueAt(i, histEq->getValueAt(i-1));
         }
 
         for (int i = 0; i < COLOR_LEVEL; i++) {
-            grayMap[i] = grayMap[i] * (COLOR_LEVEL-1) / totalPixel;
+            histEq->setValueAt(i, histEq->getValueAt(i) * (COLOR_LEVEL-1) / totalPixel);
         }
-        histEq.push_back(grayMap);
     }
-    return histEq;
+
+    return *histEq;
 }
 
 Image * Image::histogramEqualization() {
-    std::vector<std::vector<int>> hist = this->histogram();
+    ImageHistogram hist = this->histogram();
     int totalPixel = this->getHeight() * this->getWidth();
     if (this->getOriginalFormat() == "bmp" || this->getOriginalFormat() == "ppm" ) {
-        std::vector<int> redMap = hist.at(0);
-        std::vector<int> greenMap = hist.at(1);
-        std::vector<int> blueMap = hist.at(2);
+        std::vector<int> redMap = hist.getRed();
+        std::vector<int> greenMap = hist.getGreen();
+        std::vector<int> blueMap = hist.getBlue();
         for (int i = 1; i < COLOR_LEVEL; i++) {
             redMap[i] += redMap[i-1];
             greenMap[i] += greenMap[i-1];
@@ -566,7 +565,7 @@ Image * Image::histogramEqualization() {
             }
         }
     } else {
-        std::vector<int> grayMap = hist.at(0);
+        std::vector<int> grayMap = hist.getGray();
         for (int i = 1; i < COLOR_LEVEL; i++) {
             grayMap[i] += grayMap[i-1];
         }
@@ -588,10 +587,10 @@ Image * Image::histogramEqualization() {
 }
 
 std::vector<int> histSpecHelper(std::vector<int> &a, std::vector<int> &b) {
-    for (int i = 0; i < COLOR_LEVEL; i++) {
+    for (int i = 0; i < Image::COLOR_LEVEL; i++) {
         int minval = abs(a[i] - b[0]);
         int minj = 0;
-        for (int j = 0; j < COLOR_LEVEL; j++) {
+        for (int j = 0; j < Image::COLOR_LEVEL; j++) {
             if (abs(a[i] - b[j]) < minval) {
                 minval = abs(a[i] - b[j]);
                 minj = j;
@@ -605,8 +604,8 @@ std::vector<int> histSpecHelper(std::vector<int> &a, std::vector<int> &b) {
 // Match histogram of this image into something like B image.
 Image * Image::histogramSpecification(Image& B) {
     // Equalize this image first.
-    std::vector<std::vector<int>> histThis = this->equalizedHistogram();
-    std::vector<std::vector<int>> histOp = B.equalizedHistogram();
+    ImageHistogram histThis = this->equalizedHistogram();
+    ImageHistogram histOp = B.equalizedHistogram();
     std::vector<int> redMapThis;
     std::vector<int> greenMapThis;
     std::vector<int> blueMapThis;
@@ -615,23 +614,23 @@ Image * Image::histogramSpecification(Image& B) {
     std::vector<int> blueMapOp;
 
     if (this->getOriginalFormat() == "bmp" || this->getOriginalFormat() == "ppm" ) {
-        redMapThis = histThis.at(0);
-        greenMapThis = histThis.at(1);
-        blueMapThis = histThis.at(2);
+        redMapThis = histThis.getRed();
+        greenMapThis = histThis.getGreen();
+        blueMapThis = histThis.getBlue();
     } else {
-        redMapThis = histThis.at(0);
-        greenMapThis = histThis.at(0);
-        blueMapThis = histThis.at(0);
+        redMapThis = histThis.getGray();
+        greenMapThis = histThis.getGray();
+        blueMapThis = histThis.getGray();
     }
 
     if (B.getOriginalFormat() == "bmp" || B.getOriginalFormat() == "ppm") {
-        redMapOp = histOp.at(0);
-        greenMapOp = histOp.at(1);
-        blueMapOp = histOp.at(2);
+        redMapOp = histOp.getRed();
+        greenMapOp = histOp.getGreen();
+        blueMapOp = histOp.getBlue();
     } else {
-        redMapOp = histOp.at(0);
-        greenMapOp = histOp.at(0);
-        blueMapOp = histOp.at(0);
+        redMapOp = histOp.getGray();
+        greenMapOp = histOp.getGray();
+        blueMapOp = histOp.getGray();
     }
 
     redMapThis = histSpecHelper(redMapThis, redMapOp);
