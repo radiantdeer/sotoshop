@@ -15,8 +15,9 @@
 #include "../utilities/BitPlaneSlicing.hpp"
 #include "../utilities/Convolution.hpp"
 #include "../utilities/CommonConvolutions.hpp"
-#include "../utilities/Fourier.hpp"
 #include "../utilities/EdgeDetection.hpp"
+#include "../utilities/Fourier.hpp"
+#include "../utilities/PlateRecognition.hpp"
 
 MainWindow::MainWindow() : QMainWindow() {
     this->setWindowTitle("SotoShop");
@@ -84,6 +85,7 @@ MainWindow::MainWindow() : QMainWindow() {
     fourierAction = other->addAction("Fourier Transform");
     viewFourierSpectrumAction = other->addAction("View Fourier Spectrum");
     inverseFourierAction = other->addAction("Inverse Fourier Transform");
+    plateRecognitionAction = other->addAction("Plate Recognition");
 
     QMenu * edge = this->menuBar()->addMenu("Edge Detect");
     sobelOperationAction = edge->addAction("Sobel Operation");
@@ -753,6 +755,19 @@ void MainWindow::prewittOperation() {
     }
 }
 
+void MainWindow::doPlateRecognition() {
+    if (drawSurface->isImageLoaded()) {
+        drawSurface->acquireLockImage();
+        Image * image = PlateRecognition::findPlate(drawSurface->getActiveImage());
+        drawSurface->purgeImage();
+        drawSurface->setActiveImage(image);
+        drawSurface->releaseLockImage();
+        drawSurface->update();
+    } else {
+        spdlog::warn("MainWindow::invLogOperation: Please load an image first!");
+    }
+}
+
 void MainWindow::connectActionsToControllers() {
     connect(loadAction, &QAction::triggered, this, &MainWindow::loadFile);
     connect(saveAction, &QAction::triggered, this, &MainWindow::saveFile);
@@ -807,6 +822,7 @@ void MainWindow::connectActionsToControllers() {
     connect(sobelOperationAction, &QAction::triggered, this, &MainWindow::sobelOperation);
     connect(prewittOperationAction, &QAction::triggered, this, &MainWindow::prewittOperation);
 
+    connect(plateRecognitionAction, &QAction::triggered, this, &MainWindow::doPlateRecognition);
 }
 
 std::string MainWindow::getOpenFileUrl(std::string dialogTitle) {

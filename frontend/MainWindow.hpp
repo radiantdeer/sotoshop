@@ -68,6 +68,8 @@ class MainWindow : public QMainWindow {
         void viewFourierSpectrum();
         void doInverseFourier();
 
+        void doPlateRecognition();
+
         void sobelOperation();
         void prewittOperation();
 
@@ -126,6 +128,8 @@ class MainWindow : public QMainWindow {
 
         QAction * sobelOperationAction;
         QAction * prewittOperationAction;
+
+        QAction * plateRecognitionAction;
 
         DrawSurface * drawSurface;
         HistogramDialog * histDialog;
