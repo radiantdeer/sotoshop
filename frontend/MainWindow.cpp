@@ -85,6 +85,10 @@ MainWindow::MainWindow() : QMainWindow() {
     viewFourierSpectrumAction = other->addAction("View Fourier Spectrum");
     inverseFourierAction = other->addAction("Inverse Fourier Transform");
 
+    QMenu * edge = this->menuBar()->addMenu("Edge Detect");
+    sobelOperationAction = edge->addAction("Sobel Operation");
+    prewittOperationAction = edge->addAction("Prewitt Operation");
+
     connectActionsToControllers();
 
     drawSurface = new DrawSurface(this);
@@ -721,6 +725,34 @@ void MainWindow::invLogOperation() {
     }
 }
 
+void MainWindow::sobelOperation() {
+    if (drawSurface->isImageLoaded()) {
+        spdlog::info("MainWindow::sobelOperation: Edge detection with Sobel operator...");
+        Image * result = Convolution::sobelOperation(drawSurface->getActiveImage(), CommonConvolutions::SobelX, CommonConvolutions::SobelY);
+        drawSurface->acquireLockImage();
+        drawSurface->purgeImage();
+        drawSurface->setActiveImage(result);
+        drawSurface->releaseLockImage();
+        drawSurface->update();
+    } else {
+        spdlog::warn("MainWindow::sobelOperation: Please load an image first!");
+    }
+}
+
+void MainWindow::prewittOperation() {
+    if (drawSurface->isImageLoaded()) {
+        spdlog::info("MainWindow::sobelOperation: Edge detection with Sobel operator...");
+        Image * result = Convolution::sobelOperation(drawSurface->getActiveImage(), CommonConvolutions::PrewittX, CommonConvolutions::PrewittY);
+        drawSurface->acquireLockImage();
+        drawSurface->purgeImage();
+        drawSurface->setActiveImage(result);
+        drawSurface->releaseLockImage();
+        drawSurface->update();
+    } else {
+        spdlog::warn("MainWindow::sobelOperation: Please load an image first!");
+    }
+}
+
 void MainWindow::connectActionsToControllers() {
     connect(loadAction, &QAction::triggered, this, &MainWindow::loadFile);
     connect(saveAction, &QAction::triggered, this, &MainWindow::saveFile);
@@ -771,6 +803,9 @@ void MainWindow::connectActionsToControllers() {
     connect(fourierAction, &QAction::triggered, this, &MainWindow::doFourierTransform);
     connect(viewFourierSpectrumAction, &QAction::triggered, this, &MainWindow::viewFourierSpectrum);
     connect(inverseFourierAction, &QAction::triggered, this, &MainWindow::doInverseFourier);
+
+    connect(sobelOperationAction, &QAction::triggered, this, &MainWindow::sobelOperation);
+    connect(prewittOperationAction, &QAction::triggered, this, &MainWindow::prewittOperation);
 
 }
 

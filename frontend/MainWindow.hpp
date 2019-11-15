@@ -68,6 +68,9 @@ class MainWindow : public QMainWindow {
         void viewFourierSpectrum();
         void doInverseFourier();
 
+        void sobelOperation();
+        void prewittOperation();
+
     private:
         QAction * loadAction;
         QAction * saveAction;
@@ -120,6 +123,9 @@ class MainWindow : public QMainWindow {
         QAction * fourierAction;
         QAction * viewFourierSpectrumAction;
         QAction * inverseFourierAction;
+
+        QAction * sobelOperationAction;
+        QAction * prewittOperationAction;
 
         DrawSurface * drawSurface;
         HistogramDialog * histDialog;
