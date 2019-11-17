@@ -74,6 +74,9 @@ class Image {
         Image * contrastStretch();
         Image * contrastStretch(int rrmin, int rrmax, int rgmin, int rgmax, int rbmin, int rbmax);
 
+        // Binary Image
+        Image * binarySegmentation();
+        Image * binaryThinning();
     private:
         int width;
         int height;

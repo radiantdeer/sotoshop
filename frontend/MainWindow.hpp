@@ -68,6 +68,8 @@ class MainWindow : public QMainWindow {
         void viewFourierSpectrum();
         void doInverseFourier();
 
+        void doBinarySegmentation();
+        void doBinaryThinning();
     private:
         QAction * loadAction;
         QAction * saveAction;
@@ -120,6 +122,9 @@ class MainWindow : public QMainWindow {
         QAction * fourierAction;
         QAction * viewFourierSpectrumAction;
         QAction * inverseFourierAction;
+
+        QAction * binarySegmentationAction;
+        QAction * binaryThinningAction;
 
         DrawSurface * drawSurface;
         HistogramDialog * histDialog;

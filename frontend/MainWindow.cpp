@@ -85,6 +85,11 @@ MainWindow::MainWindow() : QMainWindow() {
     viewFourierSpectrumAction = other->addAction("View Fourier Spectrum");
     inverseFourierAction = other->addAction("Inverse Fourier Transform");
 
+    QMenu * binary = this->menuBar()->addMenu("Binary");
+    binarySegmentationAction = binary->addAction("Segmentation");
+    binaryThinningAction = binary -> addAction("Thinning");
+
+
     connectActionsToControllers();
 
     drawSurface = new DrawSurface(this);
@@ -721,6 +726,28 @@ void MainWindow::invLogOperation() {
     }
 }
 
+void MainWindow::doBinarySegmentation() {
+    if (drawSurface->isImageLoaded()) {
+        drawSurface->acquireLockImage();
+        drawSurface->getActiveImage()->binarySegmentation();
+        drawSurface->releaseLockImage();
+        drawSurface->update();
+    } else {
+        spdlog::warn("MainWindow::doBinarySegmentation: Please load an image first!");
+    }
+}
+
+void MainWindow::doBinaryThinning() {
+    if (drawSurface->isImageLoaded()) {
+        drawSurface->acquireLockImage();
+        drawSurface->getActiveImage()->binaryThinning();
+        drawSurface->releaseLockImage();
+        drawSurface->update();
+    } else {
+        spdlog::warn("MainWindow::doBinaryThinning: Please load an image first!");
+    }
+}
+
 void MainWindow::connectActionsToControllers() {
     connect(loadAction, &QAction::triggered, this, &MainWindow::loadFile);
     connect(saveAction, &QAction::triggered, this, &MainWindow::saveFile);
@@ -772,6 +799,8 @@ void MainWindow::connectActionsToControllers() {
     connect(viewFourierSpectrumAction, &QAction::triggered, this, &MainWindow::viewFourierSpectrum);
     connect(inverseFourierAction, &QAction::triggered, this, &MainWindow::doInverseFourier);
 
+    connect(binarySegmentationAction, &QAction::triggered, this, &MainWindow::doBinarySegmentation);
+    connect(binaryThinningAction, &QAction::triggered, this, &MainWindow::doBinaryThinning);
 }
 
 std::string MainWindow::getOpenFileUrl(std::string dialogTitle) {
