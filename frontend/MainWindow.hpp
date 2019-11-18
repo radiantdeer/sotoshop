@@ -70,6 +70,11 @@ class MainWindow : public QMainWindow {
 
         void doBinarySegmentation();
         void doBinaryThinning();
+        void doPlateRecognition();
+
+        void sobelOperation();
+        void prewittOperation();
+
     private:
         QAction * loadAction;
         QAction * saveAction;
@@ -125,6 +130,10 @@ class MainWindow : public QMainWindow {
 
         QAction * binarySegmentationAction;
         QAction * binaryThinningAction;
+        QAction * sobelOperationAction;
+        QAction * prewittOperationAction;
+
+        QAction * plateRecognitionAction;
 
         DrawSurface * drawSurface;
         HistogramDialog * histDialog;
