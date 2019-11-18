@@ -12,25 +12,12 @@ double PlateRecognition::euclidean(Point& p1, Point& p2) {
     return sqrt((p1.getX() - p2.getX()) * (p1.getX() - p2.getX()) + (p1.getY() - p2.getY()) * (p1.getY() - p2.getY()));
 }
 
-struct numOfLabel
-{
-    int label;
-    int num;
-
-    numOfLabel(int l, int n) : label(l), num(n) {}
-
-    bool operator > (numOfLabel& a2)
-    {
-        return (num > a2.num);
-    }
-};
-
 Image * PlateRecognition::findPlate(Image * image) {
     spdlog::debug("PlateRecognition::findPlate: Running...");
 
     spdlog::debug("PlateRecognition::findPlate: Allocating memory for image result...");
     Image * mask = new Image(*image);
-    Image * result = new Image(*image);
+    //Image * interim1 = new Image(*image);
 
     mask = Convolution::sobelOperation(mask, CommonConvolutions::SobelX, CommonConvolutions::SobelY);
 
@@ -49,69 +36,24 @@ Image * PlateRecognition::findPlate(Image * image) {
 
     // CCA - Connected-Component Analysis
     spdlog::debug("PlateRecognition::findPlate: CCA first run...");
-    int ccaMatrix[mask->getHeight()][mask->getWidth()];
+    int ** ccaMatrix = new int * [mask->getHeight()];
     for (int j = 0; j < mask->getHeight(); j++) {
+        ccaMatrix[j] = new int[mask->getWidth()];
         for (int i = 0; i < mask->getWidth(); i++) {
             ccaMatrix[j][i] = 0;
         }
     }
-    std::vector<Point> queue;
-    std::vector<numOfLabel> labelSum (1, numOfLabel(0, 0));
-    int label = 1;
-    for (int j = 0; j < mask->getHeight(); j++) {
-        for (int i = 0; i < mask->getWidth(); i++) {
-            if ((mask->getPixelAt(i, j).getRed() == 255) && (ccaMatrix[j][i] == 0)) {
-                labelSum.push_back(numOfLabel(label, 0));
-                ccaMatrix[j][i] = label;
-                labelSum[label].num++;
-                queue.insert(queue.begin(), Point(i, j));
-                while(queue.size() > 0) {
-                    Point current = queue.front();
-                    int x = current.getX();
-                    int y = current.getY();
-                    queue.erase(queue.begin());
-                    if ((x - 1) >= 0) {
-                        if ((mask->getPixelAt(x-1,j).getRed() == 255) && (ccaMatrix[j][x-1] == 0)) {
-                            ccaMatrix[j][x-1] = label;
-                            labelSum[label].num++;
-                            queue.push_back(Point(x-1, j));
-                        }
-                    }
-                    if ((x + 1) < mask->getWidth()) {
-                        if ((mask->getPixelAt(x+1,j).getRed() == 255) && (ccaMatrix[j][x+1] == 0)) {
-                            ccaMatrix[j][x+1] = label;
-                            labelSum[label].num++;
-                            queue.push_back(Point(x+1, j));
-                        }
-                    }
-                    if ((y - 1) >= 0) {
-                        if ((mask->getPixelAt(i, y-1).getRed() == 255) && (ccaMatrix[y-1][i] == 0)) {
-                            ccaMatrix[y-1][i] = label;
-                            labelSum[label].num++;
-                            queue.push_back(Point(i, y-1));
-                        }
-                    }
-                    if ((y + 1) < mask->getHeight()) {
-                        if ((mask->getPixelAt(i, y+1).getRed() == 255) && (ccaMatrix[y+1][i] == 0)) {
-                            ccaMatrix[y+1][i] = label;
-                            labelSum[label].num++;
-                            queue.push_back(Point(i, y+1));
-                        }
-                    }
-                }
-                label++;
-            }
-        }
-    }
+
+    std::vector<numOfLabel> labelSum = connectedComponentAnalysis(mask, ccaMatrix, true);
 
     spdlog::debug("PlateRecognition::findPlate: Sorting CCA result...");
     std::sort(labelSum.begin(), labelSum.end(), std::greater<>());
 
-    spdlog::debug("PlateRecognition::findPlate: Showing only top 28 result...");
+    spdlog::debug("PlateRecognition::findPlate: Showing only top 25 result...");
     for (int j = 0; j < mask->getHeight(); j++) {
         for (int i = 0; i < mask->getWidth(); i++) {
             bool found = false;
-            for (int k = 0; (k < 28) && (k < labelSum.size()); k++) {
+            for (int k = 0; (k < 25) && (k < labelSum.size()); k++) {
                 if (ccaMatrix[j][i] == labelSum[k].label) {
                     found = true;
                     break;
@@ -129,24 +71,175 @@ Image * PlateRecognition::findPlate(Image * image) {
     for (int j = 0; j < mask->getHeight(); j++) {
         int firstEdge = -1;
         int lastEdge = -1;
-        bool colorThis = false;
         for (int i = 0; i < mask->getWidth(); i++) {
             if (mask->getPixelAt(i, j).getRed() == 255) {
                 if (firstEdge == -1) {
                     firstEdge = i;
                 } else {
-                    lastEdge = i;
+                    if (ccaMatrix[j][firstEdge] != ccaMatrix[j][i]) {
+                        lastEdge = i;
+                    } else {
+                        firstEdge = i;
+                    }
                 }
             }
         }
-        for (int i = firstEdge; i < lastEdge; i++) {
-            mask->setPixelAt(i, j, Pixel(255, 255, 255));
+        if (lastEdge != -1) {
+            // color prevEdge -> lastEdge with white
+            for (int i = firstEdge; i < lastEdge; i++) {
+                mask->setPixelAt(i, j, Pixel(255, 255, 255));
+            }
+
+            // compensating for crooked rectangles
+            int y = j - 1;
+            if (y >= 0) {
+                bool stop = false;
+                int x = lastEdge;
+                while ((x >= 0) && !stop) {
+                    if (mask->getPixelAt(x, y).getRed() == 255) {
+                        stop = true;
+                    } else {
+                        x--;
+                    }
+                }
+                if (stop) {
+                    int prevFirstEdge = x;
+                    stop = false;
+                    while(!stop) {
+                        for (int i = prevFirstEdge; i < lastEdge; i++) {
+                            mask->setPixelAt(i, y, Pixel(255, 255, 255));
+                        }
+                        y--;
+                        if (y >= 0) {
+                            if (mask->getPixelAt(prevFirstEdge, y).getRed() == 255) {
+                                prevFirstEdge = prevFirstEdge;
+                            } else if (mask->getPixelAt(prevFirstEdge - 1, y).getRed() == 255) {
+                                prevFirstEdge--;
+                            } else if (mask->getPixelAt(prevFirstEdge + 1, y).getRed() == 255) {
+                                prevFirstEdge++;
+                            } else {
+                                stop = true;
+                            }
+                        } else {
+                            stop = true;
+                        }
+                    }
+                }
+            }
+        }
+    }
+    
+    // Second CCA - to determine largest region : where a plate number might be there
+    spdlog::debug("PlateRecognition::findPlate: Running second CCA from first run...");
+    for (int j = 0; j < mask->getHeight(); j++) {
+        for (int i = 0; i < mask->getWidth(); i++) {
+            ccaMatrix[j][i] = 0;
         }
     }
 
-    result->and_op(*mask);
+    labelSum = connectedComponentAnalysis(mask, ccaMatrix, false);
+    std::sort(labelSum.begin(), labelSum.end(), std::greater<>());
+    int largestLabel = labelSum[0].label;
+    for (int i = 0; i < labelSum.size(); i++) {
+        spdlog::debug("#{} : {}", labelSum[i].label, labelSum[i].num);
+    }
+
+    Image * result = new Image(*image);
+    for (int j = 0; j < mask->getHeight(); j++) {
+        for (int i = 0; i < mask->getWidth(); i++) {
+            if (ccaMatrix[j][i] != largestLabel) {
+                result->setPixelAt(i, j, Pixel(0, 0, 0));
+            }
+        }
+    }
+    
+    delete ccaMatrix;
 
     return result;
+}
+
+std::vector<numOfLabel> PlateRecognition::connectedComponentAnalysis(Image * image, int ** ccaMatrix, bool lineAnalysis) {
+    std::vector<Point> queue;
+    std::vector<numOfLabel> labelSum (1, numOfLabel(0, 0));
+    int label = 1;
+    for (int j = 0; j < image->getHeight(); j++) {
+        for (int i = 0; i < image->getWidth(); i++) {
+            if ((image->getPixelAt(i, j).getRed() == 255) && (ccaMatrix[j][i] == 0)) {
+                labelSum.push_back(numOfLabel(label, 0));
+                ccaMatrix[j][i] = label;
+                labelSum[label].num++;
+                queue.insert(queue.begin(), Point(i, j));
+                while(queue.size() > 0) {
+                    Point current = queue.front();
+                    int x = current.getX();
+                    int y = current.getY();
+                    queue.erase(queue.begin());
+                    if (lineAnalysis) {
+                        if ((x - 1) >= 0) {
+                            if ((image->getPixelAt(x-1,j).getRed() == 255) && (ccaMatrix[j][x-1] == 0)) {
+                                ccaMatrix[j][x-1] = label;
+                                labelSum[label].num++;
+                                queue.push_back(Point(x-1, j));
+                            }
+                        }
+                        if ((x + 1) < image->getWidth()) {
+                            if ((image->getPixelAt(x+1,j).getRed() == 255) && (ccaMatrix[j][x+1] == 0)) {
+                                ccaMatrix[j][x+1] = label;
+                                labelSum[label].num++;
+                                queue.push_back(Point(x+1, j));
+                            }
+                        }
+                        if ((y - 1) >= 0) {
+                            if ((image->getPixelAt(i, y-1).getRed() == 255) && (ccaMatrix[y-1][i] == 0)) {
+                                ccaMatrix[y-1][i] = label;
+                                labelSum[label].num++;
+                                queue.push_back(Point(i, y-1));
+                            }
+                        }
+                        if ((y + 1) < image->getHeight()) {
+                            if ((image->getPixelAt(i, y+1).getRed() == 255) && (ccaMatrix[y+1][i] == 0)) {
+                                ccaMatrix[y+1][i] = label;
+                                labelSum[label].num++;
+                                queue.push_back(Point(i, y+1));
+                            }
+                        }
+                    } else {
+                        if ((x - 1) >= 0) {
+                            if ((image->getPixelAt(x-1,y).getRed() == 255) && (ccaMatrix[y][x-1] == 0)) {
+                                ccaMatrix[y][x-1] = label;
+                                labelSum[label].num++;
+                                queue.push_back(Point(x-1, y));
+                            }
+                        }
+                        if ((x + 1) < image->getWidth()) {
+                            if ((image->getPixelAt(x+1,y).getRed() == 255) && (ccaMatrix[y][x+1] == 0)) {
+                                ccaMatrix[y][x+1] = label;
+                                labelSum[label].num++;
+                                queue.push_back(Point(x+1, y));
+                            }
+                        }
+                        if ((y - 1) >= 0) {
+                            if ((image->getPixelAt(x, y-1).getRed() == 255) && (ccaMatrix[y-1][x] == 0)) {
+                                ccaMatrix[y-1][x] = label;
+                                labelSum[label].num++;
+                                queue.push_back(Point(x, y-1));
+                            }
+                        }
+                        if ((y + 1) < image->getHeight()) {
+                            if ((image->getPixelAt(x, y+1).getRed() == 255) && (ccaMatrix[y+1][x] == 0)) {
+                                ccaMatrix[y+1][x] = label;
+                                labelSum[label].num++;
+                                queue.push_back(Point(x, y+1));
+                            }
+                        }
+                    }
+                }
+                label++;
+            }
+        }
+    }
+
+    return labelSum;
 }
 
 /*

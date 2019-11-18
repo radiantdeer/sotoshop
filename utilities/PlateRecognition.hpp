@@ -67,11 +67,27 @@ class PixelPoint {
         }
 };
 
+struct numOfLabel
+{
+    int label;
+    int num;
+
+    numOfLabel(int l, int n) : label(l), num(n) {}
+
+    bool operator > (numOfLabel& a2)
+    {
+        return (num > a2.num);
+    }
+};
+
 class PlateRecognition {
 
     public:
         static double euclidean(Point& p1, Point& p2);
         static Image * findPlate(Image * image);
+
+    private:
+        static std::vector<numOfLabel> connectedComponentAnalysis(Image * image, int ** ccaMatrix, bool lineAnalysis);
 
 };
 
