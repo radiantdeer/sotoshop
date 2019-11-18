@@ -17,7 +17,6 @@ Image * PlateRecognition::findPlate(Image * image) {
 
     spdlog::debug("PlateRecognition::findPlate: Allocating memory for image result...");
     Image * mask = new Image(*image);
-    //Image * interim1 = new Image(*image);
 
     mask = Convolution::sobelOperation(mask, CommonConvolutions::SobelX, CommonConvolutions::SobelY);
 
@@ -144,16 +143,69 @@ Image * PlateRecognition::findPlate(Image * image) {
         spdlog::debug("#{} : {}", labelSum[i].label, labelSum[i].num);
     }
 
-    Image * result = new Image(*image);
-    for (int j = 0; j < mask->getHeight(); j++) {
-        for (int i = 0; i < mask->getWidth(); i++) {
-            if (ccaMatrix[j][i] != largestLabel) {
-                result->setPixelAt(i, j, Pixel(0, 0, 0));
+    // Make image only shows this largest blob
+    int left = 0;
+    int top = 0;
+    int right = image->getWidth() - 1;
+    int bottom = image->getHeight() - 1;
+
+    // Left
+    bool stop = false;
+    int i, j;
+    for (i = 0; (i < mask->getWidth()) && !stop; i++) {
+        for (j = 0; (j < mask->getHeight()) && !stop; j++) {
+            if (ccaMatrix[j][i] == largestLabel) {
+                stop = true;
             }
         }
     }
+    left = i;
+
+    // Top
+    stop = false;
+    for (j = 0; (j < mask->getHeight()) && !stop; j++) {
+        for (i = 0; (i < mask->getWidth()) && !stop; i++) {
+            if (ccaMatrix[j][i] == largestLabel) {
+                stop = true;
+            }
+        }
+    }
+    top = j;
+
+    // Right
+    stop = false;
+    for (i = mask->getWidth() - 1; (i >= 0) && !stop; i--) {
+        for (j = 0; (j < mask->getHeight()) && !stop; j++) {
+            if (ccaMatrix[j][i] == largestLabel) {
+                stop = true;
+            }
+        }
+    }
+    right = i;
+
+    // Bottom
+    stop = false;
+    for (j = mask->getHeight() - 1; (j >= 0) && !stop; j--) {
+        for (i = 0; (i < mask->getWidth()) && !stop; i++) {
+            if (ccaMatrix[j][i] == largestLabel) {
+                stop = true;
+            }
+        }
+    }
+    bottom = j;
     
+    spdlog::debug("({},{}) ==> ({},{})", left, top, right, bottom);
+    int resultWidth = right - left;
+    int resultHeight = bottom - top;
+    Image * result = new Image(resultWidth + 1, resultHeight + 1);
+    for (int j = top; j <= bottom; j++) {
+        for (int i = left; i <= right; i++) {
+            result->setPixelAt(i - left, j - top, image->getPixelAt(i, j));
+        }
+    }
+
     delete ccaMatrix;
+    delete mask;
 
     return result;
 }
