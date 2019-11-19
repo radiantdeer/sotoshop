@@ -95,7 +95,6 @@ MainWindow::MainWindow() : QMainWindow() {
     binarySegmentationAction = binary->addAction("Segmentation");
     binaryThinningAction = binary -> addAction("Thinning");
 
-
     connectActionsToControllers();
 
     drawSurface = new DrawSurface(this);
@@ -105,6 +104,8 @@ MainWindow::MainWindow() : QMainWindow() {
     fourierFrequencies = nullptr;
     fourierVisual = nullptr;
     fourierDialog = nullptr;
+
+    PlateRecognition::loadCharacterTemplate();
 }
 
 QAction * MainWindow::getLoadAction() {
@@ -790,6 +791,7 @@ void MainWindow::doPlateRecognition() {
         drawSurface->setActiveImage(image);
         drawSurface->releaseLockImage();
         drawSurface->update();
+        PlateRecognition::recognizeCharacters(image);
     } else {
         spdlog::warn("MainWindow::invLogOperation: Please load an image first!");
     }

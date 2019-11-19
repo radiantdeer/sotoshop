@@ -1,6 +1,12 @@
+#include <dirent.h>
 #include "PlateRecognition.hpp"
 #include "Convolution.hpp"
 #include "CommonConvolutions.hpp"
+#include "../file_handling/loader/ImageLoaderFactory.hpp"
+#include "../frontend/BitPlaneDialog.hpp"
+
+const std::string PlateRecognition::BIN_TEMPLATE_PATH = "/media/antonio/Data/Documents/UNIV/Sem VII/Pengcit/Templates/binary";
+std::vector<CharacterTemplate> PlateRecognition::templates = std::vector<CharacterTemplate>(0);
 
 int median(int l, int r) { 
     int n = r - l + 1; 
@@ -294,188 +300,211 @@ std::vector<numOfLabel> PlateRecognition::connectedComponentAnalysis(Image * ima
     return labelSum;
 }
 
-/*
-// Vertical check to find possible vertical edges of plate number
-for (int i = 0; i < image->getWidth(); i++) {
+std::string PlateRecognition::recognizeCharacters(Image * image) {
+    std::string characters;
+
+    // Binarization
+    image->binarySegmentation();
+
+    // Preprocess #1 - if the amount of white (255) is much larger, it may be that the object is black.
+    // Let's make a negative image out of it!
+    ImageHistogram hist = image->histogram();
+    int num0 = hist.getValueAt(0);
+    int num255 = hist.getValueAt(255);
+    if ((num255 - num0) > 20) {
+        image->invert();
+    }
+
+    // CCA to detect objects and sort by largest object, which hopefully is the plate characters
+    spdlog::debug("PlateRecognition::recognizeCharacter: CCA first run...");
+    int ** ccaMatrix = new int * [image->getHeight()];
     for (int j = 0; j < image->getHeight(); j++) {
-        if (!visited[j][i]) {
-            visited[j][i] = true;
-            int val = image->getPixelAt(i, j).getRed();
-            if (val == 255) {
-                std::vector<Point> undoBuffer;
-                undoBuffer.push_back(Point(i, j));
-                image->setPixelAt(i, j, Pixel(255, 0, 0));
-                int w = i;
-                int k;
+        ccaMatrix[j] = new int[image->getWidth()];
+        for (int i = 0; i < image->getWidth(); i++) {
+            ccaMatrix[j][i] = 0;
+        }
+    }
 
-                // vertical detection
-                for (k = j; k < image->getHeight(); k++) {
-                    visited[k][w] = true;
-                    int val2 = image->getPixelAt(w, k).getRed();
-                    undoBuffer.push_back(Point(w, k));
-                    image->setPixelAt(w, k, Pixel(255, 0, 0));
-                    if (val2 != 255) {
-                        int valLeft = (w - 1) >= 0 ? image->getPixelAt(w - 1, k).getRed() : 0;
-                        int valRight = (w + 1) < image->getWidth() ? image->getPixelAt(w + 1, k).getRed() : 0;
-                        if (valLeft == 255) {
-                            w--;
-                            visited[k][w] = true;
-                            undoBuffer.push_back(Point(w, k));
-                            image->setPixelAt(w, k, Pixel(255, 0, 0));
-                        } else if (valRight == 255) {
-                            w++;
-                            visited[k][w] = true;
-                            undoBuffer.push_back(Point(w, k));
-                            image->setPixelAt(w, k, Pixel(255, 0, 0));
-                        } else {
-                            break;
-                        }
+    std::vector<numOfLabel> labelSum = connectedComponentAnalysis(image, ccaMatrix, false);
+    std::sort(labelSum.begin(), labelSum.end(), std::greater<>());
+    std::vector<Image> majorObjects;
+    for (int n = 0; n < labelSum.size(); n++) {
+        if (labelSum[n].num >= 20) {
+            spdlog::debug("#{} : {}", labelSum[n].label, labelSum[n].num);
+            
+            int left = 0;
+            int top = 0;
+            int right = image->getWidth() - 1;
+            int bottom = image->getHeight() - 1;
+
+            // Left
+            bool stop = false;
+            int i, j;
+            for (i = 0; (i < image->getWidth()) && !stop; i++) {
+                for (j = 0; (j < image->getHeight()) && !stop; j++) {
+                    if (ccaMatrix[j][i] == labelSum[n].label) {
+                        stop = true;
                     }
                 }
+            }
+            left = i;
 
-                if ((k - 1 - j) <= 5) {
-                    // undo this 
-                    for (int x = 0; x < undoBuffer.size(); x++) {
-                        Point thisPoint = undoBuffer[x];
-                        image->setPixelAt(thisPoint.getX(), thisPoint.getY(), Pixel(255, 255, 255));
+            // Top
+            stop = false;
+            for (j = 0; (j < image->getHeight()) && !stop; j++) {
+                for (i = 0; (i < image->getWidth()) && !stop; i++) {
+                    if (ccaMatrix[j][i] == labelSum[n].label) {
+                        stop = true;
                     }
                 }
+            }
+            top = j;
 
-                undoBuffer.clear();
-
-                // horizontal detection
-                k = j;
-                for (w = i; w < image->getWidth(); w++) {
-                    visited[k][w] = true;
-                    int val2 = image->getPixelAt(w, k).getRed();
-                    if (val2 != 255) {
-                        int valUp = (k - 1) >= 0 ? image->getPixelAt(w, k - 1).getRed() : 0;
-                        int valDown = (k + 1) < image->getHeight() ? image->getPixelAt(w, k + 1).getRed() : 0;
-                        if (valUp == 255) {
-                            k--;
-                            visited[k][w] = true;
-                            undoBuffer.push_back(Point(w, k));
-                            image->setPixelAt(w, k, Pixel(255, 0, 0));
-                        } else if (valDown == 255) {
-                            k++;
-                            visited[k][w] = true;
-                            undoBuffer.push_back(Point(w, k));
-                            image->setPixelAt(w, k, Pixel(255, 0, 0));
-                        } else {
-                            break;
-                        }
-                    } else {
-                        undoBuffer.push_back(Point(w, k));
-                        image->setPixelAt(w, k, Pixel(255, 0, 0));
+            // Right
+            stop = false;
+            for (i = image->getWidth() - 1; (i >= 0) && !stop; i--) {
+                for (j = 0; (j < image->getHeight()) && !stop; j++) {
+                    if (ccaMatrix[j][i] == labelSum[n].label) {
+                        stop = true;
                     }
                 }
-                
-                if ((w - 1 - i) <= 5) {
-                    // undo this 
-                    for (int x = 0; x < undoBuffer.size(); x++) {
-                        Point thisPoint = undoBuffer[x];
-                        image->setPixelAt(thisPoint.getX(), thisPoint.getY(), Pixel(255, 255, 255));
+            }
+            right = i;
+
+            // Bottom
+            stop = false;
+            for (j = image->getHeight() - 1; (j >= 0) && !stop; j--) {
+                for (i = 0; (i < image->getWidth()) && !stop; i++) {
+                    if (ccaMatrix[j][i] == labelSum[n].label) {
+                        stop = true;
                     }
                 }
+            }
+            bottom = j;
 
-                undoBuffer.clear();
+            int resultWidth = right - left;
+            int resultHeight = bottom - top;
+            Image * thisObject = new Image(resultWidth + 1, resultHeight + 1);
 
+            for (int j = top; j <= bottom; j++) {
+                for (int i = left; i <= right; i++) {
+                    thisObject->setPixelAt(i - left, j - top, image->getPixelAt(i, j));
+                }
+            }
+
+            majorObjects.push_back(*thisObject);
+            thisObject = thisObject->magnify2();
+            HuMoments hm = PlateRecognition::calculateHuMoments(thisObject);
+            
+            double closest = hm.distance(templates[0].constants);
+            char closestChar = templates[0].character;
+            for (int i = 1; i < templates.size(); i++) {
+                double distance = hm.distance(templates[i].constants);
+                if (closest > distance) {
+                    closest = distance;
+                    closestChar = templates[i].character;
+                }
+            }
+            spdlog::debug("{}", closestChar);
+            
+            delete thisObject;
+        } else {
+            break;
+        }
+    }
+
+    BitPlaneDialog * bitPlaneDialog = new BitPlaneDialog(majorObjects);
+    bitPlaneDialog->show();
+
+    delete ccaMatrix;
+    return characters;
+}
+
+
+double PlateRecognition::moments(Image * image, int i, int j) {
+    double result = 0;
+
+    for (int y = 0; y < image->getHeight(); y++) {
+        for (int x = 0; x < image->getWidth(); x++) {
+            if (image->getPixelAt(x, y).getRed() == 255) {
+                result += (pow(x, i) * pow(y, j));
             }
         }
     }
-}
-*/
 
-/*
-if (colorThis) {
-    if (val < 128) {
-        // still inside polygon
-        if (previousEdge) {
-            previousEdge = false;
-        }
-        image->setPixelAt(i, j, Pixel(255, 255, 255));
-    } else {
-        if (!previousEdge) { // found the end of this polygon
-            colorThis = false;
-            previousEdge = true;
-        } // else, it's still the first edge of the polygon, continue
-    }
-} else {
-    if (val >= 128) { // found a polygon side
-        previousEdge = true;
-        colorThis = true;
-    }
+    return result;
 }
-*/
 
-//double avg = 0;
-//double variance = 0;
-//int num = 0;
-/*
-std::vector<int> intensity;
-for (int l = j; (l < j + WINDOW_HEIGHT); l++) {
-    if (l > image->getHeight()) {
-        break;
-    }
-    for (int k = i; (k < i + WINDOW_WIDTH); k++) {
-        if (k > image->getWidth()) {
-            break;
-        }
-        int val = image->getPixelAt(k, l).getRed();
-        int x;
-        for (x = 0; x < intensity.size(); x++) {
-            if (intensity[x] > val) {
-                break;
+double PlateRecognition::centralMoments(Image * image, int i, int j) {
+    double xbar = moments(image, 1, 0) / moments(image, 0, 0);
+    double ybar = moments(image, 0, 1) / moments(image, 0, 0);
+    double result = 0;
+
+    for (int y = 0; y < image->getHeight(); y++) {
+        for (int x = 0; x < image->getWidth(); x++) {
+            if (image->getPixelAt(x, y).getRed() == 255) {
+                result += (pow(x - xbar, i) * pow(y - ybar, j));
             }
         }
-        intensity.insert(intensity.begin() + x, val);
-        //avg += (int) image->getPixelAt(k, l).getRed();
-        //num++;
     }
-}
-int medianPos = median(0, intensity.size());
-int q1Pos = median(0, medianPos);
-int q3Pos = median(medianPos, intensity.size());
-double eiqr = 1.5 * (intensity[q3Pos] - intensity[q1Pos]);
-int range = intensity[intensity.size() - 1] - intensity[0];
-intensity.clear();
-//avg = avg / num;
-//spdlog::debug("avg : {}", avg);
-*/
 
-/*
-for (int l = j; (l < j + WINDOW_HEIGHT); l++) {
-    if (l > image->getHeight()) {
-        break;
-    }
-    for (int k = i; (k < i + WINDOW_WIDTH); k++) {
-        if (k > image->getWidth()) {
-            break;
-        }
-        //variance += pow(avg - image->getPixelAt(k, l).getRed(), 2);
-    }
+    return result;
 }
-*/
 
-//variance = variance / num;
-//spdlog::debug("variance : {}", variance);
-//double stdev = 0;
-//stdev = sqrt(variance);
-
-/*
-if ((range >= 100)) {
-    spdlog::debug("({}, {}) => R : {} | IQR : {}", i, j, range, eiqr);
-} else {
-    for (int l = j; (l < j + WINDOW_HEIGHT); l++) {
-        if (l > image->getHeight()) {
-            break;
-        }
-        for (int k = i; (k < i + WINDOW_WIDTH); k++) {
-            if (k > image->getWidth()) {
-                break;
-            }
-            image->setPixelAt(k, l, Pixel(0, 0, 0));
-        }
-    }
+double PlateRecognition::normalizedCentralMoments(Image * image, int i, int j) {
+    return (centralMoments(image, i, j) / pow(centralMoments(image, 0, 0), ((i + j) / (3))));
 }
-*/
+
+HuMoments PlateRecognition::calculateHuMoments(Image * image) {
+    HuMoments result;
+    
+    double n20 = normalizedCentralMoments(image, 2, 0);
+    double n02 = normalizedCentralMoments(image, 0, 2);
+    result.h0 = n20 + n02;
+    result.h1 = pow(n20 - n02, 2) + (4 * pow(normalizedCentralMoments(image, 1, 1), 2));
+
+    double n30 = normalizedCentralMoments(image, 3, 0);
+    double n03 = normalizedCentralMoments(image, 0, 3);
+    double n11 = normalizedCentralMoments(image, 1, 1);
+    double n12 = normalizedCentralMoments(image, 1, 2);
+    double n21 = normalizedCentralMoments(image, 2, 1);
+    result.h2 = pow(n30 - (3 * n12), 2) + pow((3 * n21) - n03, 2);
+    result.h3 = pow(n30 + n12, 2) + pow(n21 + n30, 2);
+    result.h4 = (n30 - (3 * n12)) * (n30 + n12) * (pow(n30 + n12, 2) - (3 * pow(n21 + n03, 2)));
+    result.h4 += (((3 * n21) - n03) * ((3 * pow(n30 + n12, 2)) - pow(n21 + n03, 2)));
+    result.h5 = (n20 - n02) * (pow(n30 + n12, 2) - pow(n21 + n03, 2) + (4 * n11 * (n30 + n12) * (n21 + n03)));
+
+    return result;
+}
+
+void PlateRecognition::loadCharacterTemplate() {
+
+    DIR * dir;
+    struct dirent *ent;
+    spdlog::info("PlateRecognition::loadCharacterTemplate: Loading templates, this may take a while...");
+    if ((dir = opendir (BIN_TEMPLATE_PATH.c_str())) != NULL) {
+        ent = readdir (dir);
+        ent = readdir (dir);
+        while ((ent = readdir (dir)) != NULL) {
+            ImageLoader * loader = ImageLoaderFactory::getImageLoader(ent->d_name);
+            std::string sourceFileName = BIN_TEMPLATE_PATH + "/" + ent->d_name;
+            Image * image = loader->load(sourceFileName);
+            image = image->magnify2();
+            HuMoments hm = PlateRecognition::calculateHuMoments(image);
+            std::string pureFileName = std::string(ent->d_name);
+            pureFileName = pureFileName.substr(0, pureFileName.find("."));
+            
+            CharacterTemplate thisTemplate;
+            thisTemplate.character = pureFileName[0];
+            thisTemplate.templateWidth = image->getWidth();
+            thisTemplate.templateHeight = image->getHeight();
+            thisTemplate.constants = hm;
+            templates.push_back(thisTemplate);
+
+            delete image;
+            delete loader;
+        }
+        closedir (dir);
+    }
+    spdlog::info("PlateRecognition::loadCharacterTemplate: Template loaded. {} templates present", templates.size());
+}
