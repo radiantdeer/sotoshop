@@ -6,7 +6,7 @@
 class HoughTransformation {
     public:
         static Image* HoughLine(Image* input);
-        //static Image* HoughCircle(Image* input);
+        static Image* HoughCircle(Image* input, int rStart, int rEnd);
 };
 
 #endif

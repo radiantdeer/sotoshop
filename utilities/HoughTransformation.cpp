@@ -88,12 +88,91 @@ Image* HoughTransformation::HoughLine(Image* input) {
                     j += 0.5;
                     int y = floor(j);
                     if (y >= 0 && y < outputImage->getHeight()) {
-                        outputImage->setPixelAt(x, y, Pixel(255,255,255));
+                        Pixel *p = sobelInput->getPixelAt(x,y) & Pixel(255,255,255);
+                        outputImage->setPixelAt(x, y, *p);
                     }
                 }
             }
         }
     }
     spdlog::info("Done inversing...");
+    return outputImage;
+}
+
+Image* HoughTransformation::HoughCircle(Image* input, int rStart, int rEnd) {
+    Image* sobelInput = Convolution::sobelOperation(input, CommonConvolutions::SobelX, CommonConvolutions::SobelY);
+    int thetaStart = 0; int thetaEnd = 360;
+    int aStart = 0;     int aEnd = sobelInput->getWidth();
+    int bStart = 0;     int bEnd = sobelInput->getHeight();
+    // int rEnd = r;
+    // int rStart = r;
+    const int rRange = rEnd - rStart + 1;
+
+    // a = x - rcos(theta)
+    // b = y - rsin(theta)
+    // x = a + rcos(theta)
+    // y = b + rson(theta)
+
+    // Initiate parameter values
+    std::vector<std::vector<int>> hcParam;
+    for (int k = 0; k < aEnd; k++) {
+        std::vector<int> aParam;
+        for (int l = 0; l < bEnd; l++) {
+            aParam.push_back(0);
+        }
+        hcParam.push_back(aParam);
+    }
+    spdlog::info("Initiate values");
+
+    // run through images
+    for (int x = 0; x < sobelInput->getWidth(); x++) {
+        for (int y = 0; y < sobelInput->getHeight(); y++) {
+            if (sobelInput->getPixelAt(x,y).getRed() == 255) {
+                for (int theta = thetaStart; theta <= thetaEnd; theta++) {
+                    for (int r = rStart; r <= rEnd; r++) {
+                        double aF = x - r*cos(radian(theta));
+                        double bF = y - r*sin(radian(theta));
+                        int a = floor(aF + 0.5);
+                        int b = floor(bF + 0.5);
+                        if (a >= 0 && a < aEnd && b >= 0 && b < bEnd) {
+                            hcParam[a][b]++;
+                        }
+                    }
+                }
+            }
+        }
+    }
+    spdlog::info("Running through images");
+    /*** do Thresholding ***/
+    const int T = 100;
+    for (int a = aStart; a < aEnd; a++) {
+        for (int b = bStart; b < bEnd; b++) {
+            if (hcParam[a][b] < T) hcParam[a][b] = 0; else hcParam[a][b] = 1;
+        }
+    }
+    spdlog::info("Done thresholding...");
+
+    Image* outputImage = new Image(input->getWidth(), input->getHeight());
+    // create lines from p vector
+    for (int a = aStart; a < aEnd; a++ ) {
+        for (int b = bStart; b < bEnd; b++) {
+            double j = 0.0f;
+            if (hcParam[a][b] == 1) {
+                for (int theta = thetaStart; theta < thetaEnd; theta++) {
+                    for (int r = rStart; r <= rEnd; r++) {
+                        double xF = a + r*cos(radian(theta));
+                        double yF = a + r*sin(radian(theta));
+                        int x = floor(xF + 0.5);
+                        int y = floor(yF + 0.5);
+                        if (x >= 0 && x < outputImage->getWidth() && y >= 0 && y < outputImage->getHeight()) {
+                            Pixel *p = sobelInput->getPixelAt(x, y) & Pixel(255, 255, 255);
+                            outputImage->setPixelAt(x, y, *p);
+                        }
+                    }
+                }
+            }
+        }
+    }
+    // create detected circles
     return outputImage;
 }

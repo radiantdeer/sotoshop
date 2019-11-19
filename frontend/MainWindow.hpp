@@ -72,7 +72,7 @@ class MainWindow : public QMainWindow {
         void prewittOperation();
 
         void doLineHough();
-
+        void doCircleHough();
     private:
         QAction * loadAction;
         QAction * saveAction;
@@ -130,6 +130,8 @@ class MainWindow : public QMainWindow {
         QAction * prewittOperationAction;
 
         QAction * lineHoughAction;
+        QAction * circleHoughAction;
+
         DrawSurface * drawSurface;
         HistogramDialog * histDialog;
         BitPlaneDialog * bitPlaneDialog;

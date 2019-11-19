@@ -87,6 +87,7 @@ MainWindow::MainWindow() : QMainWindow() {
     inverseFourierAction = other->addAction("Inverse Fourier Transform");
     QMenu * houghMenu = other->addMenu("Hough Transform");
     lineHoughAction = houghMenu->addAction("Line");
+    circleHoughAction = houghMenu->addAction("Circle");
 
     QMenu * edge = this->menuBar()->addMenu("Edge Detect");
     sobelOperationAction = edge->addAction("Sobel Operation");
@@ -770,6 +771,22 @@ void MainWindow::doLineHough() {
     }
 }
 
+void MainWindow::doCircleHough() {
+    if (drawSurface->isImageLoaded()) {
+        spdlog::info("MainWindow::doCircleHough: Edge detection with Line Hough Transform...");
+        int rStart = QInputDialog::getInt(this, "Radius Start", "Enter value: ");
+        int rEnd = QInputDialog::getInt(this, "Radius End", "Enter value: ");
+        Image* result = HoughTransformation::HoughCircle(drawSurface->getActiveImage(), rStart, rEnd);
+        drawSurface->acquireLockImage();
+        drawSurface->purgeImage();
+        drawSurface->setActiveImage(result);
+        drawSurface->releaseLockImage();
+        drawSurface->update();
+    } else {
+        spdlog::warn("MainWindow::doCircleHough: Please load an image first!");
+    }
+}
+
 void MainWindow::connectActionsToControllers() {
     connect(loadAction, &QAction::triggered, this, &MainWindow::loadFile);
     connect(saveAction, &QAction::triggered, this, &MainWindow::saveFile);
@@ -825,6 +842,7 @@ void MainWindow::connectActionsToControllers() {
     connect(prewittOperationAction, &QAction::triggered, this, &MainWindow::prewittOperation);
 
     connect(lineHoughAction, &QAction::triggered, this, &MainWindow::doLineHough);
+    connect(circleHoughAction, &QAction::triggered, this, &MainWindow::doCircleHough);
 }
 
 std::string MainWindow::getOpenFileUrl(std::string dialogTitle) {
