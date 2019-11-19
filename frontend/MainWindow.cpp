@@ -791,9 +791,10 @@ void MainWindow::doPlateRecognition() {
         drawSurface->setActiveImage(image);
         drawSurface->releaseLockImage();
         drawSurface->update();
-        PlateRecognition::recognizeCharacters(image);
+        std::string recognizedCharacters = PlateRecognition::recognizeCharacters(image);
+        spdlog::info("Recognized as : {}", recognizedCharacters);
     } else {
-        spdlog::warn("MainWindow::invLogOperation: Please load an image first!");
+        spdlog::warn("MainWindow::doPlateRecognition: Please load an image first!");
     }
 }
 

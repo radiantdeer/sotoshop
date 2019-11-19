@@ -3,8 +3,10 @@
 #include "Convolution.hpp"
 #include "CommonConvolutions.hpp"
 #include "../file_handling/loader/ImageLoaderFactory.hpp"
+#include "../file_handling/saver/ImageSaverFactory.hpp"
 #include "../frontend/BitPlaneDialog.hpp"
 
+const std::string RAW2_TEMPLATE_PATH = "/media/antonio/Data/Documents/UNIV/Sem VII/Pengcit/Templates/raw2";
 const std::string PlateRecognition::BIN_TEMPLATE_PATH = "/media/antonio/Data/Documents/UNIV/Sem VII/Pengcit/Templates/binary";
 std::vector<CharacterTemplate> PlateRecognition::templates = std::vector<CharacterTemplate>(0);
 
@@ -12,7 +14,11 @@ int median(int l, int r) {
     int n = r - l + 1; 
     n = (n + 1) / 2 - 1; 
     return n + l; 
-} 
+}
+
+template <typename T> int sign(T val) {
+    return (T(0) < val) - (val < T(0));
+}
 
 double PlateRecognition::euclidean(Point& p1, Point& p2) {
     return sqrt((p1.getX() - p2.getX()) * (p1.getX() - p2.getX()) + (p1.getY() - p2.getY()) * (p1.getY() - p2.getY()));
@@ -328,8 +334,9 @@ std::string PlateRecognition::recognizeCharacters(Image * image) {
     std::vector<numOfLabel> labelSum = connectedComponentAnalysis(image, ccaMatrix, false);
     std::sort(labelSum.begin(), labelSum.end(), std::greater<>());
     std::vector<Image> majorObjects;
+    std::vector<int> position;
     for (int n = 0; n < labelSum.size(); n++) {
-        if (labelSum[n].num >= 20) {
+        if (labelSum[n].num >= 50) {
             spdlog::debug("#{} : {}", labelSum[n].label, labelSum[n].num);
             
             int left = 0;
@@ -384,15 +391,15 @@ std::string PlateRecognition::recognizeCharacters(Image * image) {
 
             int resultWidth = right - left;
             int resultHeight = bottom - top;
-            Image * thisObject = new Image(resultWidth + 1, resultHeight + 1);
+            Image * thisObject = new Image(resultWidth + 11, resultHeight + 11);
 
             for (int j = top; j <= bottom; j++) {
                 for (int i = left; i <= right; i++) {
-                    thisObject->setPixelAt(i - left, j - top, image->getPixelAt(i, j));
+                    thisObject->setPixelAt(i - left + 5, j - top + 5, image->getPixelAt(i, j));
                 }
             }
 
-            majorObjects.push_back(*thisObject);
+            //majorObjects.push_back(*thisObject);
             thisObject = thisObject->magnify2();
             HuMoments hm = PlateRecognition::calculateHuMoments(thisObject);
             
@@ -405,7 +412,17 @@ std::string PlateRecognition::recognizeCharacters(Image * image) {
                     closestChar = templates[i].character;
                 }
             }
+
             spdlog::debug("{}", closestChar);
+            
+            int pos;
+            for (pos = 0; pos < position.size(); pos++) {
+                if (position[pos] > left) {
+                    break;
+                }
+            }
+            position.insert(position.begin() + pos, left);
+            characters.insert(characters.begin() + pos, closestChar);
             
             delete thisObject;
         } else {
@@ -413,8 +430,8 @@ std::string PlateRecognition::recognizeCharacters(Image * image) {
         }
     }
 
-    BitPlaneDialog * bitPlaneDialog = new BitPlaneDialog(majorObjects);
-    bitPlaneDialog->show();
+    //BitPlaneDialog * bitPlaneDialog = new BitPlaneDialog(majorObjects);
+    //bitPlaneDialog->show();
 
     delete ccaMatrix;
     return characters;
@@ -460,12 +477,12 @@ HuMoments PlateRecognition::calculateHuMoments(Image * image) {
     
     double n20 = normalizedCentralMoments(image, 2, 0);
     double n02 = normalizedCentralMoments(image, 0, 2);
+    double n11 = normalizedCentralMoments(image, 1, 1);
     result.h0 = n20 + n02;
-    result.h1 = pow(n20 - n02, 2) + (4 * pow(normalizedCentralMoments(image, 1, 1), 2));
+    result.h1 = pow(n20 - n02, 2) + (4 * pow(n11, 2));
 
     double n30 = normalizedCentralMoments(image, 3, 0);
     double n03 = normalizedCentralMoments(image, 0, 3);
-    double n11 = normalizedCentralMoments(image, 1, 1);
     double n12 = normalizedCentralMoments(image, 1, 2);
     double n21 = normalizedCentralMoments(image, 2, 1);
     result.h2 = pow(n30 - (3 * n12), 2) + pow((3 * n21) - n03, 2);
@@ -473,6 +490,13 @@ HuMoments PlateRecognition::calculateHuMoments(Image * image) {
     result.h4 = (n30 - (3 * n12)) * (n30 + n12) * (pow(n30 + n12, 2) - (3 * pow(n21 + n03, 2)));
     result.h4 += (((3 * n21) - n03) * ((3 * pow(n30 + n12, 2)) - pow(n21 + n03, 2)));
     result.h5 = (n20 - n02) * (pow(n30 + n12, 2) - pow(n21 + n03, 2) + (4 * n11 * (n30 + n12) * (n21 + n03)));
+
+    result.h0 = -1 * sign(result.h0) * log(abs(result.h0));
+    result.h1 = -1 * sign(result.h1) * log(abs(result.h1));
+    result.h2 = -1 * sign(result.h2) * log(abs(result.h2));
+    result.h3 = -1 * sign(result.h3) * log(abs(result.h3));
+    result.h4 = -1 * sign(result.h4) * log(abs(result.h4));
+    result.h5 = -1 * sign(result.h5) * log(abs(result.h5));
 
     return result;
 }
@@ -501,10 +525,37 @@ void PlateRecognition::loadCharacterTemplate() {
             thisTemplate.constants = hm;
             templates.push_back(thisTemplate);
 
+            spdlog::debug("{} : {} | {} | {} | {} | {} | {}", thisTemplate.character, hm.h0, hm.h1, hm.h2, hm.h3, hm.h4, hm.h5);
+
             delete image;
             delete loader;
         }
         closedir (dir);
     }
     spdlog::info("PlateRecognition::loadCharacterTemplate: Template loaded. {} templates present", templates.size());
+
+    /*
+    spdlog::info("PlateRecognition::loadCharacterTemplate: Enhancing new template image...");
+    if ((dir = opendir (RAW2_TEMPLATE_PATH.c_str())) != NULL) {
+        ent = readdir (dir);
+        ent = readdir (dir);
+        while ((ent = readdir (dir)) != NULL) {
+            ImageLoader * loader = ImageLoaderFactory::getImageLoader(ent->d_name);
+            std::string sourceFileName = RAW2_TEMPLATE_PATH + "/" + ent->d_name;
+            Image * image = loader->load(sourceFileName);
+            image->invert();
+            image->binarySegmentation();
+            std::string pureFileName = std::string(ent->d_name);
+            pureFileName = pureFileName.substr(0, pureFileName.find("."));
+            std::string targetFileName = BIN_TEMPLATE_PATH + "/" + pureFileName + ".pbm";
+            ImageSaver * saver = ImageSaverFactory::getImageSaver(targetFileName);
+            saver->save(*image, targetFileName);
+
+            delete image;
+            delete loader;
+            delete saver;
+        }
+        closedir (dir);
+    }
+    */
 }
