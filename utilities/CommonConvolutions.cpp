@@ -21,8 +21,6 @@ const ConvolutionMatrix CommonConvolutions::PrewittX = ConvolutionMatrix(3, 3, p
 int prewittYMatrix[] = {1, 1, 1, 0, 0, 0, -1, -1, -1};
 const ConvolutionMatrix CommonConvolutions::PrewittY = ConvolutionMatrix(3, 3, prewittYMatrix);
 
-int laplaceOfGaussian[] = {0, -1, 0, -1, 4, -1, 0, -1, 0};
-const ConvolutionMatrix CommonConvolutions::LaplaceOfGaussian = ConvolutionMatrix(3, 3, laplaceOfGaussian);
 int laplace[] = {0, 1, 0, 1, -4, 1, 0, 1, 0};
 const ConvolutionMatrix CommonConvolutions::Laplace = ConvolutionMatrix(3, 3, laplace);
 int laplaceOfGaussian[] = {
