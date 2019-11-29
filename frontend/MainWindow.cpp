@@ -938,8 +938,6 @@ void MainWindow::connectActionsToControllers() {
   
     connect(binarySegmentationAction, &QAction::triggered, this, &MainWindow::doBinarySegmentation);
     connect(binaryThinningAction, &QAction::triggered, this, &MainWindow::doBinaryThinning);
-    connect(sobelOperationAction, &QAction::triggered, this, &MainWindow::sobelOperation);
-    connect(prewittOperationAction, &QAction::triggered, this, &MainWindow::prewittOperation);
 
     connect(plateRecognitionAction, &QAction::triggered, this, &MainWindow::doPlateRecognition);
 }
