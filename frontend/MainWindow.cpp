@@ -81,6 +81,10 @@ MainWindow::MainWindow() : QMainWindow() {
     QMenu * edgeDetectionMenu = this->menuBar()->addMenu("Edge Detection");
     gradientAction = edgeDetectionMenu->addAction("Gradient");
     laplaceOfGaussianAction = edgeDetectionMenu->addAction("Laplace of Gaussian");
+    sobelOperationAction = edgeDetectionMenu->addAction("Sobel Operation");
+    prewittOperationAction = edgeDetectionMenu->addAction("Prewitt Operation");
+    robertOperationAction = edgeDetectionMenu->addAction("Robert Operation");
+    cannyOperationAction = edgeDetectionMenu->addAction("Canny Operation");
 
     QMenu * other = this->menuBar()->addMenu("Other");
     bitPlaneAction = other->addAction("Bit Planes");
@@ -92,18 +96,9 @@ MainWindow::MainWindow() : QMainWindow() {
     circleHoughAction = houghMenu->addAction("Circle");
     plateRecognitionAction = other->addAction("Plate Recognition");
 
-    QMenu * edge = this->menuBar()->addMenu("Edge Detect");
-    sobelOperationAction = edge->addAction("Sobel Operation");
-    prewittOperationAction = edge->addAction("Prewitt Operation");
     QMenu * binary = this->menuBar()->addMenu("Binary");
     binarySegmentationAction = binary->addAction("Segmentation");
     binaryThinningAction = binary -> addAction("Thinning");
-
-    QMenu * edge = this->menuBar()->addMenu("Edge Detect");
-    sobelOperationAction = edge->addAction("Sobel Operation");
-    prewittOperationAction = edge->addAction("Prewitt Operation");
-    robertOperationAction = edge->addAction("Robert Operation");
-    cannyOperationAction = edge->addAction("Canny Operation");
 
     connectActionsToControllers();
 

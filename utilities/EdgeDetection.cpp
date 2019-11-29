@@ -1,5 +1,6 @@
 #include "CommonConvolutions.hpp"
 #include "Convolution.hpp"
+#include "EdgeDetection.hpp"
 #include <cmath>
 
 Image* EdgeDetection::gradient(Image *image) {

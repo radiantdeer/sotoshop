@@ -105,12 +105,6 @@ class MainWindow : public QMainWindow {
         QAction * unsharpMaskingAction;
         QAction * highboostAction;
 
-        QAction * laplaceAction;
-        QAction * gradientAction;
-        QAction * laplaceOfGaussianAction;
-        QAction * sobelOperationAction;
-        QAction * prewittOperationAction;
-
         QAction * rotateCWAction;
         QAction * rotateCCWAction;
         QAction * flipHAction;
@@ -137,6 +131,9 @@ class MainWindow : public QMainWindow {
         QAction * viewFourierSpectrumAction;
         QAction * inverseFourierAction;
 
+        QAction * laplaceAction;
+        QAction * gradientAction;
+        QAction * laplaceOfGaussianAction;
         QAction * sobelOperationAction;
         QAction * prewittOperationAction;
         QAction * robertOperationAction;

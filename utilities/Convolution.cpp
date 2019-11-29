@@ -130,10 +130,13 @@ Image* Convolution::sobelOperation(Image* image, const ConvolutionMatrix& opMatr
     Image *sourceImage;
 
     // IMAGE CONVERTED TO GRAYSCALE FIRST
-    Image * grayImage = image->grayscale();
+    if (image->getOriginalFormat() == "ppm") {
+        sourceImage = image->grayscale();
+    } else {
+        sourceImage = image;
+    }
 
     spdlog::debug("Convolution::sobelOperation: Preparing...");
-    sourceImage = grayImage;
 
     // OPERATE WITH UNPADDED IMAGE
     resultWidth = image->getWidth() - ((opMatrixX.getWidth() / 2) * 2);
@@ -192,16 +195,8 @@ Image* Convolution::sobelOperation(Image* image, const ConvolutionMatrix& opMatr
 
 Image* Convolution::cannyOperation(Image* image, const ConvolutionMatrix& gaussianMatrix, const ConvolutionMatrix& opMatrixX, const ConvolutionMatrix& opMatrixY, int threshold) {
 
-    /*********************************************************/
-    /* GAUSSIAN BLURRING IMAGE                               */
-    /*********************************************************/
     Image* gaussianImage = convolve(image, gaussianMatrix, true);
 
-    /*********************************************************/
-    /* MAKE GRADIENT X AND Y FROM IMAGE                      */
-    /*********************************************************/
-    // IMAGE CONVERTED TO GRAYSCALE FIRST
-    Image * grayImage = gaussianImage->grayscale();
     Image * sourceImage;
     int resultWidth, resultHeight;
     std::vector<std::vector<int>> magnitudeX;
@@ -211,7 +206,7 @@ Image* Convolution::cannyOperation(Image* image, const ConvolutionMatrix& gaussi
     int padHeight = opMatrixX.getHeight() / 2;
 
     spdlog::debug("Convolution::cannyOperation: Padding image...");
-    sourceImage = Convolution::padImage(grayImage, padWidth, padHeight);
+    sourceImage = Convolution::padImage(gaussianImage, padWidth, padHeight);
 
     // OPERATE WITH PADDED IMAGE
     resultWidth = image->getWidth();
@@ -357,6 +352,7 @@ std::vector<std::vector<double>> Convolution::imageThetaMatrix(Image *image, con
     }
 
     return result;
+}
 
 Image* Convolution::laplaceOp(Image *image) {
     spdlog::debug("Convolution::laplaceOp: Calculating laplace...");
