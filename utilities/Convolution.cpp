@@ -1,5 +1,6 @@
 #include "Convolution.hpp"
 #include <algorithm>
+#include <cmath>
 #include <sstream>
 #include <string>
 #include <vector>
@@ -207,7 +208,7 @@ Image* Convolution::cannyOperation(Image* image, const ConvolutionMatrix& gaussi
     int padWidth = opMatrixX.getWidth() / 2;
     int padHeight = opMatrixX.getHeight() / 2;
 
-    spdlog::debug("Convolution::cannyOperation: Preparing Sobel Operation...");
+    spdlog::debug("Convolution::cannyOperation: Padding image...");
     sourceImage = Convolution::padImage(grayImage, padWidth, padHeight);
 
     // OPERATE WITH PADDED IMAGE
@@ -216,51 +217,49 @@ Image* Convolution::cannyOperation(Image* image, const ConvolutionMatrix& gaussi
 
     // SOBEL OPERATION
     spdlog::debug("Convolution::cannyOperation: Starting Sobel Operation...");
+    Image * sobel = sobelOperation(sourceImage, CommonConvolutions::SobelX, CommonConvolutions::SobelY);    
+    std::vector<std::vector<double>> theta = imageThetaMatrix(sourceImage, CommonConvolutions::SobelX, CommonConvolutions::SobelY);
     Image * result = new Image(resultWidth, resultHeight);
-    result->setOriginalFormat(sourceImage->getOriginalFormat());
 
-    for (int j = 0; j < resultHeight; j++) {
-        std::vector<int> magnitudeMinorX;
-        std::vector<int> magnitudeMinorY;
-        for (int i = 0; i < resultWidth; i++) {
-            // SOBEL VARIABLE
-            int xSum = 0;
-            int ySum = 0;
-            int magnitude = 0;
+    // "Thinning"
+    spdlog::debug("Convolution::cannyOperation: Running non-max suppression...");
+    for (int j = 1; j < theta.size() - 1; j++) {
+        for (int i = 1; i < theta.at(j).size() - 1; i++) {
+            int q = 255;
+            int r = 255;
 
-            // COUNT X SUM
-            for (int y = 0; y < opMatrixX.getHeight(); y++) {
-                for (int x = 0; x < opMatrixX.getWidth(); x++) {
-                    int opConstant = opMatrixX.getElementAt(x, y);
-                    Pixel currentPixel = sourceImage->getPixelAt(i + x, j + y);
-                    xSum += (opConstant * (int) currentPixel.getRed());
-                }
+            if (((theta.at(j).at(i) >= 0) && (theta.at(j).at(i) < 22.5)) || ((theta.at(j).at(i) >= 157.5) && (theta.at(j).at(i) <= 180))) {
+                q = sobel->getPixelAt(i, j + 1).getRed();
+                r = sobel->getPixelAt(i, j - 1).getRed();
+            } else if ((theta.at(j).at(i) >= 22.5) && (theta.at(j).at(i) < 67.5)) {
+                q = sobel->getPixelAt(i + 1, j - 1).getRed();
+                r = sobel->getPixelAt(i - 1, j + 1).getRed();
+            } else if ((theta.at(j).at(i) >= 67.5) && (theta.at(j).at(i) < 112.5)) {
+                q = sobel->getPixelAt(i + 1, j).getRed();
+                r = sobel->getPixelAt(i - 1, j).getRed();
+            } else if ((theta.at(j).at(i) >= 112.5) && (theta.at(j).at(i) < 157.5)) {
+                q = sobel->getPixelAt(i - 1, j - 1).getRed();
+                r = sobel->getPixelAt(i + 1, j + 1).getRed();
             }
-
-            magnitudeMinorX.push_back(xSum);
-
-            // COUNT Y SUM
-            for (int y = 0; y < opMatrixY.getHeight(); y++) {
-                for (int x = 0; x < opMatrixY.getWidth(); x++) {
-                    int opConstant = opMatrixY.getElementAt(x, y);
-                    Pixel currentPixel = sourceImage->getPixelAt(i + x, j + y);
-                    ySum += (opConstant * (int) currentPixel.getRed());
-                }
+            
+            int thisVal = sobel->getPixelAt(i, j).getRed();
+            if ((thisVal > q) && (thisVal > r)) {
+                result->setPixelAt(i, j, Pixel(thisVal, thisVal, thisVal));
             }
-
-            magnitudeMinorY.push_back(ySum);
         }
-        magnitudeX.push_back(magnitudeMinorX);
-        magnitudeY.push_back(magnitudeMinorY);
     }
 
-    /*********************************************************/
-    /* THRESHOLDING                                          */
-    /*********************************************************/
-
-
-
-    return image;
+    // Thresholding
+    for (int j = 0; j < result->getHeight(); j++) {
+        for (int i = 0; i < result->getWidth(); i++) {
+            if (result->getPixelAt(i, j).getRed() >= threshold) {
+                result->setPixelAt(i, j, Pixel(255, 255, 255));
+            } else {
+                result->setPixelAt(i, j, Pixel(0, 0, 0));
+            }
+        }
+    }
+    return result;
 }
 
 Image* Convolution::padImage(Image* image, int padWidth, int padHeight) {
@@ -305,4 +304,54 @@ Image* Convolution::highpass(Image* image) {
     highpass->substract(*lowpass);
     delete lowpass;
     return highpass;
+}
+
+std::vector<std::vector<double>> Convolution::imageThetaMatrix(Image *image, const ConvolutionMatrix& opMatrixX, const ConvolutionMatrix& opMatrixY) {
+    // IMAGE CONVERTED TO GRAYSCALE FIRST
+    Image * sourceImage = image->grayscale();
+
+    spdlog::debug("Convolution::sobelOperation: Preparing...");
+
+    // OPERATE WITH UNPADDED IMAGE
+    int resultWidth = image->getWidth() - ((opMatrixX.getWidth() / 2) * 2);
+    int resultHeight = image->getHeight() - ((opMatrixX.getHeight() / 2) * 2);
+
+    // ADD FORMAT TO RESULT
+
+    std::vector<std::vector<double>> result;
+    for (int j = 0; j < resultHeight; j++) {
+        result.push_back(std::vector<double>());
+        for (int i = 0; i < resultWidth; i++) {
+            // SOBEL VARIABLE
+            int xSum = 0;
+            int ySum = 0;
+
+            // COUNT X SUM
+            for (int y = 0; y < opMatrixX.getHeight(); y++) {
+                for (int x = 0; x < opMatrixX.getWidth(); x++) {
+                    int opConstant = opMatrixX.getElementAt(x, y);
+                    Pixel currentPixel = sourceImage->getPixelAt(i + x, j + y);
+                    xSum += (opConstant * (int) currentPixel.getRed());
+                }
+            }
+
+            // COUNT Y SUM
+            for (int y = 0; y < opMatrixY.getHeight(); y++) {
+                for (int x = 0; x < opMatrixY.getWidth(); x++) {
+                    int opConstant = opMatrixY.getElementAt(x, y);
+                    Pixel currentPixel = sourceImage->getPixelAt(i + x, j + y);
+                    ySum += (opConstant * (int) currentPixel.getRed());
+                }
+            }
+
+            double theta = atan2(ySum, xSum) * 180 / M_PI;
+            if (theta < 0) {
+                theta += 180;
+            }
+
+            result.at(j).push_back(theta);        
+        }
+    }
+
+    return result;
 }

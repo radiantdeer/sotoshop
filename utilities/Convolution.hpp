@@ -17,9 +17,10 @@ class Convolution {
         static Image* cannyOperation(Image* image, const ConvolutionMatrix& gaussianMatrix, const ConvolutionMatrix& opMatrixX, const ConvolutionMatrix& opMatrixY, int threshold);
 
     private:
-        // padWidth & padHeight is the length of padding on just one side, not the sum of both side
         static Image* highpass(Image *image);
+        // padWidth & padHeight is the length of padding on just one side, not the sum of both side
         static Image* padImage(Image* image, int padWidth, int padHeight);
+        static std::vector<std::vector<double>> imageThetaMatrix(Image *image, const ConvolutionMatrix& opMatrixX, const ConvolutionMatrix& opMatrixY); 
 
 };
 
