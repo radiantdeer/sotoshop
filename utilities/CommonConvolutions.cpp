@@ -25,3 +25,10 @@ int laplaceOfGaussian[] = {0, -1, 0, -1, 4, -1, 0, -1, 0};
 const ConvolutionMatrix CommonConvolutions::LaplaceOfGaussian = ConvolutionMatrix(3, 3, laplaceOfGaussian);
 int laplace[] = {0, 1, 0, 1, -4, 1, 0, 1, 0};
 const ConvolutionMatrix CommonConvolutions::Laplace = ConvolutionMatrix(3, 3, laplace);
+int laplaceOfGaussian[] = {
+     0,  0, -1,  0,  0,
+     0, -1, -2, -1,  0,
+    -1, -2, 16, -2, -1,
+     0, -1, -2, -1,  0,
+     0,  0, -1,  0, 0 };
+const ConvolutionMatrix CommonConvolutions::LaplaceOfGaussian = ConvolutionMatrix(5, 5, laplaceOfGaussian);

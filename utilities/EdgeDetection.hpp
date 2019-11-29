@@ -7,6 +7,7 @@
 class EdgeDetection {
     public:
         static Image* gradient(Image *image);
+        static Image* laplaceOfGaussian(Image* image);
 };
 
 #endif

@@ -52,6 +52,7 @@ class MainWindow : public QMainWindow {
         void doUnsharpMasking();
         void doHighboost();
         void doGradient();
+        void doLaplaceOfGaussian();
 
         void grayLevelSlicing();
         void contrastStretching(bool automatic);
@@ -101,6 +102,7 @@ class MainWindow : public QMainWindow {
 
         QAction * laplaceAction;
         QAction * gradientAction;
+        QAction * laplaceOfGaussianAction;
 
         QAction * rotateCWAction;
         QAction * rotateCCWAction;
