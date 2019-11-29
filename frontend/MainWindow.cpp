@@ -16,6 +16,7 @@
 #include "../utilities/Convolution.hpp"
 #include "../utilities/CommonConvolutions.hpp"
 #include "../utilities/EdgeDetection.hpp"
+#include "../utilities/HoughTransformation.hpp"
 #include "../utilities/Fourier.hpp"
 #include "../utilities/PlateRecognition.hpp"
 
@@ -86,12 +87,14 @@ MainWindow::MainWindow() : QMainWindow() {
     fourierAction = other->addAction("Fourier Transform");
     viewFourierSpectrumAction = other->addAction("View Fourier Spectrum");
     inverseFourierAction = other->addAction("Inverse Fourier Transform");
+    QMenu * houghMenu = other->addMenu("Hough Transform");
+    lineHoughAction = houghMenu->addAction("Line");
+    circleHoughAction = houghMenu->addAction("Circle");
     plateRecognitionAction = other->addAction("Plate Recognition");
 
     QMenu * edge = this->menuBar()->addMenu("Edge Detect");
     sobelOperationAction = edge->addAction("Sobel Operation");
     prewittOperationAction = edge->addAction("Prewitt Operation");
-
     QMenu * binary = this->menuBar()->addMenu("Binary");
     binarySegmentationAction = binary->addAction("Segmentation");
     binaryThinningAction = binary -> addAction("Thinning");
@@ -748,6 +751,34 @@ void MainWindow::invLogOperation() {
     }
 }
 
+void MainWindow::sobelOperation() {
+    if (drawSurface->isImageLoaded()) {
+        spdlog::info("MainWindow::sobelOperation: Edge detection with Sobel operator...");
+        Image * result = Convolution::sobelOperation(drawSurface->getActiveImage(), CommonConvolutions::SobelX, CommonConvolutions::SobelY);
+        drawSurface->acquireLockImage();
+        drawSurface->purgeImage();
+        drawSurface->setActiveImage(result);
+        drawSurface->releaseLockImage();
+        drawSurface->update();
+    } else {
+        spdlog::warn("MainWindow::sobelOperation: Please load an image first!");
+    }
+}
+
+void MainWindow::prewittOperation() {
+    if (drawSurface->isImageLoaded()) {
+        spdlog::info("MainWindow::prewittOperation: Edge detection with Prewitt operator...");
+        Image * result = Convolution::sobelOperation(drawSurface->getActiveImage(), CommonConvolutions::PrewittX, CommonConvolutions::PrewittY);
+        drawSurface->acquireLockImage();
+        drawSurface->purgeImage();
+        drawSurface->setActiveImage(result);
+        drawSurface->releaseLockImage();
+        drawSurface->update();
+    } else {
+        spdlog::warn("MainWindow::sobelOperation: Please load an image first!");
+    }
+}
+      
 void MainWindow::doBinarySegmentation() {
     if (drawSurface->isImageLoaded()) {
         drawSurface->acquireLockImage();
@@ -770,31 +801,33 @@ void MainWindow::doBinaryThinning() {
     }
 }
 
-void MainWindow::sobelOperation() {
+void MainWindow::doLineHough() {
     if (drawSurface->isImageLoaded()) {
-        spdlog::info("MainWindow::sobelOperation: Edge detection with Sobel operator...");
-        Image * result = Convolution::sobelOperation(drawSurface->getActiveImage(), CommonConvolutions::SobelX, CommonConvolutions::SobelY);
+        spdlog::info("MainWindow::doLineHough: Edge detection with Line Hough Transform...");
+        Image* result = HoughTransformation::HoughLine(drawSurface->getActiveImage());
         drawSurface->acquireLockImage();
         drawSurface->purgeImage();
         drawSurface->setActiveImage(result);
         drawSurface->releaseLockImage();
         drawSurface->update();
     } else {
-        spdlog::warn("MainWindow::sobelOperation: Please load an image first!");
+        spdlog::warn("MainWindow::doLineHough: Please load an image first!");
     }
 }
 
-void MainWindow::prewittOperation() {
+void MainWindow::doCircleHough() {
     if (drawSurface->isImageLoaded()) {
-        spdlog::info("MainWindow::sobelOperation: Edge detection with Sobel operator...");
-        Image * result = Convolution::sobelOperation(drawSurface->getActiveImage(), CommonConvolutions::PrewittX, CommonConvolutions::PrewittY);
+        spdlog::info("MainWindow::doCircleHough: Edge detection with Line Hough Transform...");
+        int rStart = QInputDialog::getInt(this, "Radius Start", "Enter value: ");
+        int rEnd = QInputDialog::getInt(this, "Radius End", "Enter value: ");
+        Image* result = HoughTransformation::HoughCircle(drawSurface->getActiveImage(), rStart, rEnd);
         drawSurface->acquireLockImage();
         drawSurface->purgeImage();
         drawSurface->setActiveImage(result);
         drawSurface->releaseLockImage();
         drawSurface->update();
     } else {
-        spdlog::warn("MainWindow::sobelOperation: Please load an image first!");
+        spdlog::warn("MainWindow::doCircleHough: Please load an image first!");
     }
 }
 
@@ -865,6 +898,12 @@ void MainWindow::connectActionsToControllers() {
     connect(viewFourierSpectrumAction, &QAction::triggered, this, &MainWindow::viewFourierSpectrum);
     connect(inverseFourierAction, &QAction::triggered, this, &MainWindow::doInverseFourier);
 
+    connect(sobelOperationAction, &QAction::triggered, this, &MainWindow::sobelOperation);
+    connect(prewittOperationAction, &QAction::triggered, this, &MainWindow::prewittOperation);
+
+    connect(lineHoughAction, &QAction::triggered, this, &MainWindow::doLineHough);
+    connect(circleHoughAction, &QAction::triggered, this, &MainWindow::doCircleHough);
+  
     connect(binarySegmentationAction, &QAction::triggered, this, &MainWindow::doBinarySegmentation);
     connect(binaryThinningAction, &QAction::triggered, this, &MainWindow::doBinaryThinning);
     connect(sobelOperationAction, &QAction::triggered, this, &MainWindow::sobelOperation);
