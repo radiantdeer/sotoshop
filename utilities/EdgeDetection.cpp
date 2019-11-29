@@ -1,4 +1,6 @@
 #include "EdgeDetection.hpp"
+#include "CommonConvolutions.hpp"
+#include "Convolution.hpp"
 #include <cmath>
 
 Image* EdgeDetection::gradient(Image *image) {
@@ -32,4 +34,9 @@ Image* EdgeDetection::gradient(Image *image) {
         }
     }
     return result;
+}
+
+Image* EdgeDetection::laplaceOfGaussian(Image* image) {
+    Image* log = Convolution::convolve(image, CommonConvolutions::LaplaceOfGaussian, true);
+    return log;
 }

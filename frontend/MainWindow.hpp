@@ -52,6 +52,7 @@ class MainWindow : public QMainWindow {
         void doUnsharpMasking();
         void doHighboost();
         void doGradient();
+        void doLaplaceOfGaussian();
 
         void grayLevelSlicing();
         void contrastStretching(bool automatic);
@@ -73,6 +74,14 @@ class MainWindow : public QMainWindow {
 
         void doLineHough();
         void doCircleHough();
+
+        void doBinarySegmentation();
+        void doBinaryThinning();
+        void doPlateRecognition();
+
+        void sobelOperation();
+        void prewittOperation();
+
     private:
         QAction * loadAction;
         QAction * saveAction;
@@ -99,6 +108,7 @@ class MainWindow : public QMainWindow {
 
         QAction * laplaceAction;
         QAction * gradientAction;
+        QAction * laplaceOfGaussianAction;
 
         QAction * rotateCWAction;
         QAction * rotateCCWAction;
@@ -131,6 +141,13 @@ class MainWindow : public QMainWindow {
 
         QAction * lineHoughAction;
         QAction * circleHoughAction;
+
+        QAction * binarySegmentationAction;
+        QAction * binaryThinningAction;
+        QAction * sobelOperationAction;
+        QAction * prewittOperationAction;
+
+        QAction * plateRecognitionAction;
 
         DrawSurface * drawSurface;
         HistogramDialog * histDialog;

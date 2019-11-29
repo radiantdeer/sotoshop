@@ -763,3 +763,93 @@ Image * Image::contrastStretch(int rrmin, int rrmax, int rgmin, int rgmax, int r
     }
     return this;
 }
+
+Image * Image::binarySegmentation() {
+    this->grayscale();
+    int threshold = this->MAX_GRAY / 2;
+    int newThreshold = threshold;
+    std::vector<int> gBright;
+    std::vector<int> gDarker;
+    while (abs(newThreshold - threshold) > 20) {
+        threshold = newThreshold;
+        for (int i = 0; i < this->getWidth(); i++) {
+            for (int j = 0; j < this->getHeight(); j++) {
+                Pixel p = this->getPixelAt(i, j);
+                if (p.getRed() > threshold) {
+                    gBright.push_back(p.getRed());
+                } else {
+                    gDarker.push_back(p.getRed());
+                }
+            }
+        }
+        int avgDarker = 0;
+        int avgBright = 0;
+        int tD = 0;
+        int tB = 0;
+        if (gDarker.size() > 0) {
+            for (int i = 0; i < gDarker.size(); i++) {
+                tD += gDarker.at(i);
+            }
+            avgDarker = tD / gDarker.size();
+        }
+        if (gBright.size() > 0) {
+            for (int i = 0; i < gBright.size(); i++) {
+                tB += gBright.at(i);
+            }
+            avgBright = tB / gBright.size();
+        }
+        newThreshold = (int)((avgBright + avgDarker)/2);
+    }
+    threshold = newThreshold;
+    for (int i = 0; i < this->getWidth(); i++) {
+        for (int j = 0; j < this->getHeight(); j++) {
+            Pixel p = this->getPixelAt(i, j);
+            if (p.getRed() > threshold) {
+                this->setPixelAt(i, j, Pixel(255, 255, 255));
+            } else {
+                this->setPixelAt(i, j, Pixel(0, 0, 0));
+            }
+        }
+    }
+    return this;
+}
+
+Image * Image::binaryThinning() {
+    this->binarySegmentation();
+    int y[9] = {0};
+    int ok;
+    do {
+        ok = 1;
+        for (int i = 1; i < this->getWidth()-1; i++) {
+            for (int j = 1; j < this->getHeight()-1; j++) {
+                if (this->getPixelAt(i,j).getRed() == 255) {
+                    int count = 0;
+                    for (int k = -1; k <= 1; k++) {
+                        for (int l = -1; l <= 1; l++) {
+                            if (this->getPixelAt(i + k, j + l).getRed() == 255) count++;
+                        }
+                    }
+                    if ((count > 2) && (count < 8)) {
+                        y[0] = this->getPixelAt(i-1, j-1).getRed();
+                        y[1] = this->getPixelAt(i  , j-1).getRed();
+                        y[2] = this->getPixelAt(i+1, j-1).getRed();
+                        y[3] = this->getPixelAt(i+1, j  ).getRed();
+                        y[4] = this->getPixelAt(i+1, j+1).getRed();
+                        y[5] = this->getPixelAt(i  , j+1).getRed();
+                        y[6] = this->getPixelAt(i-1, j+1).getRed();
+                        y[7] = this->getPixelAt(i-1, j  ).getRed();
+                        y[8] = this->getPixelAt(i-1, j-1).getRed();
+                        int trans = 0;
+                        for (int m = 0; m <= 7; m++) {
+                            if (y[m] == 0 && y[m+1] == 255) trans++;
+                            if (trans == 1) {
+                                this->setPixelAt(i, j, Pixel(0,0,0));
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    } while (ok == 0);
+    return this;
+}

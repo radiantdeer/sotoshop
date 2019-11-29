@@ -15,9 +15,10 @@
 #include "../utilities/BitPlaneSlicing.hpp"
 #include "../utilities/Convolution.hpp"
 #include "../utilities/CommonConvolutions.hpp"
-#include "../utilities/Fourier.hpp"
 #include "../utilities/EdgeDetection.hpp"
 #include "../utilities/HoughTransformation.hpp"
+#include "../utilities/Fourier.hpp"
+#include "../utilities/PlateRecognition.hpp"
 
 MainWindow::MainWindow() : QMainWindow() {
     this->setWindowTitle("SotoShop");
@@ -79,6 +80,7 @@ MainWindow::MainWindow() : QMainWindow() {
 
     QMenu * edgeDetectionMenu = this->menuBar()->addMenu("Edge Detection");
     gradientAction = edgeDetectionMenu->addAction("Gradient");
+    laplaceOfGaussianAction = edgeDetectionMenu->addAction("Laplace of Gaussian");
 
     QMenu * other = this->menuBar()->addMenu("Other");
     bitPlaneAction = other->addAction("Bit Planes");
@@ -88,10 +90,14 @@ MainWindow::MainWindow() : QMainWindow() {
     QMenu * houghMenu = other->addMenu("Hough Transform");
     lineHoughAction = houghMenu->addAction("Line");
     circleHoughAction = houghMenu->addAction("Circle");
+    plateRecognitionAction = other->addAction("Plate Recognition");
 
     QMenu * edge = this->menuBar()->addMenu("Edge Detect");
     sobelOperationAction = edge->addAction("Sobel Operation");
     prewittOperationAction = edge->addAction("Prewitt Operation");
+    QMenu * binary = this->menuBar()->addMenu("Binary");
+    binarySegmentationAction = binary->addAction("Segmentation");
+    binaryThinningAction = binary -> addAction("Thinning");
 
     connectActionsToControllers();
 
@@ -102,6 +108,8 @@ MainWindow::MainWindow() : QMainWindow() {
     fourierFrequencies = nullptr;
     fourierVisual = nullptr;
     fourierDialog = nullptr;
+
+    PlateRecognition::loadCharacterTemplate();
 }
 
 QAction * MainWindow::getLoadAction() {
@@ -381,6 +389,20 @@ void MainWindow::doGradient() {
         drawSurface->update();
     } else {
         spdlog::warn("MainWindow::doGradient: Please load an image first!");
+    }
+}
+
+void MainWindow::doLaplaceOfGaussian() {
+    if (drawSurface->isImageLoaded()) {
+        spdlog::info("MainWindow::doLaplaceOfGaussian: Edge Detection with LaplaceOfGaussian...");
+        Image * result = EdgeDetection::laplaceOfGaussian(drawSurface->getActiveImage());
+        drawSurface->acquireLockImage();
+        drawSurface->purgeImage();
+        drawSurface->setActiveImage(result);
+        drawSurface->releaseLockImage();
+        drawSurface->update();
+    } else {
+        spdlog::warn("MainWindow::doLaplaceOfGaussian: Please load an image first!");
     }
 }
 
@@ -745,7 +767,7 @@ void MainWindow::sobelOperation() {
 
 void MainWindow::prewittOperation() {
     if (drawSurface->isImageLoaded()) {
-        spdlog::info("MainWindow::sobelOperation: Edge detection with Sobel operator...");
+        spdlog::info("MainWindow::prewittOperation: Edge detection with Prewitt operator...");
         Image * result = Convolution::sobelOperation(drawSurface->getActiveImage(), CommonConvolutions::PrewittX, CommonConvolutions::PrewittY);
         drawSurface->acquireLockImage();
         drawSurface->purgeImage();
@@ -754,6 +776,28 @@ void MainWindow::prewittOperation() {
         drawSurface->update();
     } else {
         spdlog::warn("MainWindow::sobelOperation: Please load an image first!");
+    }
+}
+      
+void MainWindow::doBinarySegmentation() {
+    if (drawSurface->isImageLoaded()) {
+        drawSurface->acquireLockImage();
+        drawSurface->getActiveImage()->binarySegmentation();
+        drawSurface->releaseLockImage();
+        drawSurface->update();
+    } else {
+        spdlog::warn("MainWindow::doBinarySegmentation: Please load an image first!");
+    }
+}
+
+void MainWindow::doBinaryThinning() {
+    if (drawSurface->isImageLoaded()) {
+        drawSurface->acquireLockImage();
+        drawSurface->getActiveImage()->binaryThinning();
+        drawSurface->releaseLockImage();
+        drawSurface->update();
+    } else {
+        spdlog::warn("MainWindow::doBinaryThinning: Please load an image first!");
     }
 }
 
@@ -784,6 +828,21 @@ void MainWindow::doCircleHough() {
         drawSurface->update();
     } else {
         spdlog::warn("MainWindow::doCircleHough: Please load an image first!");
+    }
+}
+
+void MainWindow::doPlateRecognition() {
+    if (drawSurface->isImageLoaded()) {
+        drawSurface->acquireLockImage();
+        Image * image = PlateRecognition::findPlate(drawSurface->getActiveImage());
+        drawSurface->purgeImage();
+        drawSurface->setActiveImage(image);
+        drawSurface->releaseLockImage();
+        drawSurface->update();
+        std::string recognizedCharacters = PlateRecognition::recognizeCharacters(image);
+        spdlog::info("Recognized as : {}", recognizedCharacters);
+    } else {
+        spdlog::warn("MainWindow::doPlateRecognition: Please load an image first!");
     }
 }
 
@@ -832,6 +891,7 @@ void MainWindow::connectActionsToControllers() {
     connect(highboostAction, &QAction::triggered, this, &MainWindow::doHighboost);
 
     connect(gradientAction, &QAction::triggered, this, &MainWindow::doGradient);
+    connect(laplaceOfGaussianAction, &QAction::triggered, this, &MainWindow::doLaplaceOfGaussian);
 
     connect(bitPlaneAction, &QAction::triggered, this, &MainWindow::showBitPlanes);
     connect(fourierAction, &QAction::triggered, this, &MainWindow::doFourierTransform);
@@ -843,6 +903,13 @@ void MainWindow::connectActionsToControllers() {
 
     connect(lineHoughAction, &QAction::triggered, this, &MainWindow::doLineHough);
     connect(circleHoughAction, &QAction::triggered, this, &MainWindow::doCircleHough);
+  
+    connect(binarySegmentationAction, &QAction::triggered, this, &MainWindow::doBinarySegmentation);
+    connect(binaryThinningAction, &QAction::triggered, this, &MainWindow::doBinaryThinning);
+    connect(sobelOperationAction, &QAction::triggered, this, &MainWindow::sobelOperation);
+    connect(prewittOperationAction, &QAction::triggered, this, &MainWindow::prewittOperation);
+
+    connect(plateRecognitionAction, &QAction::triggered, this, &MainWindow::doPlateRecognition);
 }
 
 std::string MainWindow::getOpenFileUrl(std::string dialogTitle) {
