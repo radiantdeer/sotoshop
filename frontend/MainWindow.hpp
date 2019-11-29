@@ -79,9 +79,6 @@ class MainWindow : public QMainWindow {
         void doBinaryThinning();
         void doPlateRecognition();
 
-        void sobelOperation();
-        void prewittOperation();
-
     private:
         QAction * loadAction;
         QAction * saveAction;
@@ -109,6 +106,8 @@ class MainWindow : public QMainWindow {
         QAction * laplaceAction;
         QAction * gradientAction;
         QAction * laplaceOfGaussianAction;
+        QAction * sobelOperationAction;
+        QAction * prewittOperationAction;
 
         QAction * rotateCWAction;
         QAction * rotateCCWAction;
@@ -136,16 +135,11 @@ class MainWindow : public QMainWindow {
         QAction * viewFourierSpectrumAction;
         QAction * inverseFourierAction;
 
-        QAction * sobelOperationAction;
-        QAction * prewittOperationAction;
-
         QAction * lineHoughAction;
         QAction * circleHoughAction;
 
         QAction * binarySegmentationAction;
         QAction * binaryThinningAction;
-        QAction * sobelOperationAction;
-        QAction * prewittOperationAction;
 
         QAction * plateRecognitionAction;
 
