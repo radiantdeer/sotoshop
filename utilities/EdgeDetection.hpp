@@ -1,15 +1,13 @@
-#ifndef EDGEDETECTION_HPP
-#define EDGEDETECTION_HPP
+#ifndef __EDGE_DETECTION_HPP
+#define __EDGE_DETECTION_HPP
 
-#include <vector>
 #include "../datastruct/Image.hpp"
 #include "Convolution.hpp"
-#include "CommonConvolutions.hpp"
 
-class EdgeDetection
-{
+class EdgeDetection {
     public:
-        static Image* SobelOperation(Image* image, const int constant, bool padImage);
+        static Image* gradient(Image *image);
+        static Image* laplaceOfGaussian(Image* image);
 };
 
-#endif // EDGEDETECTION_HPP
+#endif

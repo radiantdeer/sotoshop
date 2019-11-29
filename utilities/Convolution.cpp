@@ -145,6 +145,7 @@ Image* Convolution::sobelOperation(Image* image, const ConvolutionMatrix& opMatr
 
     for (int j = 0; j < resultHeight; j++) {
         for (int i = 0; i < resultWidth; i++) {
+
             // SOBEL VARIABLE
             int xSum = 0;
             int ySum = 0;
@@ -173,13 +174,14 @@ Image* Convolution::sobelOperation(Image* image, const ConvolutionMatrix& opMatr
 
             // SET NEW PIXEL VALUE
             Pixel thisPixel (Pixel::thresholding(magnitude), Pixel::thresholding(magnitude), Pixel::thresholding(magnitude));
+
             result->setPixelAt(i, j, thisPixel);
         }
     }
 
     Image * paddedResult;
 
-    // PADD IMAGE
+    // PAD IMAGE
     spdlog::debug("Convolution::sobelOperation: Adding padding to result image...");
     int padWidth = opMatrixX.getWidth() / 2;
     int padHeight = opMatrixX.getHeight() / 2;
@@ -261,6 +263,7 @@ Image* Convolution::cannyOperation(Image* image, const ConvolutionMatrix& gaussi
     }
     return result;
 }
+
 
 Image* Convolution::padImage(Image* image, int padWidth, int padHeight) {
     int originalWidth = image->getWidth();
@@ -354,4 +357,9 @@ std::vector<std::vector<double>> Convolution::imageThetaMatrix(Image *image, con
     }
 
     return result;
+
+Image* Convolution::laplaceOp(Image *image) {
+    spdlog::debug("Convolution::laplaceOp: Calculating laplace...");
+    Image * laplace = convolve(image, CommonConvolutions::Laplace, true);
+    return laplace;
 }

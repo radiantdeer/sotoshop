@@ -11,10 +11,14 @@
 #include <QUrl>
 #include <sstream>
 #include "../spdlog/spdlog.h"
+#include "../datastruct/ImageHistogram.hpp"
 #include "../utilities/BitPlaneSlicing.hpp"
 #include "../utilities/Convolution.hpp"
 #include "../utilities/CommonConvolutions.hpp"
+#include "../utilities/EdgeDetection.hpp"
+#include "../utilities/HoughTransformation.hpp"
 #include "../utilities/Fourier.hpp"
+#include "../utilities/PlateRecognition.hpp"
 
 MainWindow::MainWindow() : QMainWindow() {
     this->setWindowTitle("SotoShop");
@@ -69,16 +73,31 @@ MainWindow::MainWindow() : QMainWindow() {
     QMenu * highPass = convolutionMenu->addMenu("High-pass Filter");
     highPassFilter1Action = highPass->addAction("Variation 1");
     highPassFilter2Action = highPass->addAction("Variation 2");
-    highPassFilter3Action = highPass->addAction("Variation 3");
+    highPassFilter3Action = highPass->addAction("Variation 3 (Laplace)");
     highPassFilter4Action = highPass->addAction("Variation 4");
     unsharpMaskingAction = convolutionMenu->addAction("Unsharp Masking");
     highboostAction = convolutionMenu->addAction("Highboost");
+
+    QMenu * edgeDetectionMenu = this->menuBar()->addMenu("Edge Detection");
+    gradientAction = edgeDetectionMenu->addAction("Gradient");
+    laplaceOfGaussianAction = edgeDetectionMenu->addAction("Laplace of Gaussian");
 
     QMenu * other = this->menuBar()->addMenu("Other");
     bitPlaneAction = other->addAction("Bit Planes");
     fourierAction = other->addAction("Fourier Transform");
     viewFourierSpectrumAction = other->addAction("View Fourier Spectrum");
     inverseFourierAction = other->addAction("Inverse Fourier Transform");
+    QMenu * houghMenu = other->addMenu("Hough Transform");
+    lineHoughAction = houghMenu->addAction("Line");
+    circleHoughAction = houghMenu->addAction("Circle");
+    plateRecognitionAction = other->addAction("Plate Recognition");
+
+    QMenu * edge = this->menuBar()->addMenu("Edge Detect");
+    sobelOperationAction = edge->addAction("Sobel Operation");
+    prewittOperationAction = edge->addAction("Prewitt Operation");
+    QMenu * binary = this->menuBar()->addMenu("Binary");
+    binarySegmentationAction = binary->addAction("Segmentation");
+    binaryThinningAction = binary -> addAction("Thinning");
 
     QMenu * edge = this->menuBar()->addMenu("Edge Detect");
     sobelOperationAction = edge->addAction("Sobel Operation");
@@ -95,6 +114,8 @@ MainWindow::MainWindow() : QMainWindow() {
     fourierFrequencies = nullptr;
     fourierVisual = nullptr;
     fourierDialog = nullptr;
+
+    PlateRecognition::loadCharacterTemplate();
 }
 
 QAction * MainWindow::getLoadAction() {
@@ -206,7 +227,9 @@ void MainWindow::moveImage() {
 
         spdlog::info("MainWindow::moveImage: Now moving the image...");
         drawSurface->acquireLockImage();
-        drawSurface->getActiveImage()->translate(deltaX, deltaY);
+        Image * newImage = drawSurface->getActiveImage()->translate(deltaX, deltaY);
+        drawSurface->purgeImage();
+        drawSurface->setActiveImage(newImage);
         drawSurface->releaseLockImage();
         drawSurface->update();
     } else {
@@ -358,6 +381,34 @@ void MainWindow::doHighboost() {
         drawSurface->update();
     } else {
         spdlog::warn("MainWindow::doUnsharpMasking: Please load an image first!");
+    }
+}
+
+void MainWindow::doGradient() {
+    if (drawSurface->isImageLoaded()) {
+        spdlog::info("MainWindow::doGradient: Edge Detection with Gradient...");
+        Image * result = EdgeDetection::gradient(drawSurface->getActiveImage());
+        drawSurface->acquireLockImage();
+        drawSurface->purgeImage();
+        drawSurface->setActiveImage(result);
+        drawSurface->releaseLockImage();
+        drawSurface->update();
+    } else {
+        spdlog::warn("MainWindow::doGradient: Please load an image first!");
+    }
+}
+
+void MainWindow::doLaplaceOfGaussian() {
+    if (drawSurface->isImageLoaded()) {
+        spdlog::info("MainWindow::doLaplaceOfGaussian: Edge Detection with LaplaceOfGaussian...");
+        Image * result = EdgeDetection::laplaceOfGaussian(drawSurface->getActiveImage());
+        drawSurface->acquireLockImage();
+        drawSurface->purgeImage();
+        drawSurface->setActiveImage(result);
+        drawSurface->releaseLockImage();
+        drawSurface->update();
+    } else {
+        spdlog::warn("MainWindow::doLaplaceOfGaussian: Please load an image first!");
     }
 }
 
@@ -577,10 +628,7 @@ void MainWindow::specifyHist() {
 void MainWindow::showHistogram() {
     if (drawSurface->isImageLoaded()) {
         spdlog::info("MainWindow::showHistogram: Showing histogram...");
-        std::vector<std::vector<int>> hist = drawSurface->getActiveImage()->histogram();
-        for (int i = 0; i < 256; i+=255) {
-            spdlog::info(hist.at(0).at(i));
-        }
+        ImageHistogram hist = drawSurface->getActiveImage()->histogram();
         if (histDialog != nullptr) {
             delete histDialog;
         }
@@ -750,6 +798,42 @@ void MainWindow::robertOperation() {
         spdlog::warn("MainWindow::robertOperation: Please load an image first!");
     }
 }
+      
+void MainWindow::doBinarySegmentation() {
+    if (drawSurface->isImageLoaded()) {
+        drawSurface->acquireLockImage();
+        drawSurface->getActiveImage()->binarySegmentation();
+        drawSurface->releaseLockImage();
+        drawSurface->update();
+    } else {
+        spdlog::warn("MainWindow::doBinarySegmentation: Please load an image first!");
+    }
+}
+
+void MainWindow::doBinaryThinning() {
+    if (drawSurface->isImageLoaded()) {
+        drawSurface->acquireLockImage();
+        drawSurface->getActiveImage()->binaryThinning();
+        drawSurface->releaseLockImage();
+        drawSurface->update();
+    } else {
+        spdlog::warn("MainWindow::doBinaryThinning: Please load an image first!");
+    }
+}
+
+void MainWindow::doLineHough() {
+    if (drawSurface->isImageLoaded()) {
+        spdlog::info("MainWindow::doLineHough: Edge detection with Line Hough Transform...");
+        Image* result = HoughTransformation::HoughLine(drawSurface->getActiveImage());
+        drawSurface->acquireLockImage();
+        drawSurface->purgeImage();
+        drawSurface->setActiveImage(result);
+        drawSurface->releaseLockImage();
+        drawSurface->update();
+    } else {
+        spdlog::warn("MainWindow::doLineHough: Please load an image first!");
+    }
+}
 
 void MainWindow::cannyOperation() {
     if (drawSurface->isImageLoaded()) {
@@ -763,6 +847,37 @@ void MainWindow::cannyOperation() {
         drawSurface->update();
     } else {
         spdlog::warn("MainWindow::cannyOperation: Please load an image first!");
+    }
+}
+
+void MainWindow::doCircleHough() {
+    if (drawSurface->isImageLoaded()) {
+        spdlog::info("MainWindow::doCircleHough: Edge detection with Line Hough Transform...");
+        int rStart = QInputDialog::getInt(this, "Radius Start", "Enter value: ");
+        int rEnd = QInputDialog::getInt(this, "Radius End", "Enter value: ");
+        Image* result = HoughTransformation::HoughCircle(drawSurface->getActiveImage(), rStart, rEnd);
+        drawSurface->acquireLockImage();
+        drawSurface->purgeImage();
+        drawSurface->setActiveImage(result);
+        drawSurface->releaseLockImage();
+        drawSurface->update();
+    } else {
+        spdlog::warn("MainWindow::doCircleHough: Please load an image first!");
+    }
+}
+
+void MainWindow::doPlateRecognition() {
+    if (drawSurface->isImageLoaded()) {
+        drawSurface->acquireLockImage();
+        Image * image = PlateRecognition::findPlate(drawSurface->getActiveImage());
+        drawSurface->purgeImage();
+        drawSurface->setActiveImage(image);
+        drawSurface->releaseLockImage();
+        drawSurface->update();
+        std::string recognizedCharacters = PlateRecognition::recognizeCharacters(image);
+        spdlog::info("Recognized as : {}", recognizedCharacters);
+    } else {
+        spdlog::warn("MainWindow::doPlateRecognition: Please load an image first!");
     }
 }
 
@@ -810,6 +925,9 @@ void MainWindow::connectActionsToControllers() {
     connect(unsharpMaskingAction, &QAction::triggered, this, &MainWindow::doUnsharpMasking);
     connect(highboostAction, &QAction::triggered, this, &MainWindow::doHighboost);
 
+    connect(gradientAction, &QAction::triggered, this, &MainWindow::doGradient);
+    connect(laplaceOfGaussianAction, &QAction::triggered, this, &MainWindow::doLaplaceOfGaussian);
+
     connect(bitPlaneAction, &QAction::triggered, this, &MainWindow::showBitPlanes);
     connect(fourierAction, &QAction::triggered, this, &MainWindow::doFourierTransform);
     connect(viewFourierSpectrumAction, &QAction::triggered, this, &MainWindow::viewFourierSpectrum);
@@ -820,12 +938,21 @@ void MainWindow::connectActionsToControllers() {
     connect(robertOperationAction, &QAction::triggered, this, &MainWindow::robertOperation);
     connect(cannyOperationAction, &QAction::triggered, this, &MainWindow::cannyOperation);
 
+    connect(lineHoughAction, &QAction::triggered, this, &MainWindow::doLineHough);
+    connect(circleHoughAction, &QAction::triggered, this, &MainWindow::doCircleHough);
+  
+    connect(binarySegmentationAction, &QAction::triggered, this, &MainWindow::doBinarySegmentation);
+    connect(binaryThinningAction, &QAction::triggered, this, &MainWindow::doBinaryThinning);
+    connect(sobelOperationAction, &QAction::triggered, this, &MainWindow::sobelOperation);
+    connect(prewittOperationAction, &QAction::triggered, this, &MainWindow::prewittOperation);
+
+    connect(plateRecognitionAction, &QAction::triggered, this, &MainWindow::doPlateRecognition);
 }
 
 std::string MainWindow::getOpenFileUrl(std::string dialogTitle) {
     using namespace std;
     spdlog::debug("Showing up the open file dialog...");
-    QUrl tempFileUrl = QFileDialog::getOpenFileUrl(this, dialogTitle.c_str(), *(new QUrl()), "Image Files (*.raw , *.pbm , *.pgm , *.ppm , *.bmp);; All Files (*)");
+    QUrl tempFileUrl = QFileDialog::getOpenFileUrl(this, dialogTitle.c_str(), *(new QUrl()), "Image Files (*.raw , *.pbm , *.pgm , *.ppm , *.bmp);; All Files (*)", 0, QFileDialog::DontUseNativeDialog);
     string fileUrl = tempFileUrl.toLocalFile().toUtf8().constData();
     return fileUrl;
 }
@@ -833,7 +960,7 @@ std::string MainWindow::getOpenFileUrl(std::string dialogTitle) {
 std::string MainWindow::getSaveFileUrl(std::string dialogTitle) {
     using namespace std;
     spdlog::debug("Showing up the save file dialog...");
-    QUrl tempFileUrl = QFileDialog::getSaveFileUrl(this, dialogTitle.c_str(), *(new QUrl()), "Raw Image File (*.raw);; PBM Image File (*.pbm);; PGM Image File (*.pgm);; PPM Image File (*.ppm);; Bitmap File (*.bmp)");
+    QUrl tempFileUrl = QFileDialog::getSaveFileUrl(this, dialogTitle.c_str(), *(new QUrl()), "Raw Image File (*.raw);; PBM Image File (*.pbm);; PGM Image File (*.pgm);; PPM Image File (*.ppm);; Bitmap File (*.bmp)", 0, QFileDialog::DontUseNativeDialog);
     string fileUrl = tempFileUrl.toLocalFile().toUtf8().constData();
     return fileUrl;
 }

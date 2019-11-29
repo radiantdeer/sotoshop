@@ -12,6 +12,9 @@ class Convolution {
         static Image* medianConvolve(Image* image, int filterWidth, int filterHeight, bool padImage);
         static Image* unsharpMasking(Image* image);
         static Image* highboost(Image* image, double alpha);
+        static Image* laplaceOp(Image* image);
+
+        static Image* sobelOperation(Image* image, const ConvolutionMatrix& opMatrixX, const ConvolutionMatrix& opMatrixY);
 
         static Image* sobelOperation(Image* image, const ConvolutionMatrix& opMatrixX, const ConvolutionMatrix& opMatrixY);
         static Image* cannyOperation(Image* image, const ConvolutionMatrix& gaussianMatrix, const ConvolutionMatrix& opMatrixX, const ConvolutionMatrix& opMatrixY, int threshold);

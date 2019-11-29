@@ -13,12 +13,15 @@ class CommonConvolutions {
         static const ConvolutionMatrix HighFilter3;
         static const ConvolutionMatrix HighFilter4;
         static const ConvolutionMatrix Gaussian;
+        static const ConvolutionMatrix Laplace;
+        static const ConvolutionMatrix LaplaceOfGaussian;
         static const ConvolutionMatrix SobelX;
         static const ConvolutionMatrix SobelY;
         static const ConvolutionMatrix PrewittX;
         static const ConvolutionMatrix PrewittY;
         static const ConvolutionMatrix RobertX;
         static const ConvolutionMatrix RobertY;
+
 };
 
 #endif

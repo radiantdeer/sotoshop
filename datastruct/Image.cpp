@@ -283,19 +283,17 @@ Image * Image::not_op() {
 }
 
 Image * Image::translate(int dx, int dy) {
-    for (int i = this->getWidth() - 1; i >= 0; i--) {
-        for (int j = this->getHeight() - 1; j >= 0; j--) {
-            if (((i - dx) >= 0) && ((j - dy) >= 0)) {
-                Pixel a = this->getPixelAt(i - dx, j - dy);
-                Pixel *b = new Pixel(a);
-                this->setPixelAt(i, j, *b);
-                delete b;
-            } else {
-                this->setPixelAt(i, j, Pixel(0, 0, 0));
+    Image *newImage = new Image(this->getWidth(), this->getHeight());
+    for (int i = 0; i < this->getWidth(); i++) {
+        for (int j = 0; j < this->getHeight(); j++) {
+            if (((i + dx) >= 0) && ((i + dx) < this->getWidth()) && ((j + dy) >= 0) && ((j + dy) < this->getHeight())) {
+                Pixel *a = new Pixel(this->getPixelAt(i, j));
+                newImage->setPixelAt(i + dx, j + dy, *a);
+                delete a;
             }
         }
     }
-    return this;
+    return newImage;
 }
 
 Image * Image::rotate90CW(){
@@ -477,78 +475,77 @@ Image * Image::operator~() {
 // Returns array of color histogram
 // Returns a matrix of 3 x 256 for colored images (PPM, BMP)
 // Returns a matrix of 1 x 256 for grayscaled images (PBM, PGM, RAW)
-std::vector<std::vector<int>> Image::histogram() {
-    std::vector<std::vector<int>> hist;
+ImageHistogram Image::histogram() {
+    ImageHistogram hist;
     if (this->getOriginalFormat() == "bmp" || this->getOriginalFormat() == "ppm") {
         // color
-        std::vector<int> red (256, 0);
-        std::vector<int> green (256, 0);
-        std::vector<int> blue (256, 0);
+        hist.setGrayscale(false);
         for (int i = 0; i < this->getWidth(); i++) {
             for (int j = 0; j < this->getHeight(); j++) {
-                red[this->getPixelAt(i,j).getRed()]++;
-                green[this->getPixelAt(i,j).getGreen()]++;
-                blue[this->getPixelAt(i,j).getBlue()]++;
+                hist.incrementValueAt(this->getPixelAt(i,j).getRed(), 1, 'R');
+                hist.incrementValueAt(this->getPixelAt(i,j).getGreen(), 1, 'G');
+                hist.incrementValueAt(this->getPixelAt(i,j).getBlue(), 1, 'B');
             }
         }
-        hist.push_back(red);
-        hist.push_back(green);
-        hist.push_back(blue);
+        spdlog::debug("Means : ");
+        spdlog::debug("  Red : {}", hist.mean('R'));
+        spdlog::debug("  Green : {}", hist.mean('G'));
+        spdlog::debug("  Blue : {}", hist.mean('B'));
     } else {
         // grayscale
-        std::vector<int> gray (256, 0);
+        hist.setGrayscale(true);
         for (int i = 0; i < this->getWidth(); i++) {
             for (int j = 0; j < this->getHeight(); j++) {
-                gray[this->getPixelAt(i, j).getRed()]++;
+                hist.incrementValueAt(this->getPixelAt(i, j).getRed());
             }
         }
-        hist.push_back(gray);
+        spdlog::debug("Mean (Gray) : {}", hist.mean('R'));
     }
     return hist;
 }
 
-std::vector<std::vector<int>> Image::equalizedHistogram() {
-    std::vector<std::vector<int>> hist = this->histogram();
-    std::vector<std::vector<int>> histEq;
+ImageHistogram Image::equalizedHistogram() {
+    ImageHistogram hist = this->histogram();
+    std::vector<std::vector<int>> temp;
+    ImageHistogram *histEq;
     int totalPixel = this->getHeight() * this->getWidth();
-    if (this->getOriginalFormat() == "bmp" || this->getOriginalFormat() == "ppm" ) {
-        std::vector<int> redMap = hist.at(0);
-        std::vector<int> greenMap = hist.at(1);
-        std::vector<int> blueMap = hist.at(2);
+    if (this->getOriginalFormat() == "bmp" || this->getOriginalFormat() == "ppm") {
+        temp.push_back(hist.getRed());
+        temp.push_back(hist.getGreen());
+        temp.push_back(hist.getBlue());
+        histEq = new ImageHistogram(temp, false);
         for (int i = 1; i < COLOR_LEVEL; i++) {
-            redMap[i] += redMap[i-1];
-            greenMap[i] += greenMap[i-1];
-            blueMap[i] += blueMap[i-1];
+            histEq->incrementValueAt(i, histEq->getValueAt(i-1, 'R'), 'R');
+            histEq->incrementValueAt(i, histEq->getValueAt(i-1, 'G'), 'G');
+            histEq->incrementValueAt(i, histEq->getValueAt(i-1, 'B'), 'B');
         }
         for (int i = 0; i < COLOR_LEVEL; i++) {
-            redMap[i] = redMap[i] * (COLOR_LEVEL-1) / totalPixel;
-            greenMap[i] = greenMap[i] * (COLOR_LEVEL-1) / totalPixel;
-            blueMap[i] = blueMap[i] * (COLOR_LEVEL-1) / totalPixel;
+            histEq->setValueAt(i, histEq->getValueAt(i, 'R') * (COLOR_LEVEL-1) / totalPixel, 'R');
+            histEq->setValueAt(i, histEq->getValueAt(i, 'G') * (COLOR_LEVEL-1) / totalPixel, 'G');
+            histEq->setValueAt(i, histEq->getValueAt(i, 'R') * (COLOR_LEVEL-1) / totalPixel, 'B');
         }
-        histEq.push_back(redMap);
-        histEq.push_back(greenMap);
-        histEq.push_back(blueMap);
     } else {
-        std::vector<int> grayMap = hist.at(0);
+        temp.push_back(hist.getRed());
+        histEq = new ImageHistogram(temp, true);
         for (int i = 1; i < COLOR_LEVEL; i++) {
-            grayMap[i] += grayMap[i-1];
+            histEq->incrementValueAt(i, histEq->getValueAt(i-1));
         }
 
         for (int i = 0; i < COLOR_LEVEL; i++) {
-            grayMap[i] = grayMap[i] * (COLOR_LEVEL-1) / totalPixel;
+            histEq->setValueAt(i, histEq->getValueAt(i) * (COLOR_LEVEL-1) / totalPixel);
         }
-        histEq.push_back(grayMap);
     }
-    return histEq;
+
+    return *histEq;
 }
 
 Image * Image::histogramEqualization() {
-    std::vector<std::vector<int>> hist = this->histogram();
+    ImageHistogram hist = this->histogram();
     int totalPixel = this->getHeight() * this->getWidth();
     if (this->getOriginalFormat() == "bmp" || this->getOriginalFormat() == "ppm" ) {
-        std::vector<int> redMap = hist.at(0);
-        std::vector<int> greenMap = hist.at(1);
-        std::vector<int> blueMap = hist.at(2);
+        std::vector<int> redMap = hist.getRed();
+        std::vector<int> greenMap = hist.getGreen();
+        std::vector<int> blueMap = hist.getBlue();
         for (int i = 1; i < COLOR_LEVEL; i++) {
             redMap[i] += redMap[i-1];
             greenMap[i] += greenMap[i-1];
@@ -568,7 +565,7 @@ Image * Image::histogramEqualization() {
             }
         }
     } else {
-        std::vector<int> grayMap = hist.at(0);
+        std::vector<int> grayMap = hist.getGray();
         for (int i = 1; i < COLOR_LEVEL; i++) {
             grayMap[i] += grayMap[i-1];
         }
@@ -590,10 +587,10 @@ Image * Image::histogramEqualization() {
 }
 
 std::vector<int> histSpecHelper(std::vector<int> &a, std::vector<int> &b) {
-    for (int i = 0; i < COLOR_LEVEL; i++) {
+    for (int i = 0; i < Image::COLOR_LEVEL; i++) {
         int minval = abs(a[i] - b[0]);
         int minj = 0;
-        for (int j = 0; j < COLOR_LEVEL; j++) {
+        for (int j = 0; j < Image::COLOR_LEVEL; j++) {
             if (abs(a[i] - b[j]) < minval) {
                 minval = abs(a[i] - b[j]);
                 minj = j;
@@ -607,8 +604,8 @@ std::vector<int> histSpecHelper(std::vector<int> &a, std::vector<int> &b) {
 // Match histogram of this image into something like B image.
 Image * Image::histogramSpecification(Image& B) {
     // Equalize this image first.
-    std::vector<std::vector<int>> histThis = this->equalizedHistogram();
-    std::vector<std::vector<int>> histOp = B.equalizedHistogram();
+    ImageHistogram histThis = this->equalizedHistogram();
+    ImageHistogram histOp = B.equalizedHistogram();
     std::vector<int> redMapThis;
     std::vector<int> greenMapThis;
     std::vector<int> blueMapThis;
@@ -617,23 +614,23 @@ Image * Image::histogramSpecification(Image& B) {
     std::vector<int> blueMapOp;
 
     if (this->getOriginalFormat() == "bmp" || this->getOriginalFormat() == "ppm" ) {
-        redMapThis = histThis.at(0);
-        greenMapThis = histThis.at(1);
-        blueMapThis = histThis.at(2);
+        redMapThis = histThis.getRed();
+        greenMapThis = histThis.getGreen();
+        blueMapThis = histThis.getBlue();
     } else {
-        redMapThis = histThis.at(0);
-        greenMapThis = histThis.at(0);
-        blueMapThis = histThis.at(0);
+        redMapThis = histThis.getGray();
+        greenMapThis = histThis.getGray();
+        blueMapThis = histThis.getGray();
     }
 
     if (B.getOriginalFormat() == "bmp" || B.getOriginalFormat() == "ppm") {
-        redMapOp = histOp.at(0);
-        greenMapOp = histOp.at(1);
-        blueMapOp = histOp.at(2);
+        redMapOp = histOp.getRed();
+        greenMapOp = histOp.getGreen();
+        blueMapOp = histOp.getBlue();
     } else {
-        redMapOp = histOp.at(0);
-        greenMapOp = histOp.at(0);
-        blueMapOp = histOp.at(0);
+        redMapOp = histOp.getGray();
+        greenMapOp = histOp.getGray();
+        blueMapOp = histOp.getGray();
     }
 
     redMapThis = histSpecHelper(redMapThis, redMapOp);
@@ -764,5 +761,95 @@ Image * Image::contrastStretch(int rrmin, int rrmax, int rgmin, int rgmax, int r
             this->setPixelAt(i, j, Pixel(redVal, greenVal, blueVal));
         }
     }
+    return this;
+}
+
+Image * Image::binarySegmentation() {
+    this->grayscale();
+    int threshold = this->MAX_GRAY / 2;
+    int newThreshold = threshold;
+    std::vector<int> gBright;
+    std::vector<int> gDarker;
+    while (abs(newThreshold - threshold) > 20) {
+        threshold = newThreshold;
+        for (int i = 0; i < this->getWidth(); i++) {
+            for (int j = 0; j < this->getHeight(); j++) {
+                Pixel p = this->getPixelAt(i, j);
+                if (p.getRed() > threshold) {
+                    gBright.push_back(p.getRed());
+                } else {
+                    gDarker.push_back(p.getRed());
+                }
+            }
+        }
+        int avgDarker = 0;
+        int avgBright = 0;
+        int tD = 0;
+        int tB = 0;
+        if (gDarker.size() > 0) {
+            for (int i = 0; i < gDarker.size(); i++) {
+                tD += gDarker.at(i);
+            }
+            avgDarker = tD / gDarker.size();
+        }
+        if (gBright.size() > 0) {
+            for (int i = 0; i < gBright.size(); i++) {
+                tB += gBright.at(i);
+            }
+            avgBright = tB / gBright.size();
+        }
+        newThreshold = (int)((avgBright + avgDarker)/2);
+    }
+    threshold = newThreshold;
+    for (int i = 0; i < this->getWidth(); i++) {
+        for (int j = 0; j < this->getHeight(); j++) {
+            Pixel p = this->getPixelAt(i, j);
+            if (p.getRed() > threshold) {
+                this->setPixelAt(i, j, Pixel(255, 255, 255));
+            } else {
+                this->setPixelAt(i, j, Pixel(0, 0, 0));
+            }
+        }
+    }
+    return this;
+}
+
+Image * Image::binaryThinning() {
+    this->binarySegmentation();
+    int y[9] = {0};
+    int ok;
+    do {
+        ok = 1;
+        for (int i = 1; i < this->getWidth()-1; i++) {
+            for (int j = 1; j < this->getHeight()-1; j++) {
+                if (this->getPixelAt(i,j).getRed() == 255) {
+                    int count = 0;
+                    for (int k = -1; k <= 1; k++) {
+                        for (int l = -1; l <= 1; l++) {
+                            if (this->getPixelAt(i + k, j + l).getRed() == 255) count++;
+                        }
+                    }
+                    if ((count > 2) && (count < 8)) {
+                        y[0] = this->getPixelAt(i-1, j-1).getRed();
+                        y[1] = this->getPixelAt(i  , j-1).getRed();
+                        y[2] = this->getPixelAt(i+1, j-1).getRed();
+                        y[3] = this->getPixelAt(i+1, j  ).getRed();
+                        y[4] = this->getPixelAt(i+1, j+1).getRed();
+                        y[5] = this->getPixelAt(i  , j+1).getRed();
+                        y[6] = this->getPixelAt(i-1, j+1).getRed();
+                        y[7] = this->getPixelAt(i-1, j  ).getRed();
+                        y[8] = this->getPixelAt(i-1, j-1).getRed();
+                        int trans = 0;
+                        for (int m = 0; m <= 7; m++) {
+                            if (y[m] == 0 && y[m+1] == 255) trans++;
+                            if (trans == 1) {
+                                this->setPixelAt(i, j, Pixel(0,0,0));
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    } while (ok == 0);
     return this;
 }

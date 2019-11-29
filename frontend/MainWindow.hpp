@@ -51,6 +51,9 @@ class MainWindow : public QMainWindow {
         void doHighPassFilter(int filterVariation);
         void doUnsharpMasking();
         void doHighboost();
+        void doGradient();
+        void doLaplaceOfGaussian();
+
         void grayLevelSlicing();
         void contrastStretching(bool automatic);
 
@@ -70,6 +73,13 @@ class MainWindow : public QMainWindow {
         void prewittOperation();
         void robertOperation();
         void cannyOperation();
+
+        void doLineHough();
+        void doCircleHough();
+
+        void doBinarySegmentation();
+        void doBinaryThinning();
+        void doPlateRecognition();
 
     private:
         QAction * loadAction;
@@ -94,6 +104,12 @@ class MainWindow : public QMainWindow {
         QAction * highPassFilter4Action;
         QAction * unsharpMaskingAction;
         QAction * highboostAction;
+
+        QAction * laplaceAction;
+        QAction * gradientAction;
+        QAction * laplaceOfGaussianAction;
+        QAction * sobelOperationAction;
+        QAction * prewittOperationAction;
 
         QAction * rotateCWAction;
         QAction * rotateCCWAction;
@@ -125,6 +141,14 @@ class MainWindow : public QMainWindow {
         QAction * prewittOperationAction;
         QAction * robertOperationAction;
         QAction * cannyOperationAction;
+
+        QAction * lineHoughAction;
+        QAction * circleHoughAction;
+
+        QAction * binarySegmentationAction;
+        QAction * binaryThinningAction;
+
+        QAction * plateRecognitionAction;
 
         DrawSurface * drawSurface;
         HistogramDialog * histDialog;

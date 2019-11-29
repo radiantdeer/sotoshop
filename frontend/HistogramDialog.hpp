@@ -5,9 +5,11 @@
 #include <QObject>
 #include <QWidget>
 
+#include "../datastruct/ImageHistogram.hpp"
+
 class HistogramDialog : public QWidget {
     public:
-        HistogramDialog(const std::vector<std::vector<int>> hist);
+        HistogramDialog(ImageHistogram hist);
     private:
         QTabWidget *tabWidget;
 };
