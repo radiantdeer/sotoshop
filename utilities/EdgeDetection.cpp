@@ -1,4 +1,3 @@
-#include "EdgeDetection.hpp"
 #include "CommonConvolutions.hpp"
 #include "Convolution.hpp"
 #include <cmath>

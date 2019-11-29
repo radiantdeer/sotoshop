@@ -71,6 +71,8 @@ class MainWindow : public QMainWindow {
 
         void sobelOperation();
         void prewittOperation();
+        void robertOperation();
+        void cannyOperation();
 
         void doLineHough();
         void doCircleHough();
@@ -134,6 +136,11 @@ class MainWindow : public QMainWindow {
         QAction * fourierAction;
         QAction * viewFourierSpectrumAction;
         QAction * inverseFourierAction;
+
+        QAction * sobelOperationAction;
+        QAction * prewittOperationAction;
+        QAction * robertOperationAction;
+        QAction * cannyOperationAction;
 
         QAction * lineHoughAction;
         QAction * circleHoughAction;

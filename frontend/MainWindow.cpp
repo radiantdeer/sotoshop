@@ -99,6 +99,12 @@ MainWindow::MainWindow() : QMainWindow() {
     binarySegmentationAction = binary->addAction("Segmentation");
     binaryThinningAction = binary -> addAction("Thinning");
 
+    QMenu * edge = this->menuBar()->addMenu("Edge Detect");
+    sobelOperationAction = edge->addAction("Sobel Operation");
+    prewittOperationAction = edge->addAction("Prewitt Operation");
+    robertOperationAction = edge->addAction("Robert Operation");
+    cannyOperationAction = edge->addAction("Canny Operation");
+
     connectActionsToControllers();
 
     drawSurface = new DrawSurface(this);
@@ -775,7 +781,21 @@ void MainWindow::prewittOperation() {
         drawSurface->releaseLockImage();
         drawSurface->update();
     } else {
-        spdlog::warn("MainWindow::sobelOperation: Please load an image first!");
+        spdlog::warn("MainWindow::prewwittOperation: Please load an image first!");
+    }
+}
+
+void MainWindow::robertOperation() {
+    if (drawSurface->isImageLoaded()) {
+        spdlog::info("MainWindow::robertOperation: Edge detection with Robert operator...");
+        Image * result = Convolution::sobelOperation(drawSurface->getActiveImage(), CommonConvolutions::RobertX, CommonConvolutions::RobertY);
+        drawSurface->acquireLockImage();
+        drawSurface->purgeImage();
+        drawSurface->setActiveImage(result);
+        drawSurface->releaseLockImage();
+        drawSurface->update();
+    } else {
+        spdlog::warn("MainWindow::robertOperation: Please load an image first!");
     }
 }
       
@@ -812,6 +832,21 @@ void MainWindow::doLineHough() {
         drawSurface->update();
     } else {
         spdlog::warn("MainWindow::doLineHough: Please load an image first!");
+    }
+}
+
+void MainWindow::cannyOperation() {
+    if (drawSurface->isImageLoaded()) {
+        spdlog::info("MainWindow::cannyOperation: Edge detection with Canny operator...");
+        int threshold = QInputDialog::getInt(this, "Threshold", "Value");
+        Image * result = Convolution::cannyOperation(drawSurface->getActiveImage(), CommonConvolutions::Gaussian, CommonConvolutions::SobelX, CommonConvolutions::SobelY, threshold);
+        drawSurface->acquireLockImage();
+        drawSurface->purgeImage();
+        drawSurface->setActiveImage(result);
+        drawSurface->releaseLockImage();
+        drawSurface->update();
+    } else {
+        spdlog::warn("MainWindow::cannyOperation: Please load an image first!");
     }
 }
 
@@ -900,6 +935,8 @@ void MainWindow::connectActionsToControllers() {
 
     connect(sobelOperationAction, &QAction::triggered, this, &MainWindow::sobelOperation);
     connect(prewittOperationAction, &QAction::triggered, this, &MainWindow::prewittOperation);
+    connect(robertOperationAction, &QAction::triggered, this, &MainWindow::robertOperation);
+    connect(cannyOperationAction, &QAction::triggered, this, &MainWindow::cannyOperation);
 
     connect(lineHoughAction, &QAction::triggered, this, &MainWindow::doLineHough);
     connect(circleHoughAction, &QAction::triggered, this, &MainWindow::doCircleHough);
