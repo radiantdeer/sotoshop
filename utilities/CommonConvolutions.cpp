@@ -14,3 +14,10 @@ int highFilter4[] = {0, -1, 0, -1, 5, -1, 0, -1, 0};
 const ConvolutionMatrix CommonConvolutions::HighFilter4 = ConvolutionMatrix(3, 3, highFilter4);
 int laplace[] = {0, 1, 0, 1, -4, 1, 0, 1, 0};
 const ConvolutionMatrix CommonConvolutions::Laplace = ConvolutionMatrix(3, 3, laplace);
+int laplaceOfGaussian[] = {
+     0,  0, -1,  0,  0,
+     0, -1, -2, -1,  0,
+    -1, -2, 16, -2, -1,
+     0, -1, -2, -1,  0,
+     0,  0, -1,  0, 0 };
+const ConvolutionMatrix CommonConvolutions::LaplaceOfGaussian = ConvolutionMatrix(5, 5, laplaceOfGaussian);

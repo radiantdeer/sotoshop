@@ -78,6 +78,7 @@ MainWindow::MainWindow() : QMainWindow() {
 
     QMenu * edgeDetectionMenu = this->menuBar()->addMenu("Edge Detection");
     gradientAction = edgeDetectionMenu->addAction("Gradient");
+    laplaceOfGaussianAction = edgeDetectionMenu->addAction("Laplace of Gaussian");
 
     QMenu * other = this->menuBar()->addMenu("Other");
     bitPlaneAction = other->addAction("Bit Planes");
@@ -373,6 +374,20 @@ void MainWindow::doGradient() {
         drawSurface->update();
     } else {
         spdlog::warn("MainWindow::doGradient: Please load an image first!");
+    }
+}
+
+void MainWindow::doLaplaceOfGaussian() {
+    if (drawSurface->isImageLoaded()) {
+        spdlog::info("MainWindow::doLaplaceOfGaussian: Edge Detection with LaplaceOfGaussian...");
+        Image * result = EdgeDetection::laplaceOfGaussian(drawSurface->getActiveImage());
+        drawSurface->acquireLockImage();
+        drawSurface->purgeImage();
+        drawSurface->setActiveImage(result);
+        drawSurface->releaseLockImage();
+        drawSurface->update();
+    } else {
+        spdlog::warn("MainWindow::doLaplaceOfGaussian: Please load an image first!");
     }
 }
 
@@ -766,6 +781,7 @@ void MainWindow::connectActionsToControllers() {
     connect(highboostAction, &QAction::triggered, this, &MainWindow::doHighboost);
 
     connect(gradientAction, &QAction::triggered, this, &MainWindow::doGradient);
+    connect(laplaceOfGaussianAction, &QAction::triggered, this, &MainWindow::doLaplaceOfGaussian);
 
     connect(bitPlaneAction, &QAction::triggered, this, &MainWindow::showBitPlanes);
     connect(fourierAction, &QAction::triggered, this, &MainWindow::doFourierTransform);
