@@ -1,3 +1,4 @@
+#include <dirent.h>
 #include <QApplication>
 #include <string>
 #include "frontend/MainWindow.hpp"

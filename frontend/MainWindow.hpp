@@ -69,6 +69,13 @@ class MainWindow : public QMainWindow {
         void viewFourierSpectrum();
         void doInverseFourier();
 
+        void doBinarySegmentation();
+        void doBinaryThinning();
+        void doPlateRecognition();
+
+        void sobelOperation();
+        void prewittOperation();
+
     private:
         QAction * loadAction;
         QAction * saveAction;
@@ -122,6 +129,13 @@ class MainWindow : public QMainWindow {
         QAction * fourierAction;
         QAction * viewFourierSpectrumAction;
         QAction * inverseFourierAction;
+
+        QAction * binarySegmentationAction;
+        QAction * binaryThinningAction;
+        QAction * sobelOperationAction;
+        QAction * prewittOperationAction;
+
+        QAction * plateRecognitionAction;
 
         DrawSurface * drawSurface;
         HistogramDialog * histDialog;

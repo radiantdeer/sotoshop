@@ -15,8 +15,9 @@
 #include "../utilities/BitPlaneSlicing.hpp"
 #include "../utilities/Convolution.hpp"
 #include "../utilities/CommonConvolutions.hpp"
-#include "../utilities/Fourier.hpp"
 #include "../utilities/EdgeDetection.hpp"
+#include "../utilities/Fourier.hpp"
+#include "../utilities/PlateRecognition.hpp"
 
 MainWindow::MainWindow() : QMainWindow() {
     this->setWindowTitle("SotoShop");
@@ -85,6 +86,15 @@ MainWindow::MainWindow() : QMainWindow() {
     fourierAction = other->addAction("Fourier Transform");
     viewFourierSpectrumAction = other->addAction("View Fourier Spectrum");
     inverseFourierAction = other->addAction("Inverse Fourier Transform");
+    plateRecognitionAction = other->addAction("Plate Recognition");
+
+    QMenu * edge = this->menuBar()->addMenu("Edge Detect");
+    sobelOperationAction = edge->addAction("Sobel Operation");
+    prewittOperationAction = edge->addAction("Prewitt Operation");
+
+    QMenu * binary = this->menuBar()->addMenu("Binary");
+    binarySegmentationAction = binary->addAction("Segmentation");
+    binaryThinningAction = binary -> addAction("Thinning");
 
     connectActionsToControllers();
 
@@ -95,6 +105,8 @@ MainWindow::MainWindow() : QMainWindow() {
     fourierFrequencies = nullptr;
     fourierVisual = nullptr;
     fourierDialog = nullptr;
+
+    PlateRecognition::loadCharacterTemplate();
 }
 
 QAction * MainWindow::getLoadAction() {
@@ -736,6 +748,71 @@ void MainWindow::invLogOperation() {
     }
 }
 
+void MainWindow::doBinarySegmentation() {
+    if (drawSurface->isImageLoaded()) {
+        drawSurface->acquireLockImage();
+        drawSurface->getActiveImage()->binarySegmentation();
+        drawSurface->releaseLockImage();
+        drawSurface->update();
+    } else {
+        spdlog::warn("MainWindow::doBinarySegmentation: Please load an image first!");
+    }
+}
+
+void MainWindow::doBinaryThinning() {
+    if (drawSurface->isImageLoaded()) {
+        drawSurface->acquireLockImage();
+        drawSurface->getActiveImage()->binaryThinning();
+        drawSurface->releaseLockImage();
+        drawSurface->update();
+    } else {
+        spdlog::warn("MainWindow::doBinaryThinning: Please load an image first!");
+    }
+}
+
+void MainWindow::sobelOperation() {
+    if (drawSurface->isImageLoaded()) {
+        spdlog::info("MainWindow::sobelOperation: Edge detection with Sobel operator...");
+        Image * result = Convolution::sobelOperation(drawSurface->getActiveImage(), CommonConvolutions::SobelX, CommonConvolutions::SobelY);
+        drawSurface->acquireLockImage();
+        drawSurface->purgeImage();
+        drawSurface->setActiveImage(result);
+        drawSurface->releaseLockImage();
+        drawSurface->update();
+    } else {
+        spdlog::warn("MainWindow::sobelOperation: Please load an image first!");
+    }
+}
+
+void MainWindow::prewittOperation() {
+    if (drawSurface->isImageLoaded()) {
+        spdlog::info("MainWindow::sobelOperation: Edge detection with Sobel operator...");
+        Image * result = Convolution::sobelOperation(drawSurface->getActiveImage(), CommonConvolutions::PrewittX, CommonConvolutions::PrewittY);
+        drawSurface->acquireLockImage();
+        drawSurface->purgeImage();
+        drawSurface->setActiveImage(result);
+        drawSurface->releaseLockImage();
+        drawSurface->update();
+    } else {
+        spdlog::warn("MainWindow::sobelOperation: Please load an image first!");
+    }
+}
+
+void MainWindow::doPlateRecognition() {
+    if (drawSurface->isImageLoaded()) {
+        drawSurface->acquireLockImage();
+        Image * image = PlateRecognition::findPlate(drawSurface->getActiveImage());
+        drawSurface->purgeImage();
+        drawSurface->setActiveImage(image);
+        drawSurface->releaseLockImage();
+        drawSurface->update();
+        std::string recognizedCharacters = PlateRecognition::recognizeCharacters(image);
+        spdlog::info("Recognized as : {}", recognizedCharacters);
+    } else {
+        spdlog::warn("MainWindow::doPlateRecognition: Please load an image first!");
+    }
+}
+
 void MainWindow::connectActionsToControllers() {
     connect(loadAction, &QAction::triggered, this, &MainWindow::loadFile);
     connect(saveAction, &QAction::triggered, this, &MainWindow::saveFile);
@@ -788,6 +865,12 @@ void MainWindow::connectActionsToControllers() {
     connect(viewFourierSpectrumAction, &QAction::triggered, this, &MainWindow::viewFourierSpectrum);
     connect(inverseFourierAction, &QAction::triggered, this, &MainWindow::doInverseFourier);
 
+    connect(binarySegmentationAction, &QAction::triggered, this, &MainWindow::doBinarySegmentation);
+    connect(binaryThinningAction, &QAction::triggered, this, &MainWindow::doBinaryThinning);
+    connect(sobelOperationAction, &QAction::triggered, this, &MainWindow::sobelOperation);
+    connect(prewittOperationAction, &QAction::triggered, this, &MainWindow::prewittOperation);
+
+    connect(plateRecognitionAction, &QAction::triggered, this, &MainWindow::doPlateRecognition);
 }
 
 std::string MainWindow::getOpenFileUrl(std::string dialogTitle) {
