@@ -1,6 +1,6 @@
-#include "HoughTransformation.hpp";
-#include "Convolution.hpp";
-#include "CommonConvolutions.hpp";
+#include "HoughTransformation.hpp"
+#include "Convolution.hpp"
+#include "CommonConvolutions.hpp"
 #include "../spdlog/spdlog.h"
 
 
@@ -88,7 +88,8 @@ Image* HoughTransformation::HoughLine(Image* input) {
                     j += 0.5;
                     int y = floor(j);
                     if (y >= 0 && y < outputImage->getHeight()) {
-                        Pixel *p = sobelInput->getPixelAt(x,y) & Pixel(255,255,255);
+                        Pixel p255 = Pixel(255,255,255);
+                        Pixel *p = sobelInput->getPixelAt(x,y) & p255;
                         outputImage->setPixelAt(x, y, *p);
                     }
                 }
@@ -165,7 +166,8 @@ Image* HoughTransformation::HoughCircle(Image* input, int rStart, int rEnd) {
                         int x = floor(xF + 0.5);
                         int y = floor(yF + 0.5);
                         if (x >= 0 && x < outputImage->getWidth() && y >= 0 && y < outputImage->getHeight()) {
-                            Pixel *p = sobelInput->getPixelAt(x, y) & Pixel(255, 255, 255);
+                            Pixel p255 = Pixel(255, 255, 255);
+                            Pixel *p = sobelInput->getPixelAt(x, y) & p255;
                             outputImage->setPixelAt(x, y, *p);
                         }
                     }
